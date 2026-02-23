@@ -1,0 +1,8 @@
+#order-items{
+    /* background-color: #c8c8c8; */
+}
+
+#order-items .selected{
+    /* border: 1px solid black; */
+    background-color: lightblue !important;
+}
