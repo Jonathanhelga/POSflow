@@ -10,7 +10,7 @@
 
 #c-modal-order-item{
     max-width: 23vw;
-    height: 43vh;
+    /* height: 43vh; */
     overflow-y: auto;
     border-radius: var(--radius);
     background-color: var(--panel-bg);

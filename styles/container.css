@@ -27,11 +27,22 @@
 }
 .l-sidebar__summary{
     background-color: var(--backgroundColorLightMode);
-    padding: 15px;
-    flex-shrink: 0;
+    padding: 10px;
+    /* flex-shrink: 0; */
+    /* justify-content: space-between; */
     border-left: var(--pos-border);
     border-right: var(--pos-border);
     border-bottom: var(--pos-border);
+}
+.l-sidebar__summary .c-table th {
+    border: 3px solid black;
+    text-align: center;
+}
+
+.l-sidebar__summary .c-table td {
+    border: 3px solid black;
+    text-align: center;
+    vertical-align: top;
 }
 
 .l-sidebar__actions{
