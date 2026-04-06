@@ -31,11 +31,10 @@ export function modal_handler(){
         console.log("button is clicked");
     });
 
-    const closeButtons = document.querySelectorAll('.c-modal__close');
+    const closeButtons = document.querySelectorAll('[data-modal-close]');
     closeButtons.forEach((button) => {
         button.addEventListener('click', function(e) {
-            // Get the specific ID for this specific button
-            const modalId = e.target.getAttribute('data-modal-close');
+            const modalId = e.target.closest('[data-modal-close]').getAttribute('data-modal-close');
             toggleModal(modalId);
         });
     });

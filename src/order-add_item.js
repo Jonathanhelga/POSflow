@@ -14,6 +14,7 @@ export function openOrderItemModal(itemID) {
     document.getElementById('js-order-qty').value = matchedItem ? matchedItem.quantity : 1;
 
     document.getElementById('js-current-item-id').value = item.id;
+    document.getElementById('order-item-sku').textContent = item.sku || '';
     document.getElementById('order-item-name').textContent = item.itemName;
     document.getElementById('order-item-stock').textContent = item.stockLevel;
     document.getElementById('order-item-price').textContent = formatRupiah(item.sellPrice);
@@ -150,8 +151,8 @@ function updateTotals(){
         totalPrice += item.price * item.quantity;
         totalQty += item.quantity;
     });
-    totalItemsElement.textContent = formatRupiah(totalPrice);
-    orderTotalPrice.textContent = totalQty;
+    totalItemsElement.textContent = totalQty;
+    orderTotalPrice.textContent = formatRupiah(totalPrice);
 }
 
 function rowIdFor(itemID){ return `order-row-${itemID}`; }
@@ -161,8 +162,8 @@ let lastSelectedRow = null;
 
 function handleRowClick(index, rowElement){
     const removeBtn = document.getElementById('js-order-remove');
-    
-    if(lastSelectedRow === index){
+
+    if(lastSelectedRow === rowElement){
         rowElement.classList.remove('selected');
         selectedRowIndex  = -1;
         lastSelectedRow = null;

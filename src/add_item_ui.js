@@ -23,6 +23,7 @@ export function initInventoryForm() {
             costPrice: Number(document.getElementById('cost-price').value) || 0,
             sellPrice: Number(document.getElementById('sell-price').value) || 0,
             stockLevel: parseFloat(document.getElementById('item-qty').value) || 0,
+            minStockLevel: parseFloat(document.getElementById('min-stock-level').value) || 0,
             unit: document.getElementById('item-unit').value,
             supplier: document.getElementById('supplier-info').value.trim(),
             description: document.getElementById('js-description').value.trim(),

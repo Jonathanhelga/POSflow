@@ -23,7 +23,9 @@ export async function renderLoggedInState(user) {
         initializeOrderForm();
     }
     else{
-        console.log("not have business profile");
-        return;
+        console.log("not have business profile — resuming setup wizard");
+        const wizard = document.getElementById('setup-wizard');
+        wizard.classList.remove('is-hidden');
+        wizard.classList.add('is-active');
     }
 }

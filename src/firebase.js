@@ -42,13 +42,7 @@ export async function submitSettingsData(formData){
 }
 
 export async function loginUser(email, password) {
-    try {
-        await signInWithEmailAndPassword(auth, email, password);
-    } catch (error) {
-        alert(error?.message || 'Sign in failed');
-        console.error("humm I believe the user haven't made any account yet.");
-        return;
-    }
+    await signInWithEmailAndPassword(auth, email, password);
 }
 
 export async function LogOutUser(){

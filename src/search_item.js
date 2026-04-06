@@ -27,6 +27,7 @@ export async function loadAllItems() {
 export function addSingleItem(item){
     const container = document.getElementById('item-grid');
     if(!container) return;
+    allItems.push(item);
     createItemButton(container, item);
 }
 

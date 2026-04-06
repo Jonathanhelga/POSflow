@@ -99,7 +99,6 @@ export function switchView(targetView){
 
 export function eventDelegation(containerID){
     const mainContainer = document.getElementById(containerID);
-    switchView('signUp');
     mainContainer.addEventListener('click', (e) => {
         if (e.target && e.target.id === 'js-to-signUp') {
             e.preventDefault();
