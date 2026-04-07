@@ -1,7 +1,7 @@
 import { toggleModal } from './modal-handler';
 import { formatRupiah } from "./formatRupiah";
 import { allItems } from "./search_item";
-import { doc } from 'firebase/firestore';
+import { auth, submitOrder } from "./firebase";
 
 let orderedItems = [];
 let selectedRowIndex = -1;
@@ -40,6 +40,51 @@ export function initializeOrderForm(){
             toggleModal('order-item-modal');
         });
     }
+}
+export async function initSubmitOrder(){
+    const submitBtn = document.getElementById('js-order-submit');
+    if (!submitBtn) return;
+    submitBtn.addEventListener('click', async () => {
+        if (orderedItems.length === 0) {
+            alert("No items in the order yet.");
+            return;
+        }
+
+        const user = auth.currentUser;
+        if (!user) {
+            alert("Session expired. Please log in again.");
+            return;
+        }
+
+        const mappedItems = orderedItems.map(item => ({
+            id: item.id,
+            name: item.name,
+            price: item.price,
+            quantity: item.quantity,
+            subtotal: item.price * item.quantity,
+        }));
+
+        const orderPayload = {
+            items: mappedItems,
+            totalQuantity: orderedItems.reduce((sum, item) => sum + item.quantity, 0),
+            totalPrice: orderedItems.reduce((sum, item) => sum + (item.price * item.quantity), 0),
+        };
+
+        const originalText = submitBtn.textContent;
+        submitBtn.disabled = true;
+        submitBtn.textContent = "Submitting...";
+
+        try {
+            await submitOrder(orderPayload, user.uid);
+            resetOrderAfterSubmit();
+        } catch (err) {
+            console.error("Order submission failed:", err);
+            alert(`Failed to submit order: ${err.message}`);
+        } finally {
+            submitBtn.disabled = false;
+            submitBtn.textContent = originalText;
+        }
+    });
 }
 
 export function addItemToOrder(itemID, itemName, itemPrice, itemQuantity){

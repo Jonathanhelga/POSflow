@@ -60,7 +60,7 @@ export async function submitItemData(itemData, uid){
         const inventoryRef = collection(db, "inventory");
         const docRef = await addDoc(inventoryRef, {
             ...itemData,
-            created_at: new Date().toISOString(),
+            createdAt: serverTimestamp(),
             lastUpdated: serverTimestamp(), // Better for sorting than local time
             updateQuantity: false,
             ownerId: uid
@@ -74,5 +74,19 @@ export async function submitItemData(itemData, uid){
     } catch (error) {
         console.error("Error adding document: ", error);
         throw error;
+    }
+}
+
+export async function submitOrder(orderPayload, uid){
+    try {
+        const orderRef = collection(db, "orders");
+        const docRef = await addDoc(orderRef, {
+            ...orderPayload,
+            ownerId: uid,
+            createdAt: serverTimestamp(),
+        });
+    return docRef.id;
+    } catch (error) {
+        
     }
 }
