@@ -6,6 +6,8 @@ import '../styles/features_modal.css';
 import '../styles/item_button.css';
 import '../styles/order_item_modal.css';
 import '../styles/ordering_items.css';
+import '../styles/profile_modal.css';
+import '../styles/order_history_modal.css';
 import { auth } from "./firebase";
 import { onAuthStateChanged } from "firebase/auth";
 import { switchView, eventDelegation } from "./control_wizard";

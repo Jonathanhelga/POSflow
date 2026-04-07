@@ -1,25 +1,34 @@
-#features-modal{
-    justify-content:end;
+/* ═══════════════════════════════════════════════════════════════
+   FEATURES MODAL  (#features-modal)
+   Side-panel modal that slides in from the right.
+   Lists secondary app actions: Update Inventory, Barcode, etc.
+   ═══════════════════════════════════════════════════════════════ */
+
+/* Overlay: right-aligned */
+#features-modal {
+    justify-content: end;
     padding: 1.3rem;
 }
 
-#c-modal-features{
-    max-width: 22vw;
+/* Panel sizing */
+#c-modal-features {
+    max-width: var(--modal-side-width);
     height: 100%;
     overflow-y: auto;
-    border-radius: var(--radius) 0px 0px var(--radius);
-    background-color: #f0f9e8;
+    border-radius: var(--radius) 0 0 var(--radius);
+    background-color: var(--clr-modal-panel);
 }
 
-.c-actions--stack{
+/* Vertical stack of feature action buttons */
+.c-actions--stack {
     display: flex;
     flex-direction: column;
     padding: var(--padding);
+    gap: 20px;
 }
-
-.c-actions--stack button{
-    height: 3rem;
-    background-color: var(--bg-color);
+.c-actions--stack button {
+    height: 5rem;
+    background-color: var(--clr-feature-buttons);
     color: rgb(97, 97, 97);
-    border: 1px solid black;
+    /* border: 1px solid black; */
 }

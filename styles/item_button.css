@@ -1,32 +1,32 @@
-/* Mapping Semantic Keys to the Professional Palette */
-.btn--primary   { background-color: #4E7397; color: white; }
-.btn--success   { background-color: #86A38C; color: white; }
-.btn--neutral   { background-color: #718096; color: white; }
-.btn--priority  { background-color: #C58B8B; color: white; }
-.btn--legibility { background-color: #2D3748; color: white; }
+/* ═══════════════════════════════════════════════════════════════
+   ITEM GRID & BUTTONS
+   The inventory button grid shown in the main panel.
+   Color themes (.btn--*) are defined in add_item_modal.css
+   since they map directly to the tagColor field on each item.
+   ═══════════════════════════════════════════════════════════════ */
 
-#item-grid{
+#item-grid {
     display: flex;
-    flex-wrap: wrap; 
-    justify-content: start; 
-    gap: 40px; 
+    flex-wrap: wrap;
+    justify-content: start;
+    gap: 40px;
     padding: 10px;
 }
+
 .c-item-button {
     border: none;
     border-radius: 10px;
     color: white;
-    width: 11vw; 
-    height: 10vh; 
+    width: 11vw;
+    height: 10vh;
     text-align: center;
     font-size: clamp(0.8rem, 2.5vw, 1.35rem);
-    padding: 0 5px 0 5px;
+    padding: 0 5px;
     cursor: pointer;
     transition: background-color 0.3s ease;
-    display: flex; 
-    justify-content: center; 
-    align-items: center; 
+    display: flex;
+    justify-content: center;
+    align-items: center;
     word-wrap: break-word;
 }
-
-.c-item-button:hover { background-color: #5f5e5e58 !important; color: black;}
+.c-item-button:hover { background-color: #5f5e5e58 !important; color: black; }

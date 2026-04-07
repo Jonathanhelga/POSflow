@@ -1,0 +1,13 @@
+#order-history-modal {
+    align-items: center;
+    justify-content: center;
+}
+
+#c-modal-order-history{
+    width: 100%;
+    max-width: 50vw;
+    overflow-y: auto;
+    border-radius: var(--radius);
+    background-color: var(--clr-panel);
+    box-shadow: var(--shadow);
+}

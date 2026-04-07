@@ -1,41 +1,98 @@
-:root{
-    --backgroundColorLightMode: #f8fafc;
-    --backgroundColorDarkMode: rgb(133, 120, 120);
-    --primary-color: #98d2e6;  
-    --success-color: #40b28c;  
-    --danger-color: #ef4444;   
-    --container-button-color: rgb(219, 225, 203);
-    --bg-color: antiquewhite;  
-    --panel-bg: #ffffff;
-    --border-color: gray;
-    --text-primary: #1f2937;
-    --text-secondary: #6b7280;
-    --color-gray-medium: #999;
-    --clr-border: #d1d5db;
+/* ═══════════════════════════════════════════════════════════════
+   DESIGN TOKENS
+   All values (colors, spacing, radius, shadow) are defined here.
+   Never hardcode these values in component files — always use a
+   variable. This makes global restyling a one-file change.
+   ═══════════════════════════════════════════════════════════════ */
+:root {
+    /* — Background Colors — */
+    --clr-bg-app:      antiquewhite;  /* Page / app-level background  */
+    --clr-bg-surface:  #f8fafc;       /* Sidebar, panels, cards        */
+    --clr-panel:       #ffffff;       /* White content areas           */
+    --clr-modal-panel: #e4eddc;       /* Side-panel modal background   */
 
-    --radius: 12px;
-    --gap: 0.7rem;
-    --shadow: 0 6px 18px rgba(18, 24, 40, 1);
-    --bg-app: antiquewhite;
-    --font-size: 1rem;
-    --padding: 1rem;
+    /* — Brand / Status Colors — */ 
+    --clr-primary: #98d2e6;
+    --clr-success: #a9d597;
+    --clr-danger:  #f18a7a;
+    --clr-logout: rgb(160, 143, 158);
+    --clr-feature-buttons: rgb(221, 220, 199);
+    /* — Text Colors — */
+    --clr-text-primary:   #1f2937;
+    --clr-text-secondary: #6b7280;
+    --clr-gray-mid:       #999;
+
+    /* — Border & Interaction State — */
+    --clr-border:   #d1d5db;
+    --clr-selected: lightblue;
+    --clr-editing:  rgb(126, 227, 202);
+    --clr-hover:    #c8c8c8;
+
+    /* — Spacing — */
+    --gap:           0.7rem;
+    --padding:       1rem;
+    --pos-padding:   0.75rem;
     --margin-bottom: 20px;
 
-    --pos-border: 4px solid gray;
-    --pos-font-size: 1.3rem;
-    --pos-spacing: 15px;
-    --pos-padding: 0.75rem;
-    --pos-bg-color: #fff;
-    --state-selected: lightblue;
-    --state-editing: rgb(126, 227, 202);
-    --state-hover: #c8c8c8;
+    /* — Shape & Typography — */
+    --radius:    12px;
+    --font-size: 1rem;
+
+    /* — POS Layout — */
+    --pos-border:       4px solid gray;
+    --modal-side-width: 22vw;   /* Consistent width for all side-panel modals */
+
+    /* — Elevation — */
+    --shadow: 0 6px 18px rgba(18, 24, 40, 1);
 }
 
-.c-field{ margin-bottom: var(--margin-bottom); }
 
-.c-field__label { display: block; font-weight: 600; margin-bottom: 6px; font-size: var(--font-size); }
+/* ═══════════════════════════════════════════════════════════════
+   GLOBAL RESET & BASE
+   ═══════════════════════════════════════════════════════════════ */
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
 
-.c-field__input, .c-field__select, .c-field__textarea {
+body {
+    font-family: 'Arial', sans-serif;
+    background-color: var(--clr-bg-app);
+    color: var(--clr-text-primary);
+}
+
+
+/* ═══════════════════════════════════════════════════════════════
+   BASE COMPONENTS
+   Shared UI primitives used across the whole app.
+   ═══════════════════════════════════════════════════════════════ */
+
+/* — Button — */
+.btn {
+    padding: 10px 20px;
+    border: none;
+    border-radius: var(--radius);
+    font-size: var(--font-size);
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.2s ease, filter 0.2s, transform 0.1s ease;
+}
+.btn:hover { filter: brightness(0.9); }
+
+/* — Form Field — */
+.c-field { margin-bottom: var(--margin-bottom); }
+
+.c-field__label {
+    display: block;
+    font-weight: 600;
+    margin-bottom: 6px;
+    font-size: var(--font-size);
+}
+
+.c-field__input,
+.c-field__select,
+.c-field__textarea {
     width: 100%;
     padding: 10px;
     border: 1px solid var(--clr-border);
@@ -43,29 +100,133 @@
     box-sizing: border-box;
 }
 
-.c-field__select { 
-    font-size: 0.8barem;
-    appearance: none; /* Remove default browser styling */
+.c-field__select {
+    font-size: 0.8rem;
+    appearance: none;
     background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
     background-repeat: no-repeat;
     background-position: right 8px center;
     background-size: 20px;
-    padding-right: 36px; 
+    padding-right: 36px;
 }
 
-.c-field__input:focus, .c-field__select:focus, .c-field__textarea:focus{ border-color: #3498db; outline: none; }
-
-.btn {
-    padding: 10px 20px;
-    border: none;
-    border-radius: 6px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: filter 0.2s;
+.c-field__input:focus,
+.c-field__select:focus,
+.c-field__textarea:focus {
+    border-color: #3498db;
+    outline: none;
 }
-.btn:hover { filter: brightness(0.9); }
 
-/* Modal Close Button */
+/* — Actions Group — */
+.c-actions {
+    display: flex;
+    gap: var(--gap);
+    width: auto;
+}
+
+
+/* ═══════════════════════════════════════════════════════════════
+   MODAL — BASE COMPONENT
+   Every modal shares these styles. Only overlay alignment and
+   panel sizing are overridden in each modal's own CSS file.
+
+   ╔══ HOW TO ADD A NEW MODAL ══════════════════════════════════╗
+   ║                                                            ║
+   ║  1. Copy this HTML into index.html:                        ║
+   ║                                                            ║
+   ║     <div id="my-modal" class="c-modal is-hidden">          ║
+   ║       <div class="c-modal__panel" id="c-modal-my">         ║
+   ║         <header class="c-modal__header">                   ║
+   ║           <h2 class="c-modal__title">Title</h2>            ║
+   ║           <button class="c-modal__close"                   ║
+   ║             data-modal-close="my-modal">&times;</button>   ║
+   ║         </header>                                          ║
+   ║         <div class="c-modal__body">                        ║
+   ║           <!-- content here -->                            ║
+   ║         </div>                                             ║
+   ║         <footer class="c-modal__footer">                   ║
+   ║           <!-- action buttons here -->                     ║
+   ║         </footer>                                          ║
+   ║       </div>                                               ║
+   ║     </div>                                                 ║
+   ║                                                            ║
+   ║  2. In your CSS file, add only the position overrides:     ║
+   ║                                                            ║
+   ║     SIDE PANEL (slides in from right):                     ║
+   ║       #my-modal        { justify-content: end;             ║
+   ║                          padding: 1.3rem; }                ║
+   ║       #c-modal-my      { max-width: var(--modal-side-width)║
+   ║                          height: 100%;                     ║
+   ║                          overflow-y: auto;                 ║
+   ║                          border-radius: var(--radius) 0    ║
+   ║                            0 var(--radius);                ║
+   ║                          background: var(--clr-modal-panel)║
+   ║                        }                                   ║
+   ║                                                            ║
+   ║     CENTER MODAL:                                          ║
+   ║       #my-modal        { align-items: center;              ║
+   ║                          justify-content: center; }        ║
+   ║       #c-modal-my      { max-width: 28vw;                  ║
+   ║                          border-radius: var(--radius);     ║
+   ║                          box-shadow: var(--shadow); }      ║
+   ║                                                            ║
+   ║  3. Wire it in modal-handler.js or via toggleModal().      ║
+   ╚════════════════════════════════════════════════════════════╝ */
+
+/* Overlay */
+.c-modal {
+    display: flex;
+    position: fixed;
+    inset: 0;
+    z-index: 20;
+    background-color: rgba(0, 0, 0, 0.5);
+    font-family: sans-serif;
+}
+.c-modal.is-hidden { display: none; }
+
+/* Panel */
+.c-modal__panel {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    background-color: var(--clr-panel);
+    box-sizing: border-box;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 1);
+}
+
+/* Side modal (right-aligned) open/close */
+.c-modal--side .c-modal__panel {
+    animation: slideInFromRight 0.4s ease;
+}
+.c-modal--side.is-closing .c-modal__panel {
+    animation: slideOutFromRight 0.4s ease forwards;
+}
+
+/* Center modal open/close */
+.c-modal--center .c-modal__panel {
+    animation: popIn 0.25s ease;
+}
+.c-modal--center.is-closing .c-modal__panel {
+    animation: popOut 0.2s ease forwards;
+}
+
+/* Header */
+.c-modal__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 15px 20px;
+    border-bottom: 1px solid #ddd;
+    background: var(--clr-panel);
+}
+
+/* Body */
+.c-modal__body { padding: var(--padding); }
+
+/* Footer */
+.c-modal__footer { padding: var(--padding); }
+
+/* Close Button ( × ) */
 .c-modal__close {
     display: flex;
     align-items: center;
@@ -76,73 +237,36 @@
     border: none;
     border-radius: 50%;
     background-color: transparent;
-    color: var(--text-secondary);
+    color: var(--clr-text-secondary);
     font-size: 24px;
     line-height: 1;
     cursor: pointer;
     transition: all 0.2s ease;
 }
-.c-modal__close:hover { background-color: rgba(107, 114, 128, 0.1); color: var(--text-primary); }
-.c-modal__close:focus { outline: 2px solid var(--primary-color); outline-offset: 2px; }
+.c-modal__close:hover { background-color: rgba(107, 114, 128, 0.1); color: var(--clr-text-primary); }
+.c-modal__close:focus { outline: 2px solid var(--clr-primary); outline-offset: 2px; }
 
+
+/* ═══════════════════════════════════════════════════════════════
+   ANIMATIONS
+   ═══════════════════════════════════════════════════════════════ */
 @keyframes slideInFromRight {
-    from {
-        opacity: 0;
-        transform: translateX(100%);
-    }
-    to {
-        opacity: 1;
-        transform: translateX(0);
-    }
+    from { opacity: 0; transform: translateX(100%); }
+    to   { opacity: 1; transform: translateX(0); }
 }
 @keyframes slideOutFromRight {
-    from {
-        opacity: 1;
-        transform: translateX(0);
-    }
-    to {
-        opacity: 1;
-        transform: translateX(100%);
-    }
+    from { opacity: 1; transform: translateX(0); }
+    to   { opacity: 0; transform: translateX(100%); }
 }
-
-.c-modal{
-    display: flex;
-    position: fixed;
-    inset: 0;
-    z-index: 20;
-    background-color: rgba(0, 0, 0, 0.5); 
-    font-family: sans-serif;
-    opacity: 1;
+@keyframes popIn {
+    from { opacity: 0; transform: scale(0.92); }
+    to   { opacity: 1; transform: scale(1); }
 }
-
-.c-modal.is-hidden{ 
-    display: none;
-    opacity: 0;
+@keyframes popOut {
+    from { opacity: 1; transform: scale(1); }
+    to   { opacity: 0; transform: scale(0.92); }
 }
-.c-modal.is-closing-rightModal .c-modal__panel {
-    animation: slideOutFromRight 0.4s ease forwards;
-}
-
-.c-modal__panel{
-    width: 100%;
-    display: flex;
-    flex-direction: column;
-    background-color: #f0f9e8;
-    box-sizing: border-box;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 1);
-    animation: slideInFromRight 0.4s ease;
-}
-
-.c-modal__header{
-    display: flex;
-    flex-direction: row;
-    justify-content: space-between;
-    align-items: center;
-    padding: 15px 20px;
-    border-bottom: 1px solid #ddd;
-    background: #fff;
-}
-.c-modal__body{
-    padding: var(--padding);
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to   { opacity: 1; }
 }

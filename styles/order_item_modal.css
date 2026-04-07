@@ -1,26 +1,35 @@
-#order-item-modal{
+/* ═══════════════════════════════════════════════════════════════
+   ORDER FORM MODAL  (#order-item-modal)
+   Centered modal that appears when clicking an inventory button.
+   Shows item details and lets the cashier enter quantity.
+   ═══════════════════════════════════════════════════════════════ */
+
+/* Overlay: centered */
+#order-item-modal {
     align-items: center;
     justify-content: center;
 }
-.order-form-content{
+
+/* Panel sizing */
+#c-modal-order-item {
+    max-width: 23vw;
+    overflow-y: auto;
+    border-radius: var(--radius);
+    background-color: var(--clr-panel);
+    box-shadow: var(--shadow);
+}
+
+/* Vertical form layout */
+.order-form-content {
     display: flex;
     flex-direction: column;
     gap: var(--gap);
 }
 
-#c-modal-order-item{
-    max-width: 23vw;
-    /* height: 43vh; */
-    overflow-y: auto;
-    border-radius: var(--radius);
-    background-color: var(--panel-bg);
-    box-shadow: var(--shadow);
-
-}
-
-#item-information{
+/* Item info banner (gradient header inside the form) */
+#item-information {
     padding: var(--padding);
-    background: linear-gradient(135deg, var(--primary-color), #00d4ff);
+    background: linear-gradient(135deg, var(--clr-primary), #00d4ff);
     color: white;
     display: flex;
     flex-direction: column;
@@ -30,12 +39,12 @@
     border-radius: var(--radius);
     margin-bottom: var(--gap);
 }
-#order-item-title{
+#order-item-title {
     font-size: 1.75rem;
     margin-bottom: 10px;
     font-weight: 700;
 }
-#item-information h3{
+#item-information h3 {
     font-size: 1rem;
     margin-bottom: 5px;
     background: rgba(255, 255, 255, 0.2);
@@ -45,54 +54,28 @@
     font-weight: 500;
 }
 
-.c-detail{
+/* Price / Stock detail row */
+.c-detail {
     display: flex;
     justify-content: space-between;
     align-items: center;
     margin-bottom: var(--gap);
     padding: var(--pos-padding);
-    background-color: var(--backgroundColorLightMode);
+    background-color: var(--clr-bg-surface);
     border-radius: var(--radius);
     border: 1px solid var(--clr-border);
 }
-.c-detail h3{
+.c-detail h3 {
     margin: 0;
     font-size: 1rem;
     font-weight: 600;
-    color: var(--text-primary);
+    color: var(--clr-text-primary);
 }
 
-#order-item-price{
-    color: var(--success-color);
-}
+/* Inline value highlights */
+#order-item-price               { color: var(--clr-success); }
+#order-item-stock,
+#order-item-unit                { color: var(--clr-text-secondary); }
 
-#order-item-stock, #order-item-unit{
-    color: var(--text-secondary);
-}
-
-.c-field{
-    margin-bottom: var(--gap);
-}
-
-/* .c-actions .btn{
-    background-color: var(--container-button-color);
-    color: white;
-    border: none;
-    padding: 10px 20px;
-    border-radius: var(--radius);
-    font-weight: 600;
-    cursor: pointer;
-    transition: background-color 0.2s ease;
-}
-
-.c-actions .btn:hover{
-    background-color: #7bb3d1;
-}
-
-.c-actions .btn:last-child{
-    background-color: var(--container-button-color);
-}
-
-.c-actions .btn:last-child:hover{
-    background-color: #d32f2f;
-} */
+/* Tighten field spacing inside this modal */
+.order-form-content .c-field { margin-bottom: var(--gap); }

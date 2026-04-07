@@ -1,23 +1,20 @@
-/* Mapping Semantic Keys to the Professional Palette */
-.btn--primary   { background-color: #4E7397; color: white; }
-.btn--success   { background-color: #86A38C; color: white; }
-.btn--neutral   { background-color: #718096; color: white; }
-.btn--priority  { background-color: #C58B8B; color: white; }
-.btn--legibility { background-color: #2D3748; color: white; }
-
-#item-create-modal{
-    justify-content:end;
+/* Overlay: right-aligned */
+#item-create-modal {
+    justify-content: end;
     padding: 1.3rem;
 }
 
-#c-modal-item-create{
-    max-width: 22vw;
+/* Panel sizing */
+#c-modal-item-create {
+    max-width: var(--modal-side-width);
     height: 100%;
     overflow-y: auto;
-    border-radius: var(--radius) 0px 0px var(--radius);
-    background-color: #f0f9e8;
+    border-radius: var(--radius) 0 0 var(--radius);
+    background-color: var(--clr-modal-panel);
 }
-.c-qty-unit{
+
+/* Quantity + Unit inline row */
+.c-qty-unit {
     display: flex;
     width: 100%;
     align-items: center;
@@ -25,9 +22,16 @@
     min-width: 0;
     transition: border-color 0.2s ease, box-shadow 0.2s ease;
 }
+.c-qty-unit input  { flex: 2 1 0; } /* ~67% width */
+.c-qty-unit select { flex: 1 1 0; } /* ~33% width */
 
-.c-qty-unit input { flex: 2 1 0; } /* Input takes ~67% width, unit selector takes ~33% */
-.c-qty-unit select { flex: 1 1 0; }
+/* Form action buttons */
+#js-add-new-item  { background-color: var(--clr-success); color: white; }
+#js-reset-new-item { background-color: #ddd; }
 
-#js-add-new-item{ background-color: var(--success-color);}
-#js-reset-new-item{ background-color:#ddd}
+
+.btn--primary    { background-color: #4E7397; color: white; }
+.btn--success    { background-color: #86A38C; color: white; }
+.btn--neutral    { background-color: #718096; color: white; }
+.btn--priority   { background-color: #C58B8B; color: white; }
+.btn--legibility { background-color: #2D3748; color: white; }

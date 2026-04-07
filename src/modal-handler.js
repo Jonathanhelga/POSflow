@@ -9,11 +9,11 @@ export function toggleModal(idName){
         modal.addEventListener('click', handleBackdropClick);
     }
 
-    else { 
-        modal.classList.add('is-closing-rightModal');
+    else {
+        modal.classList.add('is-closing');
         modal.addEventListener('animationend', function() {
             modal.classList.add('is-hidden');
-            modal.classList.remove('is-closing-rightModal');
+            modal.classList.remove('is-closing');
             modal.onclick = null;
         }, { once: true });
         modal.removeEventListener('click', handleBackdropClick);
@@ -31,6 +31,11 @@ export function modal_handler(){
         console.log("button is clicked");
     });
 
+    document.getElementById('js-order-history-open').addEventListener('click', function (){
+        toggleModal('order-history-modal');
+        console.log("button is clicked");
+    });
+    
     const closeButtons = document.querySelectorAll('[data-modal-close]');
     closeButtons.forEach((button) => {
         button.addEventListener('click', function(e) {

@@ -3,6 +3,7 @@ import { initInventoryForm } from './add_item_ui';
 import { loadAllItems, initializeSearch } from './search_item';
 import { getDoc, doc } from "firebase/firestore";
 import { initializeOrderForm } from "./order-add_item";
+import { initProfile } from "./profile";
 async function hasBusinessProfile(uid) {
     console.log("check business profile");
     
@@ -21,6 +22,14 @@ export async function renderLoggedInState(user) {
         loadAllItems();
         initializeSearch();
         initializeOrderForm();
+        initProfile(user);
+
+        // Populate toolbar profile button with user's email initial
+        const initial = (user.email || '?').charAt(0).toUpperCase();
+        const avatar = document.getElementById('js-profile-avatar');
+        // const nameEl = document.getElementById('js-profile-name');
+        if (avatar) avatar.textContent = initial;
+        // if (nameEl) nameEl.textContent = user.email;
     }
     else{
         console.log("not have business profile — resuming setup wizard");

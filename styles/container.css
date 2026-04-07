@@ -1,149 +1,152 @@
-.l-app{
-    display: none;
+/* ═══════════════════════════════════════════════════════════════
+   POS APP LAYOUT
+   The two-column layout for the main POS screen:
+     .l-app          — root flex container (hidden until logged in)
+       .l-sidebar    — left 30%: order table, totals, actions
+       .l-main       — right 70%: search bar + item grid
+   ═══════════════════════════════════════════════════════════════ */
+
+/* — Root App Container — */
+.l-app { display: none; }
+.l-app.is-active {
+    display: flex;
+    flex-direction: row;
     height: 100vh;
     width: 100vw;
     padding: 0.5rem;
     gap: var(--gap);
-    flex-direction: row;
 }
-.l-app.is-active{ display: flex; }
 
-.l-sidebar{
+
+/* ── Sidebar ────────────────────────────────────────────────── */
+.l-sidebar {
     display: flex;
     flex-direction: column;
     width: 30%;
     box-sizing: border-box;
     z-index: 10;
 }
-.l-sidebar__top{
-    flex: 1; /* Takes all available free space */
+
+/* Order table area — scrollable */
+.l-sidebar__top {
+    flex: 1;
     max-height: 60%;
     overflow-y: auto;
-    background-color: var(--backgroundColorLightMode);
+    background-color: var(--clr-bg-surface);
     padding: 0;
-    border-top: var(--pos-border);
-    border-left: var(--pos-border);
+    border-top:   var(--pos-border);
+    border-left:  var(--pos-border);
     border-right: var(--pos-border);
 }
-.l-sidebar__summary{
-    background-color: var(--backgroundColorLightMode);
-    padding: 10px;
-    /* flex-shrink: 0; */
-    /* justify-content: space-between; */
-    border-left: var(--pos-border);
-    border-right: var(--pos-border);
-    border-bottom: var(--pos-border);
-}
-.l-sidebar__summary .c-table th {
-    border: 3px solid black;
-    text-align: center;
+.l-sidebar__top h2 {
+    font-size: 1.5rem;
+    padding: var(--pos-padding);
+    margin: 0;
+    position: sticky;
+    top: 0;
+    background-color: var(--clr-bg-surface);
 }
 
+/* Totals row */
+.l-sidebar__summary {
+    background-color: var(--clr-bg-surface);
+    padding: 10px;
+    border-left:   var(--pos-border);
+    border-right:  var(--pos-border);
+    border-bottom: var(--pos-border);
+}
+.l-sidebar__summary .c-table th,
 .l-sidebar__summary .c-table td {
-    border: 3px solid black;
+    border: 2px solid black;
     text-align: center;
     vertical-align: top;
 }
 
-.l-sidebar__actions{
+/* Action buttons (Reset, Remove, Print Bill, Order History) */
+.l-sidebar__actions {
     display: flex;
     flex-direction: column;
     flex: 1;
     max-height: 30%;
     margin-top: 1rem;
     padding: var(--pos-padding);
-    background-color: var(--backgroundColorLightMode);
+    background-color: var(--clr-bg-surface);
     border: var(--pos-border);
     gap: var(--gap);
 }
-
-.l-sidebar__top h2{
-    font-size: 1.5rem;
-    padding: var(--pos-padding);
-    margin: 0;
-    position: sticky;
-    top: 0;
+.l-sidebar-btn {
+    flex: 1;
+    padding: 1.2rem 0.5rem;
+    background-color: var(--clr-primary);
+    color: white;
 }
-.c-table{
+
+
+/* ── Order Table ────────────────────────────────────────────── */
+.c-table {
     width: 100%;
     border-collapse: collapse;
 }
-
 .c-table th {
     font-size: 1rem;
     font-weight: 900;
-    position: sticky; /* Keeps header visible when scrolling */
+    position: sticky;
     top: 0;
     z-index: 1;
 }
-
-.c-table th, .c-table td {
+.c-table th,
+.c-table td {
     padding: 8px var(--pos-padding);
     text-align: left;
     border: none;
 }
-
-.c-table__empty{
+.c-table__empty {
     font-size: 0.9rem;
-    color: var(--color-gray-medium);
+    color: var(--clr-gray-mid);
     font-style: italic;
 }
-.c-hint{
+
+/* Double-click hint below the order table */
+.c-hint {
     padding: 10px;
     font-size: 0.8rem;
-    color: #666; 
-    margin-top: 5px; 
-    text-align: center; 
+    color: #666;
+    margin-top: 5px;
+    text-align: center;
     font-style: italic;
 }
 
-.c-actions {
-    display: flex;
-    gap: var(--gap);
-    width: auto;
-}
 
-.btn {
-
-    border-radius: var(--radius);
-    font-size: 1rem;
-    cursor: pointer;
-    transition: background-color 0.2s ease, transform 0.1s ease;
-}
-.l-sidebar-btn{
-    flex: 1;
-    padding: 1.2rem 0.5rem;
-    background-color: var(--primary-color);
-    color: white;
-}
-
-.l-main{
+/* ── Main Panel (Search + Item Grid) ───────────────────────── */
+.l-main {
     display: flex;
     flex-direction: column;
     padding: var(--pos-padding);
     width: 70%;
     box-sizing: border-box;
     z-index: 10;
-    background-color: var(--backgroundColorLightMode);
+    background-color: var(--clr-bg-surface);
     border: var(--pos-border);
 }
 
-.l-main__toolbar{
-    display: flex;  
+/* Toolbar: search bar + feature buttons */
+.l-main__toolbar {
+    display: flex;
     flex-direction: row;
     align-items: center;
     padding: var(--pos-padding);
     justify-content: space-between;
     margin-bottom: 1rem;
 }
-.c-search{
+
+/* — Search — */
+.c-search {
     display: flex;
-    width:68%;
-    gap:var(--gap);
+    width: 68%;
+    gap: var(--gap);
     align-items: center;
 }
-
-.item-search{
+.item-search {
     width: 60%;
     padding: 12px 20px 12px 45px;
     border: 2px solid #e1e8ed;
@@ -160,19 +163,21 @@
     box-shadow: 0 0 0 3px rgba(74, 144, 226, 0.1);
     transform: translateY(-1px);
 }
-.search-stats{
+.search-stats {
     padding: var(--pos-padding);
     background: #b8b9bb;
     border-radius: 5px;
     font-size: 14px;
     color: #666;
 }
-.c-actions__features{
+
+/* — Feature Buttons (Add New Item, Other Features) — */
+.c-actions__features {
     display: flex;
     flex-direction: row;
     gap: var(--gap);
 }
-.c-actions__features button{
+.c-actions__features button {
     font-size: 0.9rem;
     background-color: #b6b6b6;
     border-radius: 100px;

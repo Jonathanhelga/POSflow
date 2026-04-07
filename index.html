@@ -217,7 +217,7 @@
     </template>
 
     <!-- ============= Modals ============= -->
-    <div id="item-create-modal" class="c-modal is-hidden">
+    <div id="item-create-modal" class="c-modal c-modal--side is-hidden">
         <div class="c-modal__panel" id="c-modal-item-create">
           <header class="c-modal__header">
             <h2 class="c-modal__title">Add New Item</h2>
@@ -302,7 +302,7 @@
         </div>
     </div>
 
-    <div id="features-modal" class="c-modal is-hidden">
+    <div id="features-modal" class="c-modal c-modal--side is-hidden">
         <div class="c-modal__panel" id="c-modal-features">
           <header class="c-modal__header">
             <h2 class="c-modal__title">Features</h2>
@@ -319,7 +319,7 @@
         </div>
     </div>
 
-    <div id="order-item-modal" class="c-modal is-hidden">
+    <div id="order-item-modal" class="c-modal c-modal--center is-hidden">
       <div class="c-modal__panel" id="c-modal-order-item">
           <header class="c-modal__header">
             <h2 class="c-modal__title">Order Form</h2>
@@ -350,8 +350,102 @@
             </form>
           </div>
       </div>
+
     </div>
-    
+
+    <div id="order-history-modal" class="c-modal c-modal--center is-hidden">
+      <div class="c-modal__panel" id="c-modal-order-history">
+        <header class="c-modal__header">
+            <h2 class="c-modal__title">Order History</h2>
+            <button type="button" class="c-modal__close" aria-label="Close" data-modal-close="order-history-modal">&times;</button>
+        </header>
+        <div class="c-modal__body">
+        
+        </div>
+      </div>
+    </div>
+    <!-- ============= Profile Modal ============= -->
+    <div id="profile-modal" class="c-modal c-modal--side is-hidden">
+      <div class="c-modal__panel" id="c-modal-profile">
+        <header class="c-modal__header">
+          <h2 class="c-modal__title">My Profile</h2>
+          <button type="button" class="c-modal__close" data-modal-close="profile-modal">&times;</button>
+        </header>
+
+        <div class="c-modal__body">
+          <!-- Signed-in account info (read-only) -->
+          <div class="c-profile__account">
+            <div class="c-profile__avatar-large" id="js-profile-avatar-large">?</div>
+            <div>
+              <p class="c-profile__label">Signed in as</p>
+              <strong id="js-profile-email-display">—</strong>
+            </div>
+          </div>
+
+          <form id="js-profile-form">
+            <div class="c-profile__section-title">Account</div>
+            <div class="c-field">
+              <label class="c-field__label" for="profile-username">Username</label>
+              <input class="c-field__input" type="text" id="profile-username" placeholder="Your name" />
+            </div>
+
+            <div class="c-profile__section-title">Business Identity</div>
+            <div class="c-field">
+              <label class="c-field__label" for="profile-business-name">Business Name</label>
+              <input class="c-field__input" type="text" id="profile-business-name" placeholder="e.g. Electric Shop" />
+            </div>
+            <div class="c-field">
+              <label class="c-field__label" for="profile-business-address">Address</label>
+              <textarea class="c-field__textarea" rows="2" id="profile-business-address" placeholder="Street, City, Zip"></textarea>
+            </div>
+            <div class="c-field">
+              <label class="c-field__label" for="profile-business-phone">Phone</label>
+              <input class="c-field__input" type="tel" id="profile-business-phone" placeholder="(09) 704192445" />
+            </div>
+            <div class="c-field">
+              <label class="c-field__label" for="profile-business-instagram">Instagram</label>
+              <input class="c-field__input" type="text" id="profile-business-instagram" placeholder="@Hello_there" />
+            </div>
+            <div class="c-field">
+              <label class="c-field__label" for="profile-business-email">Business Email</label>
+              <input class="c-field__input" type="email" id="profile-business-email" placeholder="hello@shop.com" />
+            </div>
+
+            <div class="c-profile__section-title">Financial Settings</div>
+            <div class="c-field">
+              <label class="c-field__label" for="profile-tax-rate">Tax Rate (%)</label>
+              <input class="c-field__input" type="number" id="profile-tax-rate" placeholder="0" min="0" max="100" />
+            </div>
+            <div class="c-field">
+              <label class="c-field__label" for="profile-invoice-prefix">Invoice Prefix</label>
+              <input class="c-field__input" type="text" id="profile-invoice-prefix" placeholder="INV-" />
+            </div>
+
+            <div class="c-profile__section-title">Printer Setup</div>
+            <div class="c-field">
+              <label class="c-field__label" for="profile-paper-size">Paper Size</label>
+              <select class="c-field__select" id="profile-paper-size">
+                <option value="58">58mm (Small Thermal)</option>
+                <option value="80">80mm (Standard Thermal)</option>
+              </select>
+            </div>
+            <div class="c-field">
+              <label class="c-field__label" for="profile-receipt-footer">Receipt Footer Message</label>
+              <textarea class="c-field__textarea" rows="2" id="profile-receipt-footer" placeholder="Thank You for Your Purchase!"></textarea>
+            </div>
+
+            <div class="c-actions">
+              <button type="submit" class="btn c-profile__save-btn" id="js-profile-save">Save Changes</button>
+            </div>
+          </form>
+        </div>
+
+        <footer class="c-modal__footer">
+          <button type="button" class="btn c-profile__logout-btn" id="js-profile-logout">Log Out</button>
+        </footer>
+      </div>
+    </div>
+
     <main id="pos-app" class="l-app">
       <aside class="l-sidebar">
         <section class="l-sidebar__top">
@@ -385,8 +479,8 @@
             </thead>
             <tbody id="order-summary">
               <tr>
-                <td><span id="order-total-items"></span></td>
-                <td><span id="order-total-price"></span></td>
+                <td><span id="order-total-items">0</span></td>
+                <td><span id="order-total-price">0.0</span></td>
               </tr>
             </tbody>
           </table>
@@ -428,6 +522,10 @@
               <button id="js-item-create-open" class="btn btn--primary" type="button">Add New Item</button>
               <button id="js-features-open" class="btn btn--secondary" type="button">Other Features</button>
             </div>
+            <button id="js-profile-open" class="btn c-profile-btn" type="button">
+              <span class="c-profile-btn__avatar" id="js-profile-avatar">?</span>
+              <!-- <span class="c-profile-btn__name" id="js-profile-name">Profile</span> -->
+            </button>
           </div>
 
         </header>
