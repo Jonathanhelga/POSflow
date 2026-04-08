@@ -126,55 +126,6 @@ body {
     width: auto;
 }
 
-
-/* ═══════════════════════════════════════════════════════════════
-   MODAL — BASE COMPONENT
-   Every modal shares these styles. Only overlay alignment and
-   panel sizing are overridden in each modal's own CSS file.
-
-   ╔══ HOW TO ADD A NEW MODAL ══════════════════════════════════╗
-   ║                                                            ║
-   ║  1. Copy this HTML into index.html:                        ║
-   ║                                                            ║
-   ║     <div id="my-modal" class="c-modal is-hidden">          ║
-   ║       <div class="c-modal__panel" id="c-modal-my">         ║
-   ║         <header class="c-modal__header">                   ║
-   ║           <h2 class="c-modal__title">Title</h2>            ║
-   ║           <button class="c-modal__close"                   ║
-   ║             data-modal-close="my-modal">&times;</button>   ║
-   ║         </header>                                          ║
-   ║         <div class="c-modal__body">                        ║
-   ║           <!-- content here -->                            ║
-   ║         </div>                                             ║
-   ║         <footer class="c-modal__footer">                   ║
-   ║           <!-- action buttons here -->                     ║
-   ║         </footer>                                          ║
-   ║       </div>                                               ║
-   ║     </div>                                                 ║
-   ║                                                            ║
-   ║  2. In your CSS file, add only the position overrides:     ║
-   ║                                                            ║
-   ║     SIDE PANEL (slides in from right):                     ║
-   ║       #my-modal        { justify-content: end;             ║
-   ║                          padding: 1.3rem; }                ║
-   ║       #c-modal-my      { max-width: var(--modal-side-width)║
-   ║                          height: 100%;                     ║
-   ║                          overflow-y: auto;                 ║
-   ║                          border-radius: var(--radius) 0    ║
-   ║                            0 var(--radius);                ║
-   ║                          background: var(--clr-modal-panel)║
-   ║                        }                                   ║
-   ║                                                            ║
-   ║     CENTER MODAL:                                          ║
-   ║       #my-modal        { align-items: center;              ║
-   ║                          justify-content: center; }        ║
-   ║       #c-modal-my      { max-width: 28vw;                  ║
-   ║                          border-radius: var(--radius);     ║
-   ║                          box-shadow: var(--shadow); }      ║
-   ║                                                            ║
-   ║  3. Wire it in modal-handler.js or via toggleModal().      ║
-   ╚════════════════════════════════════════════════════════════╝ */
-
 /* Overlay */
 .c-modal {
     display: flex;
@@ -272,3 +223,33 @@ body {
     from { opacity: 0; }
     to   { opacity: 1; }
 }
+@keyframes toastSlideIn {
+    from { opacity: 0; transform: translate(-50%, -50%) scale(0.85); }
+    to   { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+}
+@keyframes toastFadeOut {
+    from { opacity: 1; }
+    to   { opacity: 0; }
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   TOAST NOTIFICATION
+   ═══════════════════════════════════════════════════════════════ */
+.c-toast {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 30;
+    padding: 0.75rem 1.25rem;
+    border-radius: var(--radius);
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: #1f2937;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+    animation: toastSlideIn 0.25s ease;
+    pointer-events: none;
+}
+.c-toast--success { background-color: var(--clr-success); }
+.c-toast--error   { background-color: var(--clr-danger); }
+.c-toast.is-hiding { animation:   0.4s ease forwards; }

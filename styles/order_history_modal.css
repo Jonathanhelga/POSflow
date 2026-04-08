@@ -10,7 +10,7 @@
 #c-modal-order-history {
     width: 90vw;
     max-width: 1000px;
-    height: 70vh;
+    /* height: 70vh; */
     max-height: 96vh;
     border-radius: var(--radius);
     background-color: var(--clr-panel);
@@ -128,8 +128,10 @@
 
 .oh-detail-panel {
     display: flex;
-    flex-direction: column;
     overflow: hidden;
+    flex-direction: column;
+    margin: 10px;
+    max-height: 90%;
 }
 
 .oh-bill {
@@ -263,7 +265,8 @@
 /* ─── Print button bar ───────────────────────────────────────── */
 
 .oh-print-bar {
-    padding: 12px 16px;
+    padding: 20px 16px;
+    margin-top: 20px;
     border-top: 1px solid var(--clr-border);
     background: var(--clr-bg-surface);
     display: flex;
