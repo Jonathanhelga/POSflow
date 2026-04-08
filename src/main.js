@@ -13,6 +13,7 @@ import { onAuthStateChanged } from "firebase/auth";
 import { switchView, eventDelegation } from "./control_wizard";
 import { renderLoggedInState } from "./loggedIn-user";
 import { modal_handler } from './modal-handler';
+import { initOrderHistory } from './order_history';
 
 document.addEventListener('DOMContentLoaded', function(){
     eventDelegation('js-wizard__body');
@@ -27,4 +28,5 @@ document.addEventListener('DOMContentLoaded', function(){
         }
     });
     modal_handler();// Open and close modal controller
+    initOrderHistory();
 });

@@ -5,6 +5,12 @@ import { auth, submitOrder } from "./firebase";
 
 let orderedItems = [];
 let selectedRowIndex = -1;
+let taxRate = 0;
+
+export function setTaxRate(rate) {
+    taxRate = parseFloat(rate) || 0;
+    updateTotals();
+}
 
 export function openOrderItemModal(itemID) {
     const item = allItems.find(item => item.id === itemID); 
@@ -64,10 +70,17 @@ export async function initSubmitOrder(){
             subtotal: item.price * item.quantity,
         }));
 
+        const subtotal = orderedItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+        const taxAmount = subtotal * (taxRate / 100);
+        const totalWithTax = subtotal + taxAmount;
+
         const orderPayload = {
             items: mappedItems,
             totalQuantity: orderedItems.reduce((sum, item) => sum + item.quantity, 0),
-            totalPrice: orderedItems.reduce((sum, item) => sum + (item.price * item.quantity), 0),
+            subtotal,
+            taxRate,
+            taxAmount,
+            totalPrice: totalWithTax,
         };
 
         const originalText = submitBtn.textContent;
@@ -188,16 +201,20 @@ function resetOrderAfterSubmit(){
     updateTotals();
 }
 function updateTotals(){
-    const totalItemsElement = document.getElementById('order-total-items');
-    const orderTotalPrice = document.getElementById('order-total-price');
-    let totalPrice = 0;
+    let subtotal = 0;
     let totalQty = 0;
     orderedItems.forEach(item => {
-        totalPrice += item.price * item.quantity;
+        subtotal += item.price * item.quantity;
         totalQty += item.quantity;
     });
-    totalItemsElement.textContent = totalQty;
-    orderTotalPrice.textContent = formatRupiah(totalPrice);
+    const taxAmount = subtotal * (taxRate / 100);
+    const totalWithTax = subtotal + taxAmount;
+
+    document.getElementById('order-total-items').textContent = totalQty;
+    document.getElementById('order-total-price').textContent = formatRupiah(subtotal);
+    document.getElementById('order-tax-label').textContent = taxRate;
+    document.getElementById('order-tax-amount').textContent = formatRupiah(taxAmount);
+    document.getElementById('order-with-tax').textContent = formatRupiah(totalWithTax);
 }
 
 function rowIdFor(itemID){ return `order-row-${itemID}`; }

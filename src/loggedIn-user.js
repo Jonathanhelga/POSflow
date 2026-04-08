@@ -1,8 +1,8 @@
-import { db, LogOutUser } from "./firebase";
+import { db, LogOutUser, fetchUserProfile } from "./firebase";
 import { initInventoryForm } from './add_item_ui';
 import { loadAllItems, initializeSearch } from './search_item';
 import { getDoc, doc } from "firebase/firestore";
-import { initializeOrderForm, initSubmitOrder } from "./order-add_item";
+import { initializeOrderForm, initSubmitOrder, setTaxRate } from "./order-add_item";
 import { initProfile } from "./profile";
 async function hasBusinessProfile(uid) {
     console.log("check business profile");
@@ -24,6 +24,9 @@ export async function renderLoggedInState(user) {
         initializeOrderForm();
         initSubmitOrder();
         initProfile(user);
+
+        const profile = await fetchUserProfile(user.uid);
+        if (profile?.tax_rate) setTaxRate(profile.tax_rate);
 
         // Populate toolbar profile button with user's email initial
         const initial = (user.email || '?').charAt(0).toUpperCase();

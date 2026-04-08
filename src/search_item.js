@@ -1,5 +1,4 @@
-import { collection, query, orderBy, getDocs } from 'firebase/firestore';
-import { db } from './firebase';
+import { auth, fetchInventory } from './firebase';
 import { createItemButton, renderItemGrid } from './item_ui';
 import { formatRupiah } from './formatRupiah';
 
@@ -9,19 +8,14 @@ function normalizeText(text){ return String(text || '').toLowerCase().trim(); }
 
 export async function loadAllItems() {
     try {
-        const q = query(collection(db, "inventory"), orderBy("lastUpdated"));
-        const querySnapshot = await getDocs(q);
-        allItems = querySnapshot.docs.map(doc => ({
-            id: doc.id,
-            ...doc.data()
-        }));
-
+        const user = auth.currentUser;
+        if (!user) return;
+        allItems = await fetchInventory(user.uid);
         console.log("Total Items Loaded:", allItems.length);
-        console.table(allItems); // Displays your data in a clean table format
-        
+        console.table(allItems);
         renderItemGrid(allItems);
-    } 
-    catch (error) {  console.error("Error pulling data:", error); }
+    }
+    catch (error) { console.error("Error pulling data:", error); }
 }
 
 export function addSingleItem(item){
@@ -31,7 +25,7 @@ export function addSingleItem(item){
     createItemButton(container, item);
 }
 
-//=============
+
 function searchedItems(query){
     if (!query || query.trim() === '') return allItems;
     const searchTerm = normalizeText(query);

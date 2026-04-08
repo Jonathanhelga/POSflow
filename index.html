@@ -243,16 +243,6 @@
                   <label class="c-field__label" for="item-name">Item Name</label>
                   <input class="c-field__input" type="text" id="item-name" placeholder="Item Name" />
                 </div>
-                <!-- <div class="c-field">
-                  <label class="c-field__label" for="tag-category">Category</label>
-                  <select id="tag-category" class="c-field__select">
-                    <option value="Lighting">Lighting</option>
-                    <option value="Cables &amp; Cords">Cables &amp; Cords</option>
-                    <option value="Electrical Wire">Electrical Wire</option>
-                    <option value="Outlets &amp; Switches">Outlets &amp; Switches</option>
-                    <option value="Smart Home">Smart Home</option>
-                  </select>
-                </div> -->
                 <div class="c-field">
                   <label class="c-field__label" for="cost-price">Cost Price (IDR)</label>
                   <input class="c-field__input" type="text" id="cost-price" placeholder="Cost Price (IDR)" />
@@ -359,8 +349,88 @@
             <h2 class="c-modal__title">Order History</h2>
             <button type="button" class="c-modal__close" aria-label="Close" data-modal-close="order-history-modal">&times;</button>
         </header>
-        <div class="c-modal__body">
-        
+        <div class="c-modal__body oh-body">
+
+          <!-- Left: order card list -->
+          <div class="oh-list-panel">
+            <div id="oh-order-list">
+              <p class="oh-empty">Loading orders...</p>
+            </div>
+          </div>
+
+          <!-- Right: bill preview -->
+          <div class="oh-detail-panel">
+            <div id="oh-bill-preview" class="oh-bill">
+
+              <!-- Bill Header (populated dynamically from profile) -->
+              <div class="oh-bill__header">
+                <div class="oh-bill__shop-name" id="oh-shop-name">—</div>
+                <div class="oh-bill__tagline" id="oh-shop-tagline"></div>
+                <div class="oh-bill__shop-details" id="oh-shop-details"></div>
+              </div>
+
+              <!-- Bill Meta -->
+              <div class="oh-bill__meta">
+                <div>
+                  <div class="oh-bill__invoice">Invoice: <span id="oh-invoice-num">—</span></div>
+                  <div>Cashier: <span id="oh-cashier">—</span></div>
+                </div>
+                <div class="oh-bill__meta-right">
+                  <div id="oh-bill-date">—</div>
+                  <div id="oh-bill-time">—</div>
+                </div>
+              </div>
+
+              <!-- Items Table -->
+              <div class="oh-bill__items">
+                <div class="oh-bill__items-header">
+                  <div>Item</div>
+                  <div>Qty</div>
+                  <div>Price</div>
+                  <div>Total</div>
+                </div>
+                <div id="oh-items-list">
+                  <!-- rows injected by JS -->
+                </div>
+              </div>
+
+              <!-- Summary -->
+              <div class="oh-bill__summary">
+                <div class="oh-bill__summary-row">
+                  <span>Total Items:</span>
+                  <span id="oh-total-items">—</span>
+                </div>
+                <div class="oh-bill__summary-row">
+                  <span>Subtotal:</span>
+                  <span id="oh-subtotal">—</span>
+                </div>
+                <div class="oh-bill__summary-row">
+                  <span>Tax (0%):</span>
+                  <span id="oh-tax">Rp 0</span>
+                </div>
+                <div class="oh-bill__summary-total">
+                  <span>GRAND TOTAL:</span>
+                  <span id="oh-grand-total">—</span>
+                </div>
+              </div>
+
+              <!-- Receipt Footer -->
+              <div class="oh-bill__footer">
+                <div class="oh-bill__thankyou">Thank You for Your Purchase!</div>
+                <div>Goods sold cannot be returned</div>
+                <div>Please check your items before leaving</div>
+              </div>
+
+            </div>
+
+            <!-- Print Button -->
+            <div class="oh-print-bar">
+              <button id="oh-print-btn" class="btn oh-print-btn" disabled>
+               Print Bill
+              </button>
+            </div>
+          </div>
+
         </div>
       </div>
     </div>
@@ -471,16 +541,22 @@
 
         <section class="l-sidebar__summary">
           <table class="c-table">
-            <thead>
-              <tr>
-                <th>Total Items</th>
-                <th>Price Total</th>
-              </tr>
-            </thead>
             <tbody id="order-summary">
               <tr>
+                <td>Total Items</td>
                 <td><span id="order-total-items">0</span></td>
-                <td><span id="order-total-price">0.0</span></td>
+              </tr>
+              <tr>
+                <td>Subtotal</td>
+                <td><span id="order-total-price">Rp 0</span></td>
+              </tr>
+              <tr>
+                <td>Tax (<span id="order-tax-label">0</span>%)</td>
+                <td><span id="order-tax-amount">Rp 0</span></td>
+              </tr>
+              <tr>
+                <td><strong>Total</strong></td>
+                <td><strong><span id="order-with-tax">Rp 0</span></strong></td>
               </tr>
             </tbody>
           </table>

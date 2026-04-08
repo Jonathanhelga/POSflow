@@ -1,5 +1,5 @@
 import { initializeApp } from "firebase/app";
-import { getFirestore, doc, setDoc, addDoc, collection, serverTimestamp  } from "firebase/firestore";
+import { getFirestore, doc, setDoc, addDoc, getDoc, collection, query, where, orderBy, getDocs, serverTimestamp  } from "firebase/firestore";
 import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "firebase/auth";
 
 const firebaseConfig = {
@@ -75,6 +75,31 @@ export async function submitItemData(itemData, uid){
         console.error("Error adding document: ", error);
         throw error;
     }
+}
+
+export async function fetchInventory(uid) {
+    const q = query(
+        collection(db, "inventory"),
+        where("ownerId", "==", uid),
+        orderBy("lastUpdated")
+    );
+    const snapshot = await getDocs(q);
+    return snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
+}
+
+export async function fetchOrders(uid) {
+    const q = query(
+        collection(db, "orders"),
+        where("ownerId", "==", uid),
+        orderBy("createdAt", "desc")
+    );
+    const snapshot = await getDocs(q);
+    return snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
+}
+
+export async function fetchUserProfile(uid) {
+    const snap = await getDoc(doc(db, "users", uid));
+    return snap.exists() ? snap.data() : null;
 }
 
 export async function submitOrder(orderPayload, uid){

@@ -1,13 +1,323 @@
+/* ═══════════════════════════════════════════════════════════════
+   ORDER HISTORY MODAL
+   ═══════════════════════════════════════════════════════════════ */
+
 #order-history-modal {
     align-items: center;
     justify-content: center;
 }
 
-#c-modal-order-history{
-    width: 100%;
-    max-width: 50vw;
-    overflow-y: auto;
+#c-modal-order-history {
+    width: 90vw;
+    max-width: 1000px;
+    height: 70vh;
+    max-height: 96vh;
     border-radius: var(--radius);
     background-color: var(--clr-panel);
     box-shadow: var(--shadow);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+}
+
+/* ─── Two-panel body ─────────────────────────────────────────── */
+
+.oh-body {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0;
+    padding: 0 !important;
+    overflow: hidden;
+    flex: 1;
+    min-height: 0;
+}
+
+/* ─── Left panel: order list ─────────────────────────────────── */
+
+.oh-list-panel {
+    border-right: 1px solid var(--clr-border);
+    overflow-y: auto;
+    padding: 1.2rem;
+}
+
+#oh-order-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1.2rem;
+}
+
+.oh-empty {
+    color: var(--clr-text-secondary);
+    font-size: 0.875rem;
+    text-align: center;
+    padding: 2rem 0;
+}
+
+.oh-empty--error { color: var(--clr-danger); }
+
+/* ─── Order card ─────────────────────────────────────────────── */
+
+.oh-card {
+    border: 1px solid var(--clr-border);
+    border-radius: var(--radius);
+    padding: 16px 18px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    transition: border-color 0.15s, box-shadow 0.15s;
+    cursor: default;
+}
+
+.oh-card:hover {
+    border-color: var(--clr-primary);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+}
+
+.oh-card--active {
+    border-color: var(--clr-primary);
+    background-color: #eef7fb;
+}
+
+/* Top row: date on left, order ID on right */
+.oh-card__top-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.oh-card__date {
+    font-weight: 700;
+    font-size: 0.95rem;
+    color: var(--clr-text-primary);
+}
+
+.oh-card__id {
+    font-size: 0.75rem;
+    color: var(--clr-text-secondary);
+    font-family: monospace;
+    letter-spacing: 0.5px;
+}
+
+/* Total — prominent, stands on its own line */
+.oh-card__total {
+    font-size: 1.15rem;
+    font-weight: 700;
+    color: var(--clr-text-primary);
+}
+
+/* Bottom row: item count on left, button on right */
+.oh-card__bottom-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.oh-card__qty {
+    font-size: 0.8rem;
+    color: var(--clr-text-secondary);
+}
+
+.oh-card__btn {
+    padding: 6px 14px;
+    font-size: 0.8rem;
+    background-color: var(--clr-primary);
+    color: var(--clr-text-primary);
+}
+
+/* ─── Right panel: bill detail ───────────────────────────────── */
+
+.oh-detail-panel {
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.oh-bill {
+    flex: 1;
+    overflow-y: auto;
+    padding: 20px;
+    font-size: 0.8rem;
+    font-family: 'Courier New', monospace;
+}
+
+/* Receipt paper */
+#oh-bill-preview {
+    max-width: 400px;
+    margin: 0 auto;
+    background: rgb(253, 255, 216);
+    padding: 30px;
+    line-height: 1.5;
+}
+
+/* Bill header */
+.oh-bill__header {
+    text-align: center;
+    border-bottom: 2px solid #000;
+    padding-bottom: 20px;
+    margin-bottom: 20px;
+}
+
+.oh-bill__shop-name {
+    font-size: 1.15rem;
+    font-weight: 700;
+    letter-spacing: 1px;
+}
+
+.oh-bill__tagline {
+    font-size: 0.75rem;
+    color: var(--clr-text-secondary);
+    margin-top: 2px;
+}
+
+.oh-bill__shop-details {
+    font-size: 0.72rem;
+    color: var(--clr-text-secondary);
+    margin-top: 6px;
+    line-height: 1.5;
+}
+
+/* Bill meta (invoice # + date/time) */
+.oh-bill__meta {
+    display: flex;
+    justify-content: space-between;
+    border-bottom: 1px dashed #ccc;
+    padding-bottom: 20px;
+    margin-bottom: 20px;
+    font-size: 0.75rem;
+}
+
+.oh-bill__invoice { font-weight: 600; }
+.oh-bill__meta-right { text-align: right; }
+
+/* Items table */
+.oh-bill__items { width: 100%; margin-bottom: 20px; }
+
+.oh-bill__items-header,
+.oh-bill__item-row {
+    display: grid;
+    grid-template-columns: 2fr 0.7fr 1.2fr 1.2fr;
+    gap: 6px;
+    padding: 6px 0;
+    font-size: 0.75rem;
+}
+
+.oh-bill__items-header {
+    font-weight: 700;
+    border-bottom: 1px solid #000;
+    margin-bottom: 4px;
+}
+
+.oh-bill__item-row { border-bottom: 1px dotted #ccc; }
+.oh-bill__item-row:last-child { border-bottom: none; }
+
+.oh-bill__item-name {
+    font-size: 0.75rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* Summary */
+.oh-bill__summary {
+    border-top: 2px solid #000;
+    padding-top: 15px;
+    margin-top: 15px;
+    margin-bottom: 12px;
+}
+
+.oh-bill__summary-row {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.75rem;
+    padding: 3px 0;
+}
+
+.oh-bill__summary-total {
+    display: flex;
+    justify-content: space-between;
+    font-weight: 700;
+    font-size: 0.875rem;
+    border-top: 2px solid #000;
+    margin-top: 8px;
+    padding-top: 8px;
+}
+
+/* Receipt footer */
+.oh-bill__footer {
+    text-align: center;
+    font-size: 0.7rem;
+    color: var(--clr-text-secondary);
+    border-top: 1px solid #000;
+    margin-top: 25px;
+    padding-top: 20px;
+    line-height: 1.8;
+}
+
+.oh-bill__thankyou {
+    font-weight: 700;
+    font-size: 0.8rem;
+    color: var(--clr-text-primary);
+    margin-bottom: 4px;
+}
+
+/* ─── Print button bar ───────────────────────────────────────── */
+
+.oh-print-bar {
+    padding: 12px 16px;
+    border-top: 1px solid var(--clr-border);
+    background: var(--clr-bg-surface);
+    display: flex;
+    justify-content: center;
+}
+
+.oh-print-btn {
+    background-color: var(--clr-primary);
+    color: var(--clr-text-primary);
+    width: 100%;
+    max-width: 260px;
+    font-size: 0.875rem;
+}
+
+.oh-print-btn:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+    filter: none;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   PRINT STYLES — only show the bill when printing
+   ═══════════════════════════════════════════════════════════════ */
+
+@media print {
+    body > *:not(#order-history-modal) { display: none !important; }
+
+    #order-history-modal {
+        display: block !important;
+        position: static !important;
+        background: none !important;
+    }
+
+    #c-modal-order-history {
+        box-shadow: none !important;
+        max-height: none !important;
+        width: auto !important;
+    }
+
+    .c-modal__header,
+    .oh-list-panel,
+    .oh-print-bar { display: none !important; }
+
+    .oh-body {
+        display: block !important;
+    }
+
+    .oh-detail-panel {
+        overflow: visible !important;
+    }
+
+    .oh-bill {
+        overflow: visible !important;
+        padding: 0 !important;
+        font-size: 10pt;
+    }
 }
