@@ -10,8 +10,7 @@
 #c-modal-order-history {
     width: 90vw;
     max-width: 1000px;
-    /* height: 70vh; */
-    max-height: 96vh;
+    max-height: 80vh;
     border-radius: var(--radius);
     background-color: var(--clr-panel);
     box-shadow: var(--shadow);

@@ -1,5 +1,5 @@
 import { initializeApp } from "firebase/app";
-import { getFirestore, doc, setDoc, addDoc, getDoc, collection, query, where, orderBy, getDocs, serverTimestamp, writeBatch, increment } from "firebase/firestore";
+import { getFirestore, doc, setDoc, addDoc, getDoc, updateDoc, collection, query, where, orderBy, getDocs, serverTimestamp, writeBatch, increment } from "firebase/firestore";
 import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "firebase/auth";
 
 const firebaseConfig = {

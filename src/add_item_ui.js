@@ -12,6 +12,22 @@ export function initInventoryForm() {
             alert("Session expired. Please log in again.");
             return;
         }
+        const requiredFields = [
+            { id: 'sku', label: 'SKU' },
+            { id: 'item-name', label: 'Item Name' },
+            { id: 'cost-price', label: 'Cost Price' },
+            { id: 'sell-price', label: 'Selling Price' },
+            { id: 'item-qty', label: 'Item Quantity' },
+            { id: 'item-unit', label: 'Unit' },
+        ];
+
+        const emptyFields = requiredFields.filter(f => !document.getElementById(f.id).value.trim());
+        if (emptyFields.length > 0) {
+            alert(`Please fill in the following required fields:\n• ${emptyFields.map(f => f.label).join('\n• ')}`);
+            document.getElementById(emptyFields[0].id).focus();
+            return;
+        }
+
         const originalText = submitBtn.textContent;
         submitBtn.disabled = true;
         submitBtn.textContent = "Saving Item...";
@@ -27,6 +43,7 @@ export function initInventoryForm() {
             supplier: document.getElementById('supplier-info').value.trim(),
             description: document.getElementById('js-description').value.trim(),
         };
+        
         try {
             const itemData = await submitItemData(formData, user.uid);
             addSingleItem(itemData);

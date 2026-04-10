@@ -35,6 +35,11 @@ export function modal_handler(){
         toggleModal('order-history-modal');
         console.log("button is clicked");
     });
+
+    document.getElementById('inventory-update-open').addEventListener('click', function (){
+        toggleModal('features-modal');
+        toggleModal('inventory-update-modal');
+    });
     
     const closeButtons = document.querySelectorAll('[data-modal-close]');
     closeButtons.forEach((button) => {

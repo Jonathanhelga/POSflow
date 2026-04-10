@@ -433,7 +433,95 @@
         </div>
       </div>
     </div>
-    <!-- ============= Profile Modal ============= -->
+
+    <div id="inventory-update-modal" class="c-modal c-modal--center is-hidden">
+      <div class="c-modal__panel" id="c-modal-inventory-update">
+        <header class="c-modal__header">
+          <h2 class="c-modal__title">Inventory Update</h2>
+          <button type="button" class="c-modal__close" aria-label="Close" data-modal-close="inventory-update-modal">&times;</button>
+        </header>
+        <div class="c-modal__body iu-body">
+          <!-- Left: Item List -->
+          <div class="iu-list-panel">
+            <div class="iu-search-bar">
+              <input type="search" id="iu-search" class="iu-search-input" placeholder="Search by name or SKU..." />
+            </div>
+            <div id="iu-item-list">
+              <p class="iu-empty">Select an item to begin...</p>
+            </div>
+          </div>
+
+          <!-- Right: Detail + Update Form -->
+          <div class="iu-detail-panel">
+
+            <!-- Empty state -->
+            <!-- <div id="iu-empty-state" class="iu-empty-state">
+              <p>← Select an item to view details and update stock</p>
+            </div>  -->
+
+            <!-- Detail view (hidden until item selected) -->
+            <div id="iu-detail-view" class="iu-detail-view is-hidden">
+
+              <!-- Item header -->
+              <div class="iu-detail-header">
+                <div id="iu-detail-tag" class="iu-detail-tag iu-tag--neutral"></div>
+                <div class="iu-detail-header__info">
+                  <h3 class="iu-detail-header__name" id="iu-detail-name">—</h3>
+                  <p class="iu-detail-header__sku" id="iu-detail-sku">—</p>
+                </div>
+                <span id="iu-status-badge" class="iu-detail-badge iu-badge--good">GOOD</span>
+              </div>
+
+              <!-- Stock metrics -->
+              <div class="iu-stock-grid">
+                <div class="iu-stock-card">
+                  <span class="iu-stock-card__label">Current Stock</span>
+                  <span class="iu-stock-card__value" id="iu-current-stock">—</span>
+                </div>
+                <div class="iu-stock-card">
+                  <span class="iu-stock-card__label">Min. Stock</span>
+                  <span class="iu-stock-card__value" id="iu-min-stock">—</span>
+                </div>
+                <div class="iu-stock-card">
+                  <span class="iu-stock-card__label">Unit</span>
+                  <span class="iu-stock-card__value" id="iu-unit">—</span>
+                </div>
+                <div class="iu-stock-card">
+                  <span class="iu-stock-card__label">Supplier</span>
+                  <span class="iu-stock-card__value" id="iu-supplier">—</span>
+                </div>
+              </div>
+
+              <!-- Prices -->
+              <div class="iu-price-row">
+                <div class="iu-price-item">
+                  <span class="iu-price-item__label">Cost Price</span>
+                  <span class="iu-price-item__value" id="iu-cost-price">—</span>
+                </div>
+                <div class="iu-price-item">
+                  <span class="iu-price-item__label">Sell Price</span>
+                  <span class="iu-price-item__value" id="iu-sell-price">—</span>
+                </div>
+              </div>
+
+              <!-- Update form -->
+              <div class="iu-update-form">
+                <label class="iu-update-form__label" for="iu-incoming-qty">Add Incoming Stock</label>
+                <div class="iu-update-form__row">
+                  <input type="number" id="iu-incoming-qty" class="iu-update-form__input"
+                         min="1" step="1" placeholder="Enter quantity to add..." />
+                  <button type="button" id="iu-save-btn" class="btn iu-save-btn">Save</button>
+                </div>
+                <p id="iu-feedback" class="iu-feedback"></p>
+              </div>
+
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
     <div id="profile-modal" class="c-modal c-modal--side is-hidden">
       <div class="c-modal__panel" id="c-modal-profile">
         <header class="c-modal__header">
