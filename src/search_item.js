@@ -1,4 +1,5 @@
-import { auth, fetchInventory } from './firebase';
+import { auth, fetchInventory, db } from './firebase';
+// import { doc, updateDoc, serverTimestamp } from 'firebase/firestore';
 import { createItemButton, renderItemGrid } from './item_ui';
 import { formatRupiah } from './formatRupiah';
 
@@ -49,7 +50,8 @@ export function initializeSearch(){
     searchInput?.addEventListener('input', (event) => handleSearchEvent(event));
 }
 //=============
-function updateLocalStock(itemId, quantityChange){}
-
-function syncStockToFirestore(itemId, newQuantity){}
-
+export function updateLocalStock(itemId, quantityChange) {
+    const item = allItems.find(i => i.id === itemId);
+    if (!item) return;
+    item.stockLevel = (item.stockLevel || 0) + quantityChange;
+}

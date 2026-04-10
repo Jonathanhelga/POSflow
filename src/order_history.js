@@ -106,9 +106,9 @@ function viewOrderDetails(order, cardEl) {
     });
 
     document.getElementById('oh-total-items').textContent = totalItems;
-    document.getElementById('oh-subtotal').textContent = `Rp ${formatRupiah(order.totalPrice)}`;
-    document.getElementById('oh-tax').textContent = 'Rp 0';
-    document.getElementById('oh-grand-total').textContent = `Rp ${formatRupiah(order.totalPrice)}`;
+    document.getElementById('oh-subtotal').textContent = `Rp ${formatRupiah(order?.subtotal || 0)}`;
+    document.getElementById('oh-tax').textContent = `Rp ${formatRupiah(order?.taxAmount || 0)}`;
+    document.getElementById('oh-grand-total').textContent = `Rp ${formatRupiah(order.totalPrice) ?? '-'}`;
 
     document.getElementById('oh-print-btn').disabled = false;
 
@@ -155,6 +155,8 @@ export async function initOrderHistory() {
         document.getElementById('oh-order-list').innerHTML = '<p class="oh-empty">Loading orders...</p>';
         try {
             const orders = await fetchOrders(user.uid);
+            console.log("orders : ", orders);
+            
             renderOrderList(orders);
         } catch (err) {
             console.error('Failed to load order history:', err);

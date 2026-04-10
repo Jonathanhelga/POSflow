@@ -1,5 +1,5 @@
 import { initializeApp } from "firebase/app";
-import { getFirestore, doc, setDoc, addDoc, getDoc, collection, query, where, orderBy, getDocs, serverTimestamp  } from "firebase/firestore";
+import { getFirestore, doc, setDoc, addDoc, getDoc, collection, query, where, orderBy, getDocs, serverTimestamp, writeBatch, increment } from "firebase/firestore";
 import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "firebase/auth";
 
 const firebaseConfig = {
@@ -103,15 +103,33 @@ export async function fetchUserProfile(uid) {
 }
 
 export async function submitOrder(orderPayload, uid){
-    try {
-        const orderRef = collection(db, "orders");
-        const docRef = await addDoc(orderRef, {
-            ...orderPayload,
-            ownerId: uid,
-            createdAt: serverTimestamp(),
+    const batch = writeBatch(db);
+
+    const orderRef = doc(collection(db, "orders"));
+    batch.set(orderRef, {
+        ...orderPayload,
+        ownerId: uid,
+        createdAt: serverTimestamp(),
+    });
+
+    for (const item of orderPayload.items) {
+        const inventoryRef = doc(db, "inventory", item.id);
+        batch.update(inventoryRef, {
+            stockLevel: increment(-item.quantity),
+            lastUpdated: serverTimestamp(),
         });
-    return docRef.id;
-    } catch (error) {
-        
     }
+
+    await batch.commit();
+    return orderRef.id;
 }
+
+export async function syncStockToFirestore(itemId, newQuantity) {
+    await updateDoc(doc(db, 'inventory', itemId), {
+        stockLevel: newQuantity,
+        lastUpdated: serverTimestamp(),
+    });
+    const item = allItems.find(i => i.id === itemId);
+    if (item) item.stockLevel = newQuantity;
+}
+

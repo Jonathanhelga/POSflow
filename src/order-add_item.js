@@ -1,6 +1,6 @@
 import { toggleModal } from './modal-handler';
 import { formatRupiah } from "./formatRupiah";
-import { allItems } from "./search_item";
+import { allItems, updateLocalStock } from "./search_item";
 import { auth, submitOrder } from "./firebase";
 
 let orderedItems = [];
@@ -46,58 +46,6 @@ export function initializeOrderForm(){
             toggleModal('order-item-modal');
         });
     }
-}
-export async function initSubmitOrder(){
-    const submitBtn = document.getElementById('js-order-submit');
-    if (!submitBtn) return;
-    submitBtn.addEventListener('click', async () => {
-        if (orderedItems.length === 0) {
-            alert("No items in the order yet.");
-            return;
-        }
-
-        const user = auth.currentUser;
-        if (!user) {
-            alert("Session expired. Please log in again.");
-            return;
-        }
-
-        const mappedItems = orderedItems.map(item => ({
-            id: item.id,
-            name: item.name,
-            price: item.price,
-            quantity: item.quantity,
-            subtotal: item.price * item.quantity,
-        }));
-
-        const subtotal = orderedItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-        const taxAmount = subtotal * (taxRate / 100);
-        const totalWithTax = subtotal + taxAmount;
-
-        const orderPayload = {
-            items: mappedItems,
-            totalQuantity: orderedItems.reduce((sum, item) => sum + item.quantity, 0),
-            subtotal,
-            taxRate,
-            taxAmount,
-            totalPrice: totalWithTax,
-        };
-
-        const originalText = submitBtn.textContent;
-        submitBtn.disabled = true;
-        submitBtn.textContent = "Submitting...";
-
-        try {
-            await submitOrder(orderPayload, user.uid);
-            resetOrderAfterSubmit();
-        } catch (err) {
-            console.error("Order submission failed:", err);
-            alert(`Failed to submit order: ${err.message}`);
-        } finally {
-            submitBtn.disabled = false;
-            submitBtn.textContent = originalText;
-        }
-    });
 }
 
 export function addItemToOrder(itemID, itemName, itemPrice, itemQuantity){
@@ -169,7 +117,6 @@ function updateRow(index){
 function orderModifier(){
     const resetButton = document.getElementById('js-order-reset');
     const removeButton = document.getElementById('js-order-remove');
-    // const submitButton = document.getElementById('js-order-print');
     resetButton.addEventListener('click', () => { resetOrderTable(); })
     removeButton.addEventListener('click', () => { removeSelectedItem(); })
 }
@@ -185,7 +132,6 @@ function removeSelectedItem(){
     const removeBtn = document.getElementById('js-order-remove');
     if (removeBtn) removeBtn.disabled = true;
 }
-
 function resetOrderTable(){
     if (orderedItems.length === 0) return;
     if (!confirm('Reset the entire order?')) return;
@@ -216,7 +162,6 @@ function updateTotals(){
     document.getElementById('order-tax-amount').textContent = formatRupiah(taxAmount);
     document.getElementById('order-with-tax').textContent = formatRupiah(totalWithTax);
 }
-
 function rowIdFor(itemID){ return `order-row-${itemID}`; }
 
 function showToast(message, type = 'success') {
@@ -230,9 +175,7 @@ function showToast(message, type = 'success') {
     }, 2000);
 }
 
-
 let lastSelectedRow = null;
-
 function handleRowClick(index, rowElement){
     const removeBtn = document.getElementById('js-order-remove');
 
@@ -249,4 +192,59 @@ function handleRowClick(index, rowElement){
     selectedRowIndex = index;
     lastSelectedRow = rowElement;
     if (removeBtn) removeBtn.disabled = false;
+}
+
+export async function initSubmitOrder(){
+    const submitBtn = document.getElementById('js-order-submit');
+    if (!submitBtn) return;
+    submitBtn.addEventListener('click', async () => {
+        if (orderedItems.length === 0) {
+            alert("No items in the order yet.");
+            return;
+        }
+        const user = auth.currentUser;
+        if (!user) {
+            alert("Session expired. Please log in again.");
+            return;
+        }
+
+        const mappedItems = orderedItems.map(item => ({
+            id: item.id,
+            name: item.name,
+            price: item.price,
+            quantity: item.quantity,
+            subtotal: item.price * item.quantity,
+        }));
+
+        const subtotal = orderedItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+        const taxAmount = subtotal * (taxRate / 100);
+        const totalWithTax = subtotal + taxAmount;
+
+        const orderPayload = {
+            items: mappedItems,
+            totalQuantity: orderedItems.reduce((sum, item) => sum + item.quantity, 0),
+            subtotal,
+            taxRate,
+            taxAmount,
+            totalPrice: totalWithTax,
+        };
+
+        const originalText = submitBtn.textContent;
+        submitBtn.disabled = true;
+        submitBtn.textContent = "Submitting...";
+        
+        try {
+            await submitOrder(orderPayload, user.uid);
+            mappedItems.forEach(item => updateLocalStock(item.id, -item.quantity));
+            resetOrderAfterSubmit();
+            showToast('Order submitted successfully!');    
+        } catch (err) {
+            console.error("Order submission failed:", err);
+            alert(`Failed to submit order: ${err.message}`);
+            showToast(`Failed to submit order: ${err.message}`, 'error');
+        } finally {
+            submitBtn.disabled = false;
+            submitBtn.textContent = originalText;
+        }
+    });
 }

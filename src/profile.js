@@ -1,6 +1,7 @@
 import { db, LogOutUser } from './firebase';
 import { getDoc, setDoc, doc } from 'firebase/firestore';
 import { toggleModal } from './modal-handler';
+import { setTaxRate } from './order-add_item';
 
 export function initProfile(user) {
     const openBtn = document.getElementById('js-profile-open');
@@ -75,11 +76,11 @@ async function saveProfileData(uid) {
 
     try {
         await setDoc(doc(db, 'users', uid), formData, { merge: true });
-        saveBtn.textContent = 'Saved!';
-        setTimeout(() => {
-            saveBtn.textContent = originalText;
-            saveBtn.disabled = false;
-        }, 1500);
+        setTaxRate(formData.tax_rate);
+        toggleModal('profile-modal');
+        saveBtn.textContent = originalText;
+        saveBtn.disabled = false;
+
     } catch (error) {
         alert('Failed to save: ' + error.message);
         saveBtn.textContent = originalText;

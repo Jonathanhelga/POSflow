@@ -21,9 +21,10 @@ document.addEventListener('DOMContentLoaded', function(){
         if (user) {
             renderLoggedInState(user);
         } else {
+            document.getElementById('pos-app').classList.remove('is-active');
             const wizard = document.getElementById('setup-wizard');
+            wizard.classList.remove('is-hidden');
             wizard.classList.add('is-active');
-            setTimeout(()=> {console.log('wait for wizard rendering');}, 300);
             switchView('signUp');
         }
     });
