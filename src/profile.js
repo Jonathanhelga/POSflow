@@ -4,14 +4,10 @@ import { toggleModal } from './modal-handler';
 import { setTaxRate } from './order-add_item';
 
 export function initProfile(user) {
-    const openBtn = document.getElementById('js-profile-open');
-    if (openBtn) {
-        openBtn.addEventListener('click', () => {
-            loadProfileData(user);
-            toggleModal('profile-modal');
-        });
-    }
-
+    document.getElementById('js-profile-open').addEventListener('click', () => {
+        toggleModal('profile-modal');
+    });
+    loadProfileData(user);
     const form = document.getElementById('js-profile-form');
     if (form) {
         form.addEventListener('submit', async (e) => {
@@ -23,7 +19,8 @@ export function initProfile(user) {
     const logoutBtn = document.getElementById('js-profile-logout');
     if (logoutBtn) {
         logoutBtn.addEventListener('click', async () => {
-            if (!confirm('Are you sure you want to log out?')) return;
+            if (!confirm('Are you sure you want to log out?')) {return;}
+            toggleModal('profile-modal');
             await LogOutUser();
         });
     }

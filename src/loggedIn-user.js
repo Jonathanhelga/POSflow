@@ -4,6 +4,7 @@ import { loadAllItems, initializeSearch } from './search_item';
 import { getDoc, doc } from "firebase/firestore";
 import { initializeOrderForm, initSubmitOrder, setTaxRate } from "./order-add_item";
 import { initProfile } from "./profile";
+
 async function fetchBusinessProfile(uid) {
     const docSnap = await getDoc(doc(db, "users", uid));
     return docSnap.exists() ? docSnap.data() : null;

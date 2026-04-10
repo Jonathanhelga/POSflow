@@ -1,5 +1,6 @@
 import { auth, fetchOrders, fetchUserProfile } from './firebase';
 import { formatRupiah } from './formatRupiah';
+import { toggleModal } from './modal-handler';
 
 let profileCache = null;
 let isProcessing = false;
@@ -81,7 +82,6 @@ function renderOrderList(orders) {
     });
 }
 
-
 function viewOrderDetails(order, cardEl) {
     const itemsList = document.getElementById('oh-items-list');
     itemsList.innerHTML = '';
@@ -132,6 +132,7 @@ export async function initOrderHistory() {
     if (!openBtn) return;
 
     openBtn.addEventListener('click', async () => {
+        toggleModal('order-history-modal');
         const user = auth.currentUser;
         if (!user) return;
 

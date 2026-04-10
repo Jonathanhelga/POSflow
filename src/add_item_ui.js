@@ -1,6 +1,10 @@
 import { submitItemData, auth } from "./firebase";
 import { addSingleItem } from "./search_item";
+import { toggleModal } from './modal-handler';
 export function initInventoryForm() {
+    document.getElementById('js-item-create-open').addEventListener('click', () => {
+        toggleModal('item-create-modal');
+    });
     const form = document.getElementById('js-item-create-form');
     const submitBtn = document.getElementById('js-add-new-item');
     if (!form || !submitBtn) return;

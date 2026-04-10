@@ -21,24 +21,8 @@ export function toggleModal(idName){
 }
 
 export function modal_handler(){
-    document.getElementById('js-item-create-open').addEventListener('click', function (){
-        toggleModal('item-create-modal');
-        console.log("button is clicked");
-    });
-
     document.getElementById('js-features-open').addEventListener('click', function (){
         toggleModal('features-modal');
-        console.log("button is clicked");
-    });
-
-    document.getElementById('js-order-history-open').addEventListener('click', function (){
-        toggleModal('order-history-modal');
-        console.log("button is clicked");
-    });
-
-    document.getElementById('inventory-update-open').addEventListener('click', function (){
-        toggleModal('features-modal');
-        toggleModal('inventory-update-modal');
     });
     
     const closeButtons = document.querySelectorAll('[data-modal-close]');

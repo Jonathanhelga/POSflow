@@ -1,6 +1,7 @@
 import { db, fetchInventory } from './firebase';
 import { auth } from './firebase';
 import { doc, updateDoc, increment, serverTimestamp } from 'firebase/firestore';
+import { toggleModal } from './modal-handler';
 
 let allItems      = [];
 let filteredItems = [];
@@ -188,7 +189,11 @@ async function openInventoryUpdate() {
 }
 
 export function initInventoryUpdate() {
-    document.getElementById('inventory-update-open').addEventListener('click', openInventoryUpdate);
+    document.getElementById('inventory-update-open').addEventListener('click', () => {
+        toggleModal('features-modal');
+        toggleModal('inventory-update-modal');
+        openInventoryUpdate();
+    });
 
     document.getElementById('iu-save-btn').addEventListener('click', handleSave);
 
