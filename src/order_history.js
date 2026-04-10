@@ -149,6 +149,7 @@ export async function initOrderHistory() {
         document.getElementById('oh-total-items').textContent = '—';
         document.getElementById('oh-subtotal').textContent = '—';
         document.getElementById('oh-grand-total').textContent = '—';
+        document.getElementById('oh-tax').textContent = '—';
         document.getElementById('oh-print-btn').disabled = true;
 
         // Fetch and render orders
