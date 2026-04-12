@@ -36,7 +36,6 @@ function renderItemList(items) {
 
         card.innerHTML = `
             <div class="iu-card__top">
-                <div class="iu-card__tag-dot iu-tag--${item.tagColor ?? 'neutral'}"></div>
                 <span class="iu-card__name">${item.itemName ?? '—'}</span>
                 <span class="iu-badge iu-badge--${status}">${status === 'good' ? 'GOOD' : 'ALERT'}</span>
             </div>
@@ -169,13 +168,13 @@ function clearFeedback() {
 async function openInventoryUpdate() {
     const user = auth.currentUser;
     if (!user) return;
-
+    
     // Reset panel state
     selectedItem = null;
     document.getElementById('iu-item-list').innerHTML   = '<p class="iu-empty">Loading...</p>';
     document.getElementById('iu-search').value          = '';
     // document.getElementById('iu-empty-state').classList.remove('is-hidden');
-    document.getElementById('iu-detail-view').classList.add('is-hidden');
+    // document.getElementById('iu-detail-view').classList.add('is-hidden');
 
     try {
         allItems      = await fetchInventory(user.uid);

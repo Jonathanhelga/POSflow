@@ -40,6 +40,9 @@
 }
 
 #oh-order-list {
+    flex: 1;
+    overflow-y: auto;
+    padding: 0.9rem;
     display: flex;
     flex-direction: column;
     gap: 1.2rem;

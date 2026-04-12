@@ -52,7 +52,7 @@ function renderOrderList(orders) {
                 <span class="oh-card__date">${formatDate(order.createdAt)}</span>
                 <span class="oh-card__id">#${shortId(order.id)}</span>
             </div>
-            <div class="oh-card__total">Rp ${formatRupiah(order.totalPrice)}</div>
+            <div class="oh-card__total">Rp. ${formatRupiah(order.totalPrice)}</div>
             <div class="oh-card__bottom-row">
                 <span class="oh-card__qty">${order.totalQuantity} item(s)</span>
             </div>

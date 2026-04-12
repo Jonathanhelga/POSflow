@@ -95,13 +95,13 @@ flex: 0 1 auto	0	1	auto	Don't grow, can shrink, starting from its natural size *
 .iu-card__top {
     display: flex;
     align-items: center;
-    gap: 7px;
+    justify-content: space-between;
     margin-bottom: 5px;
 }
 .iu-card__name {
     flex: 1;
     font-weight: 600;
-    font-size: 0.875rem;
+    font-size: 1rem;
     color: var(--clr-text-primary);
     white-space: nowrap;
     overflow: hidden;
@@ -109,12 +109,12 @@ flex: 0 1 auto	0	1	auto	Don't grow, can shrink, starting from its natural size *
 }
 .iu-card__bottom {
     display: flex;
-    justify-content: space-between;
     align-items: center;
+    justify-content: space-between;
 }
 .iu-card__sku {
     font-family: monospace;
-    font-size: 0.72rem;
+    font-size: 1rem;
     color: var(--clr-text-secondary);
     letter-spacing: 0.4px;
 }
@@ -181,6 +181,10 @@ flex: 0 1 auto	0	1	auto	Don't grow, can shrink, starting from its natural size *
     display: flex;
     flex-direction: column;
     gap: 1.1rem;
+}
+
+.iu-detail-view.is-hidden{
+    display: none;
 }
 
 /* ─── Item header ────────────────────────────────────────────── */

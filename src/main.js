@@ -9,6 +9,7 @@ import '../styles/ordering_items.css';
 import '../styles/profile_modal.css';
 import '../styles/order_history_modal.css';
 import '../styles/inventory_update_modal.css';
+import '../styles/barcode_generator_modal.css';
 import { auth } from "./firebase";
 import { onAuthStateChanged } from "firebase/auth";
 import { switchView, eventDelegation } from "./control_wizard";
@@ -16,7 +17,7 @@ import { renderLoggedInState } from "./loggedIn-user";
 import { modal_handler } from './modal-handler';
 import { initOrderHistory } from './order_history';
 import { initInventoryUpdate } from './inventory_update';
-
+import { initBarcodeGenerator } from './barcode-generator';
 document.addEventListener('DOMContentLoaded', function(){
     eventDelegation('js-wizard__body');
     onAuthStateChanged(auth, (user) => {
@@ -33,4 +34,5 @@ document.addEventListener('DOMContentLoaded', function(){
     modal_handler();// Open and close modal controller
     initOrderHistory();
     initInventoryUpdate();
+    initBarcodeGenerator();
 });

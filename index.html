@@ -301,7 +301,7 @@
           <div class="c-modal__body">
             <div class="c-actions c-actions--stack">
               <button id="inventory-update-open" class="btn" type="button">Update Inventory</button>
-              <button id="barcode-open" class="btn" type="button">Generate Barcode</button>
+              <button id="barcode-generator-open" class="btn" type="button">Generate Barcode</button>
               <!-- <button id="item-info-open" class="btn" type="button" disabled>Item Information</button> -->
               <!-- <button id="keystats-open" class="btn" type="button" disabled>Key Stats</button> -->
             </div>
@@ -460,7 +460,7 @@
             </div>  -->
 
             <!-- Detail view (hidden until item selected) -->
-            <div id="iu-detail-view" class="iu-detail-view is-hidden">
+            <div id="iu-detail-view" class="iu-detail-view">
 
               <!-- Item header -->
               <div class="iu-detail-header">
@@ -521,7 +521,46 @@
         </div>
       </div>
     </div>
-
+    <!-- Barcode Generator -->
+    <div id="barcode-generator-modal" class="c-modal c-modal--center is-hidden">
+      <div class="c-modal__panel" id="c-modal-barcode-generator">
+        <header class="c-modal__header">
+          <h2 class="c-modal__title">Barcode Generator</h2>
+          <button type="button" class="c-modal__close" aria-label="Close" data-modal-close="barcode-generator-modal">&times;</button>
+        </header>
+        <div class="c-modal__body bg-body">
+          <!-- LEFT: item list -->
+          <div class="bg-list-panel">
+            <div class="bg-search-bar">
+              <input type="search" id="bg-search" class="bg-search-input" placeholder="Search by name or SKU..." />
+            </div>
+            <div id="bg-item-list">
+              <p class="bg-empty">Select an item to begin...</p>
+            </div>
+          </div>
+          <!-- RIGHT: barcode preview -->
+          <div class="bg-detail-panel">
+            <!-- image upload -->
+            <div class="bg-upload-bar">
+              <label class="bg-upload-label" for="bg-img-upload">
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                Upload Product Photo
+              </label>
+              <input type="file" id="bg-img-upload" accept="image/jpeg,image/png,image/jpg" class="bg-upload-input" />
+              <span id="bg-img-filename" class="bg-upload-filename"></span>
+            </div>
+            <!-- the barcode design preview -->
+            <div class="bg-barcode-design" id="bg-barcode-design">
+              <p class="bg-empty">Select an item from the list.</p>
+            </div>
+            <!-- print button -->
+            <div class="bg-print-bar">
+              <button id="bg-print-btn" class="btn bg-print-btn" disabled>Print Design</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
     <div id="profile-modal" class="c-modal c-modal--side is-hidden">
       <div class="c-modal__panel" id="c-modal-profile">
         <header class="c-modal__header">
