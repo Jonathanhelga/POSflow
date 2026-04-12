@@ -188,9 +188,13 @@ async function openInventoryUpdate() {
 }
 
 export function initInventoryUpdate() {
-    document.getElementById('inventory-update-open').addEventListener('click', () => {
+    const openBtn = document.getElementById('inventory-update-open');
+    if (!openBtn) return;
+
+    openBtn.addEventListener('click', () => {
         toggleModal('features-modal');
         toggleModal('inventory-update-modal');
+        if (!auth.currentUser) return;
         openInventoryUpdate();
     });
 

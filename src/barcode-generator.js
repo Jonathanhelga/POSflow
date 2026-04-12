@@ -1,4 +1,5 @@
 import JsBarcode from 'jsbarcode';
+import html2canvas from 'html2canvas';
 import { fetchInventory } from './firebase';
 import { auth } from './firebase';
 import { toggleModal } from './modal-handler';
@@ -9,6 +10,7 @@ let filteredItems = [];
 let selectedItem  = null;
 let currentObjectUrl = null;
 let uploadedImageUrl = null;
+let activeSize = 'large';
 
 // ─── helpers ──────────────────────────────────────────────────────────────────
 
@@ -62,7 +64,7 @@ function selectItem(item) {
     });
 
     updatePreview();
-    document.getElementById('bg-print-btn').disabled = false;
+    document.getElementById('bg-save-btn').disabled = false;
 }
 
 function updatePreview() {
@@ -70,7 +72,7 @@ function updatePreview() {
 
     const design = document.getElementById('bg-barcode-design');
     design.innerHTML = `
-        <div class="bg-preview">
+        <div class="bg-preview bg-preview--${activeSize}">
             <div class="bg-preview__name">${selectedItem.itemName ?? '-'}</div>
             <div class="bg-preview__img-wrap" id="bg-preview-img-wrap">
                 <img id="bg-preview-img" src="${uploadedImageUrl ?? ''}" alt="Product photo" />
@@ -93,7 +95,7 @@ function updatePreview() {
                 height: 110,
                 fontSize: 14,
                 displayValue: true,
-                margin: 10,
+                margin: 5,
                 background: 'transparent',
             });
         } catch {
@@ -106,32 +108,39 @@ function updatePreview() {
     }
 }
 
-// ─── print ────────────────────────────────────────────────────────────────────
+// ─── save ─────────────────────────────────────────────────────────────────────
 
-function printPreview() {
+async function saveDesign() {
     if (!selectedItem) return;
-    const content = document.getElementById('bg-barcode-design').innerHTML;
-    const win = window.open('', '_blank', 'width=500,height=680');
-    win.document.write(`<!DOCTYPE html>
-<html>
-<head>
-  <title>Barcode — ${selectedItem.itemName ?? ''}</title>
-  <style>
-    body { margin: 0; display: flex; justify-content: center; padding: 24px; font-family: sans-serif; }
-    .bg-preview { text-align: center; background: #d8faff; padding: 30px 30px 50px; line-height: 1.6; max-width: 320px; width: 100%; }
-    .bg-preview__name { font-size: 1.15rem; font-weight: 700; margin-bottom: 10px; }
-    .bg-preview__img-wrap { margin-bottom: 10px; }
-    .bg-preview__img-wrap img { max-width: 120px; max-height: 120px; object-fit: contain; }
-    .bg-preview__price { font-size: 0.95rem; margin-bottom: 14px; color: #333; }
-    svg { max-width: 100%; }
-  </style>
-</head>
-<body>${content}</body>
-</html>`);
-    win.document.close();
-    win.focus();
-    win.print();
-    win.close();
+
+    const previewEl = document.querySelector('.bg-preview');
+    if (!previewEl) return;
+
+    const btn = document.getElementById('bg-save-btn');
+    btn.disabled = true;
+    btn.textContent = 'Saving...';
+
+    try {
+        // Capture the preview card as a high-res PNG (scale 3 = 3× pixel density)
+        const canvas = await html2canvas(previewEl, {
+            scale: 3,
+            useCORS: true,
+            backgroundColor: '#d8faff',
+        });
+
+        // Build filename: e.g. "barcode-SKU123-sticker-s.png"
+        const name = selectedItem.sku ?? selectedItem.itemName ?? 'barcode';
+        const link = document.createElement('a');
+        link.download = `barcode-${name}-${activeSize}.png`;
+        link.href = canvas.toDataURL('image/png');
+        link.click();
+    } catch (err) {
+        console.error('Failed to save design:', err);
+    } finally {
+        btn.disabled = false;
+        alert('design successfully downloaded')
+        btn.textContent = 'Save Design';
+    }
 }
 
 // ─── open / reset ─────────────────────────────────────────────────────────────
@@ -146,7 +155,7 @@ async function openBarcodeGenerator() {
 
     document.getElementById('bg-item-list').innerHTML  = '<p class="bg-empty">Loading...</p>';
     document.getElementById('bg-search').value         = '';
-    document.getElementById('bg-print-btn').disabled   = true;
+    document.getElementById('bg-save-btn').disabled   = true;
     document.getElementById('bg-img-upload').value     = '';
     document.getElementById('bg-img-filename').textContent = '';
     document.getElementById('bg-barcode-design').innerHTML =
@@ -176,6 +185,7 @@ export async function initBarcodeGenerator() {
         openBarcodeGenerator();
     });
 
+    
     document.getElementById('bg-search').addEventListener('input', (e) => {
         const q = e.target.value.trim().toLowerCase();
         filteredItems = q
@@ -201,5 +211,15 @@ export async function initBarcodeGenerator() {
         if (selectedItem) updatePreview();
     });
 
-    document.getElementById('bg-print-btn').addEventListener('click', printPreview);
+    document.getElementById('bg-size-options').addEventListener('click', (e) => {
+        const btn = e.target.closest('.bg-size-btn');
+        if (!btn) return;
+        activeSize = btn.dataset.size;
+        document.querySelectorAll('.bg-size-btn').forEach(b =>
+            b.classList.toggle('bg-size-btn--active', b === btn)
+        );
+        if (selectedItem) updatePreview();
+    });
+
+    document.getElementById('bg-save-btn').addEventListener('click', saveDesign);
 }
