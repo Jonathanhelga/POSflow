@@ -2,24 +2,16 @@ import { loginUser, registerUser, submitSettingsData } from "./firebase";
 let emailFinal = '';
 let passFinal = '';
 let usernameFinal = '';
+let otpAttempts = 0;
+const MAX_OTP_ATTEMPTS = 3;
 
 function checkVerificationButton() {
     const username = document.getElementById('js-username').value.trim();
     const email = document.getElementById('js-email').value.trim();
     const pass = document.getElementById('js-password').value.trim();
     const buttonVerification = document.getElementById('js-email-verify');
-    const buttonSignUp = document.getElementById('js-signup-submit');
 
-    // if(buttonSignUp.classList.contains('is-active')){
-    //     buttonSignUp.classList.remove('is-active')
-    //     buttonVerification.classList.add('is-active')
-    //     buttonVerification.disabled = true;
-    //     buttonSignUp.disabled = true;
-    // }
-
-    if (username && email && pass){ 
-        buttonVerification.disabled = false; 
-    }
+    if (username && email && pass){ buttonVerification.disabled = false; }
     else { buttonVerification.disabled = true; }
 }
 
@@ -30,18 +22,91 @@ function checkSignInButton(){
     else{ buttonSignUp.disabled = true; }
 }
 
+function showMessage(anchorEl, message, type = 'error') {
+    const container = anchorEl.closest('.c-actions') ?? anchorEl;
+    let msg = document.getElementById('auth-inline-msg');
+    if (!msg) {
+        msg = document.createElement('small');
+        msg.id = 'auth-inline-msg'; 
+        container.insertAdjacentElement('afterend', msg); //beforebegin, afterbegin, beforeend, afterend
+    }
+    msg.className = `auth-inline-msg auth-inline-msg--${type}`;
+    msg.textContent = message;
+}
+
+function clearMessage(anchorEl) {
+    let msg = document.getElementById('auth-inline-msg');
+    if (!msg) {
+        const container = anchorEl.closest('.c-actions') ?? anchorEl;
+        msg = container.nextElementSibling;
+    }
+    if (msg && msg.classList.contains('auth-inline-msg')) msg.remove();
+}
+
+function resetSignUpForm() {
+    otpAttempts = 0;
+    emailFinal = '';
+    passFinal = '';
+    usernameFinal = '';
+    document.getElementById('js-username').value = '';
+    document.getElementById('js-email').value = '';
+    document.getElementById('js-password').value = '';
+    document.getElementById('js-verification-code').value = '';
+
+    const buttonVerification = document.getElementById('js-email-verify');
+    const buttonSignUp = document.getElementById('js-signup-submit');
+    buttonVerification.disabled = true;
+    buttonVerification.textContent = 'E-Mail Verification';
+    buttonVerification.classList.add('is-active');
+    buttonSignUp.disabled = true;
+    buttonSignUp.textContent = 'Sign Up';
+    buttonSignUp.classList.remove('is-active');
+
+    const msg = document.getElementById('auth-inline-msg');
+    if (msg) msg.textContent = '';
+}
+
 function ifButtonIsClicked(){
     const buttonVerification = document.getElementById('js-email-verify');
     const buttonSignUp = document.getElementById('js-signup-submit');
     const buttonSignUpText = buttonSignUp.textContent;
-    let generatedOtp = null;
-    buttonVerification.addEventListener('click', async function (event){
+
+    function startResendCountdown() {
+        let seconds = 60;
         buttonVerification.disabled = true;
-        buttonVerification.textContent = "Sending Verification Check Your Email";
-        emailFinal =  document.getElementById('js-email').value.trim();
+        buttonVerification.textContent = `Resend in ${seconds}s`;
+        const interval = setInterval(() => {
+            seconds--;
+            if (seconds <= 0) {
+                clearInterval(interval);
+                buttonVerification.classList.add('is-active');
+                buttonVerification.disabled = false;
+                buttonVerification.textContent = 'Resend Code';
+            } else {
+                buttonVerification.textContent = `Resend in ${seconds}s`;
+            }
+        }, 1000);
+    }
+
+    buttonVerification.addEventListener('click', async function(){
+        emailFinal = document.getElementById('js-email').value.trim();
         passFinal = document.getElementById('js-password').value.trim();
         usernameFinal = document.getElementById('js-username').value.trim();
-        console.log("Requesting OTP for:", emailFinal);
+
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(emailFinal)) {
+            showMessage(buttonVerification, 'Please enter a valid email address.');
+            return;
+        }
+        if (passFinal.length < 8) {
+            showMessage(buttonVerification, 'Password must be at least 8 characters.');
+            return;
+        }
+
+        clearMessage(buttonVerification);
+        buttonVerification.disabled = true;
+        buttonVerification.textContent = 'Sending… Check Your Email';
+
         try {
             const response = await fetch('http://localhost:3000/api/send-otp', {
                 method: 'POST',
@@ -49,49 +114,77 @@ function ifButtonIsClicked(){
                 body: JSON.stringify({ email: emailFinal })
             });
             const data = await response.json();
-            if(response.ok){
-                console.log("Server says:", data.message);
+            if (response.ok) {
+                otpAttempts = 0;
                 buttonSignUp.classList.add('is-active');
-                buttonSignUp.disabled = true;
-                // IMPORTANT: In a real app, don't return the OTP to the frontend here.
-                // The verification should happen on the server.
-                generatedOtp = data.otp;
                 buttonVerification.classList.remove('is-active');
-            }
-            else{ 
-                console.log("Server says error:", data.error); 
+                buttonSignUp.disabled = true;
+                showMessage(buttonVerification, 'Code sent! Check your inbox.', 'success');
+                startResendCountdown();
+            } else {
+                showMessage(buttonVerification, data.error || 'Failed to send verification code.');
                 buttonVerification.disabled = false;
                 buttonVerification.classList.add('is-active');
             }
         } catch (error) {
-            console.error("Network Error:", error);
-            alert("Could not connect to server.");
+            showMessage(buttonVerification, 'Could not connect to server. Please try again.');
             buttonVerification.disabled = false;
             buttonVerification.classList.add('is-active');
         }
-    })
+    });
+
     buttonSignUp.addEventListener('click', async function(e){
         e.preventDefault();
-        const verificationInput = document.getElementById('js-verification-code').value.trim();
-        if(Number(verificationInput) == generatedOtp){ 
-            console.log("OTP Match! Proceeding..."); 
-            try {
-                buttonSignUp.disabled = true;
-                buttonSignUp.textContent = "Creating Account...";
-                const userCredential = await registerUser(emailFinal, passFinal);
-                console.log("User Created:", userCredential);
-                buttonSignUp.textContent = "Account Successfully Created.";
-            } catch (error) {
-                alert(error.message);
-                buttonSignUp.textContent = buttonSignUpText;
-                buttonSignUp.disabled = false;
-            }
-        } else { 
-            console.log("Wrong OTP.");
-            alert("Incorrect Code");
+
+        if (otpAttempts >= MAX_OTP_ATTEMPTS) {
+            showMessage(buttonSignUp, 'Too many incorrect attempts. Please request a new code.');
+            
+            return;
         }
-    })
+
+        const verificationInput = document.getElementById('js-verification-code').value.trim();
+        buttonSignUp.disabled = true;
+        buttonSignUp.textContent = 'Verifying…';
+
+        try {
+            // OTP is verified server-side — never compare it on the frontend.
+            // Requires POST /api/verify-otp → { email, otp } on your Express server.
+            const verifyResponse = await fetch('http://localhost:3000/api/verify-otp', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email: emailFinal, otp: verificationInput })
+            });
+
+            const isJson = verifyResponse.headers.get('Content-Type')?.includes('application/json');
+            const verifyData = isJson ? await verifyResponse.json() : {};
+
+            if (!verifyResponse.ok) {
+                otpAttempts++;
+                const remaining = MAX_OTP_ATTEMPTS - otpAttempts;
+                showMessage(
+                    buttonSignUp,
+                    remaining > 0
+                        ? `Incorrect code. ${remaining} attempt${remaining === 1 ? '' : 's'} remaining.`
+                        : 'Too many incorrect attempts. Please request a new code.'
+                );
+                buttonSignUp.textContent = buttonSignUpText;
+                buttonSignUp.disabled = remaining <= 0;
+                if (remaining <= 0) setTimeout(resetSignUpForm, 3000);
+                return;
+            }
+
+            clearMessage(buttonSignUp);
+            buttonSignUp.textContent = 'Creating Account…';
+            await registerUser(emailFinal, passFinal);
+            buttonSignUp.textContent = 'Account Successfully Created';
+        } catch (error) {
+            showMessage(buttonSignUp, error.message || 'Failed to create account. Please try again.');
+            buttonSignUp.textContent = buttonSignUpText;
+            buttonSignUp.disabled = false;
+        }
+    });
 }
+
 export function initSignUpLogic(){
     checkVerificationButton();
     ifButtonIsClicked();
@@ -107,12 +200,6 @@ export function initSignUpLogic(){
     }
 }
 
-function activateContainer(){
-    const wizard = document.getElementById('setup-wizard');
-    const container = document.getElementById('pos-app');
-    container.classList.add('is-active');
-    wizard.classList.add('is-hidden');
-}
 async function submitSettingForm(){
     const submitSettingButton = document.getElementById('js-submit-setting');
 

@@ -38,7 +38,7 @@ export function initializeOrderForm(){
             event.preventDefault();
             
             const itemId = document.getElementById('js-current-item-id').value; //is the itemID
-            const quantity = parseFloat(document.getElementById('js-order-qty').value) || 0;
+            const quantity = parseFloat(document.getElementById('js-order-qty').value) || 1;
             const item = allItems.find(item => item.id === itemId);
             if (!item) return;
             

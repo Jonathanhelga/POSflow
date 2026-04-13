@@ -26,7 +26,6 @@ function controlSignUpWizardPageDirection(){
         if (titleEl) titleEl.innerText = titles[currentStep - 1] || '';
 
         if (buttonPrev) buttonPrev.style.display = (currentStep > 1) ? '' : 'none';
-
         if (buttonNext) buttonNext.innerText = (currentStep === totalSteps) ? 'Finish Setup' : 'Next Step';
 
         if (submitButton && buttonNext) {

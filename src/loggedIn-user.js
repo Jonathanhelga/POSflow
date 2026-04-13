@@ -1,6 +1,7 @@
 import { db, LogOutUser } from "./firebase";
 import { initInventoryForm } from './add_item_ui';
-import { loadAllItems, initializeSearch } from './search_item';
+import { allItems, loadAllItems, initializeSearch, initGlobalBarcodeListener } from './search_item';
+import { openOrderItemModal } from './order-add_item';
 import { getDoc, doc } from "firebase/firestore";
 import { initializeOrderForm, initSubmitOrder, setTaxRate } from "./order-add_item";
 import { initProfile } from "./profile";
@@ -18,6 +19,10 @@ export async function renderLoggedInState(user) {
         initInventoryForm();
         loadAllItems();
         initializeSearch();
+        initGlobalBarcodeListener((sku) => {
+            const item = allItems.find(i => i.sku === sku);
+            if (item) openOrderItemModal(item.id);
+        });
         initializeOrderForm();
         initSubmitOrder();
         initProfile(user);

@@ -21,6 +21,7 @@ import { initBarcodeGenerator } from './barcode-generator';
 document.addEventListener('DOMContentLoaded', function(){
     eventDelegation('js-wizard__body');
     onAuthStateChanged(auth, (user) => {
+        console.log(auth);
         if (user) {
             renderLoggedInState(user);
         } else {

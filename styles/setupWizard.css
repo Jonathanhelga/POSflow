@@ -196,3 +196,14 @@
     color: #666;
 }
 .is-loading-auth .c-auth-loader { display: block; }
+
+/* — Inline validation messages (sign-up flow) — */
+.auth-inline-msg {
+    display: block;
+    width: 100%;
+    text-align: center;
+    margin-top: 1rem;
+    font-size: 0.85rem;
+}
+.auth-inline-msg--error  { color: #e53e3e; }
+.auth-inline-msg--success { color: #38a169; }
