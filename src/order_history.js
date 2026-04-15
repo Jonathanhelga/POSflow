@@ -35,34 +35,48 @@ function populateBillHeader(profile) {
     parts.forEach((part, i) => {
         shopDetails.appendChild(document.createTextNode(part));
         if(i < parts.length - 1) { shopDetails.appendChild(document.createElement('br')); }
-    })
-    document.getElementById('oh-shop-details').innerHTML = parts.join('<br>');
+    });
     document.getElementById('oh-cashier').textContent =
         profile?.username || auth.currentUser?.email || '—';
 }
 
 function renderOrderList(orders) {
     const container = document.getElementById('oh-order-list');
-    container.innerHTML = '';
+    container.replaceChildren();
 
     if (orders.length === 0) {
-        container.innerHTML = '<p class="oh-empty">No past orders found.</p>';
+        const empty = document.createElement('p');
+        empty.className = 'oh-empty';
+        empty.textContent = 'No past orders found.';
+        container.appendChild(empty);
         return;
     }
 
     orders.forEach(order => {
         const card = document.createElement('div');
         card.className = 'oh-card';
-        card.innerHTML = `
-            <div class="oh-card__top-row">
-                <span class="oh-card__date">${formatDate(order.createdAt)}</span>
-                <span class="oh-card__id">#${shortId(order.id)}</span>
-            </div>
-            <div class="oh-card__total">Rp. ${formatRupiah(order.totalPrice)}</div>
-            <div class="oh-card__bottom-row">
-                <span class="oh-card__qty">${order.totalQuantity} item(s)</span>
-            </div>
-        `;
+        const topRow = document.createElement('div');
+        topRow.className = 'oh-card__top-row';
+        const dateSpan = document.createElement('span');
+        dateSpan.className = 'oh-card__date';
+        dateSpan.textContent = formatDate(order.createdAt);
+        const idSpan = document.createElement('span');
+        idSpan.className = 'oh-card__id';
+        idSpan.textContent = `#${shortId(order.id)}`;
+        topRow.append(dateSpan, idSpan);
+
+        const totalDiv = document.createElement('div');
+        totalDiv.className = 'oh-card__total';
+        totalDiv.textContent = `Rp. ${formatRupiah(order.totalPrice)}`;
+
+        const bottomRow = document.createElement('div');
+        bottomRow.className = 'oh-card__bottom-row';
+        const qtySpan = document.createElement('span');
+        qtySpan.className = 'oh-card__qty';
+        qtySpan.textContent = `${order.totalQuantity} item(s)`;
+        bottomRow.appendChild(qtySpan);
+
+        card.append(topRow, totalDiv, bottomRow);
 
         const btn = document.createElement('button');
         btn.className = 'btn oh-card__btn';
@@ -90,7 +104,7 @@ function renderOrderList(orders) {
 
 function viewOrderDetails(order, cardEl) {
     const itemsList = document.getElementById('oh-items-list');
-    itemsList.innerHTML = '';
+    itemsList.replaceChildren();
 
     document.getElementById('oh-invoice-num').textContent = shortId(order.id);
     document.getElementById('oh-bill-date').textContent = formatDate(order.createdAt);
@@ -161,7 +175,7 @@ export async function initOrderHistory() {
         populateBillHeader(profileCache);
 
         // Reset bill panel
-        document.getElementById('oh-items-list').innerHTML = '';
+        document.getElementById('oh-items-list').replaceChildren();
         document.getElementById('oh-invoice-num').textContent = '—';
         document.getElementById('oh-bill-date').textContent = '—';
         document.getElementById('oh-bill-time').textContent = '—';
@@ -172,16 +186,21 @@ export async function initOrderHistory() {
         document.getElementById('oh-print-btn').disabled = true;
 
         // Fetch and render orders
-        document.getElementById('oh-order-list').innerHTML = '<p class="oh-empty">Loading orders...</p>';
+        const orderList = document.getElementById('oh-order-list');
+        const loadingMsg = document.createElement('p');
+        loadingMsg.className = 'oh-empty';
+        loadingMsg.textContent = 'Loading orders...';
+        orderList.replaceChildren(loadingMsg);
         try {
             const orders = await fetchOrders(user.uid);
             console.log("orders : ", orders);
-            
             renderOrderList(orders);
         } catch (err) {
             console.error('Failed to load order history:', err);
-            document.getElementById('oh-order-list').innerHTML =
-                '<p class="oh-empty oh-empty--error">Failed to load orders.</p>';
+            const errorMsg = document.createElement('p');
+            errorMsg.className = 'oh-empty oh-empty--error';
+            errorMsg.textContent = 'Failed to load orders.';
+            orderList.replaceChildren(errorMsg);
         }
     });
 

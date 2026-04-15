@@ -25,10 +25,13 @@ function cleanupObjectUrl() {
 
 function renderItemList(items) {
     const container = document.getElementById('bg-item-list');
-    container.innerHTML = '';
+    container.replaceChildren();
 
     if (items.length === 0) {
-        container.innerHTML = '<p class="bg-empty">No items found.</p>';
+        const empty = document.createElement('p');
+        empty.className = 'bg-empty';
+        empty.textContent = 'No items found.';
+        container.appendChild(empty);
         return;
     }
 
@@ -38,16 +41,31 @@ function renderItemList(items) {
         card.className = 'bg-card';
         if (selectedItem?.id === item.id) card.classList.add('bg-card--active');
         card.dataset.itemId = item.id;
-        card.innerHTML = `
-            <div class="bg-card__top-row">
-                <span class="bg-card__name">${item.itemName ?? '-'}</span>
-                <span class="bg-card__sku">#${item.sku ?? '-'}</span>
-            </div>
-            <div class="bg-card__second-row">
-                <span class="bg-card__price">Rp ${formatRupiah(item.sellPrice)}</span>
-                <span class="bg-card__stock">${item.stockLevel ?? 0} <span class="bg-card__unit">${item.unit ?? ''}</span></span>
-            </div>
-        `;
+        const topRow = document.createElement('div');
+        topRow.className = 'bg-card__top-row';
+        const nameSpan = document.createElement('span');
+        nameSpan.className = 'bg-card__name';
+        nameSpan.textContent = item.itemName ?? '-';
+        const skuSpan = document.createElement('span');
+        skuSpan.className = 'bg-card__sku';
+        skuSpan.textContent = `#${item.sku ?? '-'}`;
+        topRow.append(nameSpan, skuSpan);
+
+        const secondRow = document.createElement('div');
+        secondRow.className = 'bg-card__second-row';
+        const priceSpan = document.createElement('span');
+        priceSpan.className = 'bg-card__price';
+        priceSpan.textContent = `Rp ${formatRupiah(item.sellPrice)}`;
+        const stockSpan = document.createElement('span');
+        stockSpan.className = 'bg-card__stock';
+        stockSpan.textContent = `${item.stockLevel ?? 0} `;
+        const unitSpan = document.createElement('span');
+        unitSpan.className = 'bg-card__unit';
+        unitSpan.textContent = item.unit ?? '';
+        stockSpan.appendChild(unitSpan);
+        secondRow.append(priceSpan, stockSpan);
+
+        card.append(topRow, secondRow);
         card.addEventListener('click', () => selectItem(item));
         frag.appendChild(card);
     });
@@ -71,16 +89,32 @@ function updatePreview() {
     if (!selectedItem) return;
 
     const design = document.getElementById('bg-barcode-design');
-    design.innerHTML = `
-        <div class="bg-preview bg-preview--${activeSize}">
-            <div class="bg-preview__name">${selectedItem.itemName ?? '-'}</div>
-            <div class="bg-preview__img-wrap" id="bg-preview-img-wrap">
-                <img id="bg-preview-img" src="${uploadedImageUrl ?? ''}" alt="Product photo" />
-            </div>
-            <div class="bg-preview__price">Rp ${formatRupiah(selectedItem.sellPrice)}</div>
-            <svg id="bg-barcode-svg"></svg>
-        </div>
-    `;
+
+    const preview = document.createElement('div');
+    preview.className = `bg-preview bg-preview--${activeSize}`;
+
+    const nameDiv = document.createElement('div');
+    nameDiv.className = 'bg-preview__name';
+    nameDiv.textContent = selectedItem.itemName ?? '-';
+
+    const imgWrap = document.createElement('div');
+    imgWrap.className = 'bg-preview__img-wrap';
+    imgWrap.id = 'bg-preview-img-wrap';
+    const img = document.createElement('img');
+    img.id = 'bg-preview-img';
+    img.src = uploadedImageUrl ?? '';
+    img.alt = 'Product photo';
+    imgWrap.appendChild(img);
+
+    const priceDiv = document.createElement('div');
+    priceDiv.className = 'bg-preview__price';
+    priceDiv.textContent = `Rp ${formatRupiah(selectedItem.sellPrice)}`;
+
+    const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+    svg.id = 'bg-barcode-svg';
+
+    preview.append(nameDiv, imgWrap, priceDiv, svg);
+    design.replaceChildren(preview);
 
     // show/hide image block
     document.getElementById('bg-preview-img-wrap').style.display = uploadedImageUrl ? 'block' : 'none';
@@ -98,12 +132,16 @@ function updatePreview() {
                 background: 'transparent',
             });
         } catch {
-            svgEl.insertAdjacentHTML('afterend', '<p class="bg-empty bg-empty--error">Invalid SKU for barcode</p>');
-            svgEl.remove();
+            const errMsg = document.createElement('p');
+            errMsg.className = 'bg-empty bg-empty--error';
+            errMsg.textContent = 'Invalid SKU for barcode';
+            svgEl.replaceWith(errMsg);
         }
     } else {
-        svgEl.insertAdjacentHTML('afterend', '<p class="bg-empty">No SKU — barcode unavailable</p>');
-        svgEl.remove();
+        const noSkuMsg = document.createElement('p');
+        noSkuMsg.className = 'bg-empty';
+        noSkuMsg.textContent = 'No SKU — barcode unavailable';
+        svgEl.replaceWith(noSkuMsg);
     }
 }
 
@@ -152,12 +190,18 @@ async function openBarcodeGenerator() {
     cleanupObjectUrl();
     uploadedImageUrl = null;
 
-    document.getElementById('bg-item-list').innerHTML  = '<p class="bg-empty">Loading...</p>';
-    document.getElementById('bg-search').value         = '';
+    const loadingMsg = document.createElement('p');
+    loadingMsg.className = 'bg-empty';
+    loadingMsg.textContent = 'Loading...';
+    document.getElementById('bg-item-list').replaceChildren(loadingMsg);
+    document.getElementById('bg-search').value        = '';
     document.getElementById('bg-save-btn').disabled   = true;
-    document.getElementById('bg-img-upload').value     = '';
+    document.getElementById('bg-img-upload').value    = '';
     document.getElementById('bg-img-filename').textContent = '';
-    document.getElementById('bg-barcode-design').innerHTML = '<p class="bg-empty">Select an item from the list.</p>';
+    const selectMsg = document.createElement('p');
+    selectMsg.className = 'bg-empty';
+    selectMsg.textContent = 'Select an item from the list.';
+    document.getElementById('bg-barcode-design').replaceChildren(selectMsg);
 
     try {
         allItems      = await fetchInventory(user.uid);
@@ -165,9 +209,12 @@ async function openBarcodeGenerator() {
         renderItemList(filteredItems);
     } catch (err) {
         console.error('Failed to load inventory:', err);
-        document.getElementById('bg-item-list').innerHTML = '<p class="bg-empty bg-empty--error">Failed to load inventory.</p>';
+        const errMsg = document.createElement('p');
+        errMsg.className = 'bg-empty bg-empty--error';
+        errMsg.textContent = 'Failed to load inventory.';
+        document.getElementById('bg-item-list').replaceChildren(errMsg);
     }
-}1
+}
 
 // init
 

@@ -123,12 +123,13 @@ function appendRow(index){
         e.stopPropagation();
         openOrderItemModal(item.id)
     })
-
-    row.innerHTML = `
-        <td>${item.name}</td>
-        <td>${item.quantity}</td>
-        <td>${formatRupiah(item.price * item.quantity)}</td>
-    `;
+    const tdName = document.createElement('td');
+    tdName.textContent = item.name;
+    const tdQty = document.createElement('td');
+    tdQty.textContent = item.quantity;
+    const tdTotal = document.createElement('td');
+    tdTotal.textContent = formatRupiah(item.price * item.quantity);
+    row.append(tdName, tdQty, tdTotal);
 
     tableBody.appendChild(row);
 } 

@@ -20,10 +20,13 @@ function getStockStatus(current, min) {
 
 function renderItemList(items) {
     const container = document.getElementById('iu-item-list');
-    container.innerHTML = '';
+    container.replaceChildren();
 
     if (items.length === 0) {
-        container.innerHTML = '<p class="iu-empty">No items found.</p>';
+        const empty = document.createElement('p');
+        empty.className = 'iu-empty';
+        empty.textContent = 'No items found.';
+        container.appendChild(empty);
         return;
     }
 
@@ -34,19 +37,34 @@ function renderItemList(items) {
         card.className = 'iu-card';
         card.dataset.itemId = item.id;
 
-        card.innerHTML = `
-            <div class="iu-card__top">
-                <span class="iu-card__name">${item.itemName ?? '—'}</span>
-                <span class="iu-badge iu-badge--${status}">${status === 'good' ? 'GOOD' : 'ALERT'}</span>
-            </div>
-            <div class="iu-card__bottom">
-                <span class="iu-card__sku">${item.sku ?? '—'}</span>
-                <span class="iu-card__stock-info">
-                    ${item.stockLevel ?? 0} <span class="iu-card__unit">${item.unit ?? ''}</span>
-                    &nbsp;/&nbsp; min ${item.minStockLevel ?? 0}
-                </span>
-            </div>
-        `;
+        const topRow = document.createElement('div');
+        topRow.className = 'iu-card__top';
+        const nameSpan = document.createElement('span');
+        nameSpan.className = 'iu-card__name';
+        nameSpan.textContent = item.itemName ?? '—';
+        const badge = document.createElement('span');
+        badge.className = `iu-badge iu-badge--${status}`;
+        badge.textContent = status === 'good' ? 'GOOD' : 'ALERT';
+        topRow.append(nameSpan, badge);
+
+        const bottomRow = document.createElement('div');
+        bottomRow.className = 'iu-card__bottom';
+        const skuSpan = document.createElement('span');
+        skuSpan.className = 'iu-card__sku';
+        skuSpan.textContent = item.sku ?? '—';
+        const stockInfo = document.createElement('span');
+        stockInfo.className = 'iu-card__stock-info';
+        const unitSpan = document.createElement('span');
+        unitSpan.className = 'iu-card__unit';
+        unitSpan.textContent = item.unit ?? '';
+        stockInfo.append(
+            document.createTextNode(`${item.stockLevel ?? 0} `),
+            unitSpan,
+            document.createTextNode(` \u00a0/\u00a0 min ${item.minStockLevel ?? 0}`)
+        );
+        bottomRow.append(skuSpan, stockInfo);
+
+        card.append(topRow, bottomRow);
 
         card.addEventListener('click', () => selectItem(item, card));
         frag.appendChild(card);
@@ -128,9 +146,15 @@ async function handleSave() {
             const status = getStockStatus(selectedItem.stockLevel, selectedItem.minStockLevel);
             cardEl.querySelector('.iu-badge').textContent = status === 'good' ? 'GOOD' : 'ALERT';
             cardEl.querySelector('.iu-badge').className   = `iu-badge iu-badge--${status}`;
-            cardEl.querySelector('.iu-card__stock-info').innerHTML =
-                `${selectedItem.stockLevel} <span class="iu-card__unit">${selectedItem.unit ?? ''}</span>
-                 &nbsp;/&nbsp; min ${selectedItem.minStockLevel ?? 0}`;
+            const stockInfoEl = cardEl.querySelector('.iu-card__stock-info');
+            const updatedUnitSpan = document.createElement('span');
+            updatedUnitSpan.className = 'iu-card__unit';
+            updatedUnitSpan.textContent = selectedItem.unit ?? '';
+            stockInfoEl.replaceChildren(
+                document.createTextNode(`${selectedItem.stockLevel} `),
+                updatedUnitSpan,
+                document.createTextNode(` \u00a0/\u00a0 min ${selectedItem.minStockLevel ?? 0}`)
+            );
         }
 
         populateDetail(selectedItem);
@@ -171,10 +195,11 @@ async function openInventoryUpdate() {
     
     // Reset panel state
     selectedItem = null;
-    document.getElementById('iu-item-list').innerHTML   = '<p class="iu-empty">Loading...</p>';
+    const loadingMsg = document.createElement('p');
+    loadingMsg.className = 'iu-empty';
+    loadingMsg.textContent = 'Loading...';
+    document.getElementById('iu-item-list').replaceChildren(loadingMsg);
     document.getElementById('iu-search').value          = '';
-    // document.getElementById('iu-empty-state').classList.remove('is-hidden');
-    // document.getElementById('iu-detail-view').classList.add('is-hidden');
 
     try {
         allItems      = await fetchInventory(user.uid);
@@ -182,8 +207,10 @@ async function openInventoryUpdate() {
         renderItemList(filteredItems);
     } catch (err) {
         console.error('Failed to load inventory:', err);
-        document.getElementById('iu-item-list').innerHTML =
-            '<p class="iu-empty iu-empty--error">Failed to load inventory.</p>';
+        const errMsg = document.createElement('p');
+        errMsg.className = 'iu-empty iu-empty--error';
+        errMsg.textContent = 'Failed to load inventory.';
+        document.getElementById('iu-item-list').replaceChildren(errMsg);
     }
 }
 
