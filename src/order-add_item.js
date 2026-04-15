@@ -16,8 +16,9 @@ export function openOrderItemModal(itemID) {
     const item = allItems.find(item => item.id === itemID); 
     if (!item) { return; }
 
-    let matchedItem = orderedItems.find(o => o.id === itemID); //
+    let matchedItem = orderedItems.find(o => o.id === itemID);
     document.getElementById('js-order-qty').value = matchedItem ? matchedItem.quantity : 1;
+    document.getElementById('js-order-qty').max = item.stockLevel;
 
     document.getElementById('js-current-item-id').value = item.id;
     document.getElementById('order-item-sku').textContent = item.sku || '';
@@ -49,6 +50,11 @@ export function initializeOrderForm(){
 }
 
 export function addItemToOrder(itemID, itemName, itemPrice, itemQuantity){
+    const stockItem = allItems.find(i => i.id === itemID);
+    if (stockItem && itemQuantity > stockItem.stockLevel) {
+        showToast(`Only ${stockItem.stockLevel} ${stockItem.unit || 'units'} available`, 'error');
+        return;
+    }
     const existingIndex = orderedItems.findIndex(item => item.name === itemName);
     if(existingIndex !== -1){
         orderedItems[existingIndex].quantity = itemQuantity;
@@ -62,6 +68,29 @@ export function addItemToOrder(itemID, itemName, itemPrice, itemQuantity){
     updateTotals();
 }
 
+export function scanAddItem(itemID){
+    const item = allItems.find(item => item.id === itemID);
+    if (!item) return;
+    if (item.stockLevel <= 0) { showToast(`${item.itemName} is out of stock`, 'error'); return; }
+
+    const existingIndex = orderedItems.findIndex(item => item.id === itemID);
+    if(existingIndex === -1){
+        orderedItems.push({id: item.id, name: item.itemName, price: item.sellPrice, quantity: 1});
+        appendRow(orderedItems.length - 1);
+        if(orderedItems.length === 1){ fullRender(); }
+    }
+    else{
+        const newQuantity = orderedItems[existingIndex].quantity + 1;
+        if (newQuantity > item.stockLevel) {
+            showToast(`Max stock reached (${item.stockLevel})`, 'error');
+            return;
+        }
+        orderedItems[existingIndex].quantity = newQuantity;
+        updateRow(existingIndex);
+    }
+    updateTotals();
+    showToast(`${item.itemName} added`);
+}
 function fullRender(){
     const tableBody = document.getElementById('order-items');
     if(!tableBody) return;

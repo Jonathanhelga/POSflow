@@ -12,7 +12,7 @@ let currentObjectUrl = null;
 let uploadedImageUrl = null;
 let activeSize = 'large';
 
-// ─── helpers ──────────────────────────────────────────────────────────────────
+// helpers 
 
 function cleanupObjectUrl() {
     if (currentObjectUrl) {
@@ -21,7 +21,7 @@ function cleanupObjectUrl() {
     }
 }
 
-// ─── item list ────────────────────────────────────────────────────────────────
+// item list
 
 function renderItemList(items) {
     const container = document.getElementById('bg-item-list');
@@ -54,7 +54,7 @@ function renderItemList(items) {
     container.appendChild(frag);
 }
 
-// ─── selection & preview ──────────────────────────────────────────────────────
+// selection & preview
 
 function selectItem(item) {
     selectedItem = item;
@@ -83,8 +83,7 @@ function updatePreview() {
     `;
 
     // show/hide image block
-    document.getElementById('bg-preview-img-wrap').style.display =
-        uploadedImageUrl ? 'block' : 'none';
+    document.getElementById('bg-preview-img-wrap').style.display = uploadedImageUrl ? 'block' : 'none';
 
     // generate barcode
     const svgEl = document.getElementById('bg-barcode-svg');
@@ -108,7 +107,7 @@ function updatePreview() {
     }
 }
 
-// ─── save ─────────────────────────────────────────────────────────────────────
+// save
 
 async function saveDesign() {
     if (!selectedItem) return;
@@ -143,7 +142,7 @@ async function saveDesign() {
     }
 }
 
-// ─── open / reset ─────────────────────────────────────────────────────────────
+// open / reset
 
 async function openBarcodeGenerator() {
     const user = auth.currentUser;
@@ -158,8 +157,7 @@ async function openBarcodeGenerator() {
     document.getElementById('bg-save-btn').disabled   = true;
     document.getElementById('bg-img-upload').value     = '';
     document.getElementById('bg-img-filename').textContent = '';
-    document.getElementById('bg-barcode-design').innerHTML =
-        '<p class="bg-empty">Select an item from the list.</p>';
+    document.getElementById('bg-barcode-design').innerHTML = '<p class="bg-empty">Select an item from the list.</p>';
 
     try {
         allItems      = await fetchInventory(user.uid);
@@ -167,12 +165,11 @@ async function openBarcodeGenerator() {
         renderItemList(filteredItems);
     } catch (err) {
         console.error('Failed to load inventory:', err);
-        document.getElementById('bg-item-list').innerHTML =
-            '<p class="bg-empty bg-empty--error">Failed to load inventory.</p>';
+        document.getElementById('bg-item-list').innerHTML = '<p class="bg-empty bg-empty--error">Failed to load inventory.</p>';
     }
-}
+}1
 
-// ─── init ─────────────────────────────────────────────────────────────────────
+// init
 
 export async function initBarcodeGenerator() {
     const openBtn = document.getElementById('barcode-generator-open');

@@ -26,7 +26,6 @@ export function addSingleItem(item){
     createItemButton(container, item);
 }
 
-
 function searchedItems(query){
     if (!query || query.trim() === '') return allItems;
     const searchTerm = normalizeText(query);
@@ -47,64 +46,39 @@ function handleSearchEvent(event){
 
 export function initializeSearch(){
     const searchInput = document.getElementById('js-item-search');
-
-    // Normal typing
     searchInput?.addEventListener('input', (event) => handleSearchEvent(event));
-
-    // Barcode scanner 
-    // searchInput?.addEventListener('keydown', (event) => {
-    //     if (event.key !== 'Enter') return;
-    //     clearTimeout(searchTimeout);                   
-    //     const filteredItems = searchedItems(event.target.value);
-    //     renderItemGrid(filteredItems);
-    //     event.target.value = '';         
-    // });
 }
-// ─── global barcode scanner listener ─────────────────────────────────────────
-//
-// Barcode scanners behave like a keyboard: they fire keydown events very fast
-// (each character < 50 ms apart) and send Enter when the scan is complete.
-//
-// Strategy:
+
 //   1. Listen on document so no manual focus is required
-//   2. Skip the event if the user is actively typing in any input/textarea/select
-//      — this prevents the scanner from hijacking form fields
+//   2. Skip the event if the user is actively typing in any input/textarea/select this prevents the scanner from hijacking form fields
 //   3. Accumulate characters into a buffer, reset it on Enter and process the scan
 //   4. Auto-clear the buffer after 500 ms of inactivity (safety net if Enter is missed)
-
 let scanBuffer    = '';
 let scanTimestamp = 0;
 let scanTimeout   = 0;
 let scanCallback  = null; // set by initGlobalBarcodeListener
 
 const FOCUSED_TAGS   = new Set(['INPUT', 'TEXTAREA', 'SELECT']);
-const MIN_SCAN_CHARS = 3;   // ignore accidental single-key presses
-const MAX_SCAN_MS    = 500; // a real scan completes well within this window
+const MIN_SCAN_CHARS = 3;   // minimum number of characters
+const MAX_SCAN_MS    = 500; // a real scan completes well within this period
 
 function handleGlobalScan(event) {
     const active = document.activeElement;
-
-    // User is typing inside a form field — let the field handle it normally
     if (FOCUSED_TAGS.has(active?.tagName) || active?.isContentEditable) return;
 
     if (event.key === 'Enter') {
         const elapsed = Date.now() - scanTimestamp;
-        if (scanBuffer.length >= MIN_SCAN_CHARS && elapsed < MAX_SCAN_MS) {
-            // Hand the scanned SKU string to whoever registered the callback
-            scanCallback?.(scanBuffer);
-        }
+        if (scanBuffer.length >= MIN_SCAN_CHARS && elapsed < MAX_SCAN_MS) { scanCallback?.(scanBuffer); }
         scanBuffer = '';
         clearTimeout(scanTimeout);
         return;
     }
-
-    // Only accumulate printable single characters (ignore Shift, Ctrl, etc.)
+    
     if (event.key.length === 1) {
-        if (scanBuffer.length === 0) scanTimestamp = Date.now(); // start timing
+        if (scanBuffer.length === 0) scanTimestamp = Date.now(); 
         scanBuffer += event.key;
     }
 
-    // Clear buffer if Enter never arrives (e.g. scanner without Enter suffix)
     clearTimeout(scanTimeout);
     scanTimeout = setTimeout(() => { scanBuffer = ''; }, MAX_SCAN_MS);
 }

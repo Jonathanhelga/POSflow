@@ -25,11 +25,17 @@ function populateBillHeader(profile) {
     document.getElementById('oh-shop-name').textContent =
         profile?.business_name || 'My Shop';
     document.getElementById('oh-shop-tagline').textContent = '';
+    const shopDetails = document.getElementById('oh-shop-details');
+    shopDetails.textContent = '';
     const parts = [
         profile?.business_address,
         profile?.business_phone,
         profile?.business_email,
     ].filter(Boolean);
+    parts.forEach((part, i) => {
+        shopDetails.appendChild(document.createTextNode(part));
+        if(i < parts.length - 1) { shopDetails.appendChild(document.createElement('br')); }
+    })
     document.getElementById('oh-shop-details').innerHTML = parts.join('<br>');
     document.getElementById('oh-cashier').textContent =
         profile?.username || auth.currentUser?.email || '—';
@@ -96,12 +102,24 @@ function viewOrderDetails(order, cardEl) {
 
         const row = document.createElement('div');
         row.className = 'oh-bill__item-row';
-        row.innerHTML = `
-            <div class="oh-bill__item-name">${item.name}</div>
-            <div>${item.quantity}</div>
-            <div>${formatRupiah(item.price)}</div>
-            <div>${formatRupiah(item.subtotal)}</div>
-        `;
+        const itemName = document.createElement('div');
+        itemName.className = 'oh-bill__item-name';
+        itemName.textContent = item.name;
+
+        const itemQuantity = document.createElement('div');
+        itemQuantity.textContent = item.quantity;
+
+        const itemPrice = document.createElement('div');
+        itemPrice.textContent = formatRupiah(item.price);
+
+        const itemSubtotal = document.createElement('div');
+        itemSubtotal.textContent = formatRupiah(item.subtotal);
+        
+        row.appendChild(itemName);
+        row.appendChild(itemQuantity);
+        row.appendChild(itemPrice);
+        row.appendChild(itemSubtotal);
+
         itemsList.appendChild(row);
     });
 
