@@ -265,13 +265,27 @@ export async function initSubmitOrder(){
         
         try {
             await submitOrder(orderPayload, user.uid);
-            mappedItems.forEach(item => updateLocalStock(item.id, -item.quantity));
-            resetOrderAfterSubmit();
-            showToast('Order submitted successfully!');    
         } catch (err) {
             console.error("Order submission failed:", err);
-            alert(`Failed to submit order: ${err.message}`);
-            showToast(`Failed to submit order: ${err.message}`, 'error');
+            const userMessage = err.code === 'permission-denied'
+                ? "You don't have permission to submit orders."
+                : err.code === 'not-found'
+                ? "One or more items no longer exist in inventory."
+                : err.message;
+            showToast(`Failed to submit order: ${userMessage}`, 'error');
+            submitBtn.disabled = false;
+            submitBtn.textContent = originalText;
+            return;
+        }
+
+        try {
+            mappedItems.forEach(item => updateLocalStock(item.id, -item.quantity));
+            resetOrderAfterSubmit();
+            showToast('Order submitted successfully!');
+        } catch (err) {
+            console.error("Post-submit local update failed:", err);
+            mappedItems.forEach(item => updateLocalStock(item.id, item.quantity));
+            showToast('Order was submitted, but display failed to update. Please refresh.', 'error');
         } finally {
             submitBtn.disabled = false;
             submitBtn.textContent = originalText;

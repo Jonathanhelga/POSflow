@@ -139,6 +139,7 @@ function viewOrderDetails(order, cardEl) {
 
     document.getElementById('oh-total-items').textContent = totalItems;
     document.getElementById('oh-subtotal').textContent = `Rp ${formatRupiah(order?.subtotal || 0)}`;
+    document.getElementById('oh-business-tax').textContent = `${order?.taxRate || 0}`;
     document.getElementById('oh-tax').textContent = `Rp ${formatRupiah(order?.taxAmount || 0)}`;
     document.getElementById('oh-grand-total').textContent = `Rp ${formatRupiah(order.totalPrice) ?? '-'}`;
 
