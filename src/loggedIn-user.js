@@ -1,4 +1,4 @@
-import { db, LogOutUser } from "./firebase";
+import { db } from "./firebase";
 import { initInventoryForm } from './add_item_ui';
 import { allItems, loadAllItems, initializeSearch, initGlobalBarcodeListener } from './search_item';
 import { getDoc, doc } from "firebase/firestore";

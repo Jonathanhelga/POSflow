@@ -21,7 +21,11 @@ export function initProfile(user) {
         logoutBtn.addEventListener('click', async () => {
             if (!confirm('Are you sure you want to log out?')) {return;}
             toggleModal('profile-modal');
-            await LogOutUser();
+            try {
+                await LogOutUser();
+            } catch (error) {
+                alert("Sign out Error: " + error.message);
+            }
         });
     }
 }

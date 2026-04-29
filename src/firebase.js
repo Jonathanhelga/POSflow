@@ -46,13 +46,7 @@ export async function loginUser(email, password) {
 }
 
 export async function LogOutUser(){
-    try{
         await signOut(auth);
-        console.log("User signed out successfully!");
-    }catch(e){  
-        alert("Sign Out Error: " + e.message); 
-        throw e; 
-    }
 }
 
 export async function submitItemData(itemData, uid){
