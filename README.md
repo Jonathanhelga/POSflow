@@ -183,7 +183,7 @@ All collections use `ownerId` for tenant-level data isolation — each user only
 
 ```bash
 # Clone the repository
-git clone https://github.com/<your-username>/Point-of-Sale_Firebase.git
+git clone https://github.com/jonathanhelga/Point-of-Sale_Firebase.git
 cd Point-of-Sale_Firebase
 
 # Install dependencies
