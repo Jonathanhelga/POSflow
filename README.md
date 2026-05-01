@@ -1,4 +1,4 @@
-# Mini PoOoS — Point-of-Sale Web Application
+# POSFlow — Point-of-Sale Web Application
 
 A full-stack, cloud-based Point-of-Sale system built for small retail businesses. Handles inventory management, order processing, barcode generation, and thermal receipt printing — all from the browser, with zero frontend frameworks.
 
