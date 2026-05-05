@@ -1,16 +1,62 @@
-/* Overlay: right-aligned */
 #item-create-modal {
-    justify-content: end;
-    padding: 1.3rem;
+    align-items: center;
+    justify-content: center;
+    padding: 2.5rem;
 }
 
-/* Panel sizing */
 #c-modal-item-create {
-    max-width: var(--modal-side-width);
-    height: 100%;
+    width: 100%;
+    max-width: 880px;
+    max-height: 90vh;
     overflow-y: auto;
-    border-radius: var(--radius) 0 0 var(--radius);
+    border-radius: var(--radius);
     background-color: var(--clr-modal-panel);
+    box-shadow: 0 20px 60px rgba(18, 24, 40, 0.35);
+}
+
+#c-modal-item-create .c-modal__header {
+    padding: 1.75rem 2.25rem;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+}
+#c-modal-item-create .c-modal__title {
+    font-size: 1.4rem;
+    font-weight: 700;
+    margin: 0;
+}
+
+#c-modal-item-create .c-modal__body {
+    padding: 2rem 2.25rem 1.5rem;
+}
+
+.c-form-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    column-gap: 1.75rem;
+    row-gap: 2rem;
+}
+
+@media (min-width: 720px) {
+    .c-form-grid { grid-template-columns: 1fr 1fr; }
+}
+
+.c-form-grid .c-field {
+    margin-bottom: 0;       
+    min-width: 0; 
+}
+.c-form-grid .c-field--full { grid-column: 1 / -1; }
+
+/* Slightly larger inputs to feel less cramped */
+#c-modal-item-create .c-field__input,
+#c-modal-item-create .c-field__select,
+#c-modal-item-create .c-field__textarea {
+    padding: 12px 14px;
+    font-size: 0.9rem;
+    background-color: #ffffff;
+}
+
+#c-modal-item-create .c-field__label {
+    margin-bottom: 20px;
+    color: var(--clr-text-primary);
 }
 
 /* Quantity + Unit inline row */
@@ -18,15 +64,26 @@
     display: flex;
     width: 100%;
     align-items: center;
-    gap: 8px;
+    gap: 10px;
     min-width: 0;
     transition: border-color 0.2s ease, box-shadow 0.2s ease;
 }
 .c-qty-unit input  { flex: 2 1 0; } /* ~67% width */
 .c-qty-unit select { flex: 1 1 0; } /* ~33% width */
 
-/* Form action buttons */
-#js-add-new-item  { background-color: var(--clr-success); color: white; }
+#c-modal-item-create .c-modal__footer {
+    margin-top: 0.5rem;
+    padding: 1.25rem 0 0.25rem;
+    border-top: 1px solid rgba(0, 0, 0, 0.08);
+}
+#c-modal-item-create .c-actions {
+    justify-content: flex-end;
+}
+#c-modal-item-create .btn {
+    padding: 11px 22px;
+}
+
+#js-add-new-item   { background-color: var(--clr-success); color: white; }
 #js-reset-new-item { background-color: #ddd; }
 
 

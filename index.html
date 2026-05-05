@@ -218,14 +218,16 @@
     </template>
 
     <!-- ============= Modals ============= -->
-    <div id="item-create-modal" class="c-modal c-modal--side is-hidden">
+    <div id="item-create-modal" class="c-modal c-modal--center is-hidden">
         <div class="c-modal__panel" id="c-modal-item-create">
           <header class="c-modal__header">
-            <h2 class="c-modal__title">Add New Item</h2>
+            <div>
+              <h2 class="c-modal__title">Add New Item</h2>
+            </div>
             <button type="button" class="c-modal__close" aria-label="Close" data-modal-close="item-create-modal">&times;</button>
           </header>
           <div class="c-modal__body">
-            <form class="c-modal__form" id="js-item-create-form">
+            <form class="c-modal__form c-form-grid" id="js-item-create-form">
                 <div class="c-field">
                   <label class="c-field__label" for="tag-color">Button Theme</label>
                   <select id="tag-color" class="c-field__select">
@@ -240,7 +242,7 @@
                   <label class="c-field__label" for="sku">SKU</label>
                   <input class="c-field__input" type="text" id="sku" placeholder="SKU" />
                 </div>
-                <div class="c-field">
+                <div class="c-field c-field--full">
                   <label class="c-field__label" for="item-name">Item Name</label>
                   <input class="c-field__input" type="text" id="item-name" placeholder="Item Name" />
                 </div>
@@ -274,15 +276,15 @@
                     </select>
                   </div>
                 </div>
-                <div class="c-field">
+                <div class="c-field c-field--full">
                   <label class="c-field__label" for="supplier-info">Supplier Info</label>
                   <input class="c-field__input" type="text" id="supplier-info" maxlength="255" placeholder="e.g., PT. FreshGoods Supplier" />
                 </div>
-                <div class="c-field">
+                <div class="c-field c-field--full">
                   <label class="c-field__label" for="description">Description</label>
                   <textarea class="c-field__textarea" id="js-description" name="description" rows="5" placeholder="Write your description here..."></textarea>
                 </div>
-                <footer class="c-modal__footer">
+                <footer class="c-modal__footer c-field--full">
                   <div class="c-actions">
                     <button type="submit" class="btn" id="js-add-new-item" >Add Item</button>
                     <button type="button" class="btn" id="js-reset-new-item" data-modal-close="item-create-modal">Reset</button>
@@ -584,6 +586,7 @@
         </div>
       </div>
     </div>
+
     <div id="profile-modal" class="c-modal c-modal--side is-hidden">
       <div class="c-modal__panel" id="c-modal-profile">
         <header class="c-modal__header">
