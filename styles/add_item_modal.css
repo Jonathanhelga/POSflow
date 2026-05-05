@@ -22,6 +22,7 @@
     font-size: 1.4rem;
     font-weight: 700;
     margin: 0;
+    letter-spacing: 0.01em;
 }
 
 #c-modal-item-create .c-modal__body {
@@ -35,14 +36,9 @@
     row-gap: 2rem;
 }
 
-@media (min-width: 720px) {
-    .c-form-grid { grid-template-columns: 1fr 1fr; }
-}
+@media (min-width: 720px) { .c-form-grid { grid-template-columns: 1fr 1fr; } }
 
-.c-form-grid .c-field {
-    margin-bottom: 0;       
-    min-width: 0; 
-}
+.c-form-grid .c-field { margin-bottom: 0;        min-width: 0;  }
 .c-form-grid .c-field--full { grid-column: 1 / -1; }
 
 /* Slightly larger inputs to feel less cramped */

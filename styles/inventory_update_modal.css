@@ -10,7 +10,7 @@
 #c-modal-inventory-update {
     width: 90vw;
     max-width: 1000px;
-    height: 80vh;
+    /* height: 80vh; */
     max-height: 80vh;
     border-radius: var(--radius);
     background-color: var(--clr-panel);
