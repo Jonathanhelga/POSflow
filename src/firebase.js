@@ -35,7 +35,7 @@ export async function submitSettingsData(formData){
         invoice_prefix: formData.invoice_prefix,
         printer_size: formData.paper_size,
         receipt_footer: formData.receipt_footer,
-        created_at: new Date().toISOString(),
+        created_at: serverTimestamp(),
         ownerId: user.uid
     });
 
@@ -46,7 +46,22 @@ export async function loginUser(email, password) {
 }
 
 export async function LogOutUser(){
+        clearCachedUserProfile();
         await signOut(auth);
+}
+
+let cachedUserProfile = null;
+
+export function getCachedUserProfile() {
+    return cachedUserProfile;
+}
+
+export function setCachedUserProfile(profile) {
+    cachedUserProfile = profile;
+}
+
+export function clearCachedUserProfile() {
+    cachedUserProfile = null;
 }
 
 export async function submitItemData(itemData, uid){
@@ -92,8 +107,10 @@ export async function fetchOrders(uid) {
 }
 
 export async function fetchUserProfile(uid) {
+    if (cachedUserProfile) return cachedUserProfile;
     const snap = await getDoc(doc(db, "users", uid));
-    return snap.exists() ? snap.data() : null;
+    cachedUserProfile = snap.exists() ? snap.data() : null;
+    return cachedUserProfile;
 }
 
 export async function submitOrder(orderPayload, uid){

@@ -1,13 +1,13 @@
-import { db, LogOutUser } from './firebase';
-import { getDoc, setDoc, doc } from 'firebase/firestore';
+import { db, fetchUserProfile, getCachedUserProfile, setCachedUserProfile, LogOutUser } from './firebase';
+import { setDoc, doc } from 'firebase/firestore';
 import { toggleModal } from './modal-handler';
 import { setTaxRate } from './order-add_item';
 
 export function initProfile(user) {
     document.getElementById('js-profile-open').addEventListener('click', () => {
+        loadProfileData(user);
         toggleModal('profile-modal');
     });
-    loadProfileData(user);
     const form = document.getElementById('js-profile-form');
     if (form) {
         form.addEventListener('submit', async (e) => {
@@ -40,9 +40,8 @@ async function loadProfileData(user) {
     if (avatarLarge) avatarLarge.textContent = initial;
 
     // Load stored profile fields from Firestore
-    const snap = await getDoc(doc(db, 'users', user.uid));
-    if (!snap.exists()) return;
-    const data = snap.data();
+    const data = await fetchUserProfile(user.uid);
+    if (!data) return;
 
     document.getElementById('profile-username').value            = data.username            || '';
     document.getElementById('profile-business-name').value       = data.business_name       || '';
@@ -77,6 +76,15 @@ async function saveProfileData(uid) {
 
     try {
         await setDoc(doc(db, 'users', uid), formData, { merge: true });
+
+        // Refresh the in-memory profile cache so the next reader gets
+        // the new values without doing another Firestore read.
+        // We merge instead of replace so fields the form doesn't edit
+        // (created_at, ownerId, etc.) are preserved in the cache.
+        const previousProfile = getCachedUserProfile() || {};
+        const updatedProfile = { ...previousProfile, ...formData };
+        setCachedUserProfile(updatedProfile);
+
         setTaxRate(formData.tax_rate);
         toggleModal('profile-modal');
         saveBtn.textContent = originalText;

@@ -1,17 +1,11 @@
-import { db } from "./firebase";
+import { db, fetchUserProfile } from "./firebase";
 import { initInventoryForm } from './add_item_ui';
 import { allItems, loadAllItems, initializeSearch, initGlobalBarcodeListener } from './search_item';
-import { getDoc, doc } from "firebase/firestore";
 import { initializeOrderForm, initSubmitOrder, setTaxRate, scanAddItem } from "./order-add_item";
 import { initProfile } from "./profile";
 
-async function fetchBusinessProfile(uid) {
-    const docSnap = await getDoc(doc(db, "users", uid));
-    return docSnap.exists() ? docSnap.data() : null;
-}
-
 export async function renderLoggedInState(user) {
-    const profile = await fetchBusinessProfile(user.uid);
+    const profile = await fetchUserProfile(user.uid);
     if (profile) {
         document.getElementById('setup-wizard').classList.add('is-hidden');
         document.getElementById('pos-app').classList.add('is-active');

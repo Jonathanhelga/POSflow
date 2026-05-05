@@ -2,7 +2,6 @@ import { auth, fetchOrders, fetchUserProfile } from './firebase';
 import { formatRupiah } from './formatRupiah';
 import { toggleModal } from './modal-handler';
 
-let profileCache = null;
 let isProcessing = false;
 
 function formatDate(ts) {
@@ -169,11 +168,9 @@ export async function initOrderHistory() {
         const user = auth.currentUser;
         if (!user) return;
 
-        // Load profile for bill header (cached after first load)
-        if (!profileCache) {
-            profileCache = await fetchUserProfile(user.uid);
-        }
-        populateBillHeader(profileCache);
+        // Load profile for bill header (cached centrally in firebase.js)
+        const profile = await fetchUserProfile(user.uid);
+        populateBillHeader(profile);
 
         // Reset bill panel
         document.getElementById('oh-items-list').replaceChildren();

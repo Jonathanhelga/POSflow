@@ -8,7 +8,7 @@ A full-stack, cloud-based Point-of-Sale system built for small retail businesses
 
 ## Why This Project Exists
 
-Most POS software is either expensive, bloated with features small shops don't need, or locked into proprietary hardware. Mini PoOoS is purpose-built for small retail businesses (originally an electric parts shop in Indonesia) that need:
+Most POS software is either expensive, bloated with features small shops don't need, or locked into proprietary hardware. POSFlow is purpose-built for small retail businesses (originally an electric parts shop in Indonesia) that need:
 
 - A cashier interface that works on any device with a browser
 - Barcode scanning with a USB scanner — no special SDK, no mobile app
