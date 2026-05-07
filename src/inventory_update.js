@@ -1,5 +1,4 @@
 import { db, fetchInventory } from './firebase';
-import { auth } from './firebase';
 import { doc, updateDoc, increment, serverTimestamp } from 'firebase/firestore';
 import { toggleModal } from './modal-handler';
 
@@ -189,10 +188,9 @@ function clearFeedback() {
 
 // ─── Load inventory on open
 
-async function openInventoryUpdate() {
-    const user = auth.currentUser;
+async function openInventoryUpdate(user) {
     if (!user) return;
-    
+
     // Reset panel state
     selectedItem = null;
     const loadingMsg = document.createElement('p');
@@ -214,15 +212,15 @@ async function openInventoryUpdate() {
     }
 }
 
-export function initInventoryUpdate() {
+export function initInventoryUpdate(user) {
     const openBtn = document.getElementById('inventory-update-open');
     if (!openBtn) return;
 
     openBtn.addEventListener('click', () => {
         toggleModal('features-modal');
         toggleModal('inventory-update-modal');
-        if (!auth.currentUser) return;
-        openInventoryUpdate();
+        if (!user) return;
+        openInventoryUpdate(user);
     });
 
     document.getElementById('iu-save-btn').addEventListener('click', handleSave);

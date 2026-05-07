@@ -524,7 +524,7 @@
         </div>
       </div>
     </div>
-    <!-- Barcode Generator -->
+
     <div id="barcode-generator-modal" class="c-modal c-modal--center is-hidden">
       <div class="c-modal__panel" id="c-modal-barcode-generator">
         <header class="c-modal__header">
@@ -668,6 +668,107 @@
       </div>
     </div>
 
+    <div id="sales-insights-modal" class="c-modal c-modal--center is-hidden">
+      <div class="c-modal__panel" id="c-modal-sales">
+        <header class="c-modal__header">
+          <div>
+            <h2 class="c-modal__title">Sales Insight</h2>
+            <!-- <p class="c-modal__subtitle">Review revenue, orders, and best-selling items across a date range.</p> -->
+          </div>
+          <button type="button" class="c-modal__close" aria-label="Close" data-modal-close="sales-insights-modal">&times;</button>
+        </header>
+        <div class="c-modal__body c-sales">
+
+          <!-- Date range toolbar -->
+          <section class="c-sales__toolbar" aria-label="Date range">
+            <div class="c-sales__range">
+              <label class="c-sales__range-label">
+                <span>From</span>
+                <input type="date" id="js-sales-from" class="c-field__input" />
+              </label>
+              <label class="c-sales__range-label">
+                <span>To</span>
+                <input type="date" id="js-sales-to" class="c-field__input" />
+              </label>
+              <button type="button" class="c-sales__apply" id="js-sales-apply">Apply</button>
+            </div>
+            <div class="c-sales__presets" role="group" aria-label="Quick ranges">
+              <button type="button" class="c-chip is-active" data-range="today">Today</button>
+              <button type="button" class="c-chip" data-range="7d">Last 7 days</button>
+              <button type="button" class="c-chip" data-range="30d">Last 30 days</button>
+              <button type="button" class="c-chip" data-range="month">This month</button>
+              <!-- <button type="button" class="c-chip" data-range="custom">Custom</button> -->
+            </div>
+          </section>
+
+          <!-- KPI tiles -->
+          <section class="c-kpi-grid" aria-label="Key metrics">
+            <article class="c-kpi">
+              <span class="c-kpi__label">Revenue</span>
+              <span class="c-kpi__value" id="js-kpi-revenue">Rp 0</span>
+              <span class="c-kpi__delta" id="js-kpi-revenue-delta"></span>
+            </article>
+            <article class="c-kpi">
+              <span class="c-kpi__label">Orders</span>
+              <span class="c-kpi__value" id="js-kpi-orders">0</span>
+              <span class="c-kpi__delta" id="js-kpi-orders-delta"></span>
+            </article>
+            <article class="c-kpi">
+              <span class="c-kpi__label">Items Sold</span>
+              <span class="c-kpi__value" id="js-kpi-items">0</span>
+              <span class="c-kpi__delta" id="js-kpi-items-delta"></span>
+            </article>
+            <article class="c-kpi">
+              <span class="c-kpi__label">Avg Order Value</span>
+              <span class="c-kpi__value" id="js-kpi-aov">Rp 0</span>
+              <span class="c-kpi__delta" id="js-kpi-aov-delta"></span>
+            </article>
+          </section>
+
+          <!-- Chart card -->
+          <section class="c-card c-sales__chart-card">
+            <header class="c-card__header">
+              <h3 class="c-card__title">Revenue over time</h3>
+              <span class="c-card__hint" id="js-sales-chart-hint">Daily totals</span>
+            </header>
+            <div class="c-card__body c-sales__chart-body">
+              <canvas id="charts-design"></canvas>
+              <div class="c-empty" id="js-sales-chart-empty" hidden>
+                <p>No orders in this range yet.</p>
+              </div>
+            </div>
+          </section>
+
+          <!-- Top items table -->
+          <section class="c-card c-sales__top-card">
+            <header class="c-card__header">
+              <h3 class="c-card__title">Top selling items</h3>
+              <span class="c-card__hint">By revenue</span>
+            </header>
+            <div class="c-card__body">
+              <table class="c-table c-sales__table">
+                <thead>
+                  <tr>
+                    <th class="c-sales__col-rank">#</th>
+                    <th>Item</th>
+                    <th class="c-sales__col-num">Qty</th>
+                    <th class="c-sales__col-num">Revenue</th>
+                  </tr>
+                </thead>
+                <tbody id="js-sales-top-items">
+                  <!-- rows injected by sales_insight.js -->
+                </tbody>
+              </table>
+              <div class="c-empty" id="js-sales-top-empty" hidden>
+                <p>No item sales recorded for this range.</p>
+              </div>
+            </div>
+          </section>
+
+        </div>
+      </div>
+    </div>
+    
     <main id="pos-app" class="l-app">
       <aside class="l-sidebar">
         <section class="l-sidebar__top">

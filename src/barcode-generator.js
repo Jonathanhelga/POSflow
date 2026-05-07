@@ -1,7 +1,6 @@
 import JsBarcode from 'jsbarcode';
 import html2canvas from 'html2canvas';
 import { fetchInventory } from './firebase';
-import { auth } from './firebase';
 import { toggleModal } from './modal-handler';
 import { formatRupiah } from './formatRupiah';
 
@@ -182,8 +181,7 @@ async function saveDesign() {
 
 // open / reset
 
-async function openBarcodeGenerator() {
-    const user = auth.currentUser;
+async function openBarcodeGenerator(user) {
     if (!user) return;
 
     selectedItem = null;
@@ -218,15 +216,15 @@ async function openBarcodeGenerator() {
 
 // init
 
-export async function initBarcodeGenerator() {
+export async function initBarcodeGenerator(user) {
     const openBtn = document.getElementById('barcode-generator-open');
     if (!openBtn) return;
 
     openBtn.addEventListener('click', () => {
         toggleModal('features-modal');
         toggleModal('barcode-generator-modal');
-        if (!auth.currentUser) return;
-        openBarcodeGenerator();
+        if (!user) return;
+        openBarcodeGenerator(user);
     });
 
     

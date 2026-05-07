@@ -43,13 +43,13 @@ export function initializeOrderForm(){
             const item = allItems.find(item => item.id === itemId);
             if (!item) return;
             
-            addItemToOrder(item.id, item.itemName, item.sellPrice, quantity);
+            addItemToOrder(item.id, item.itemName, item.sellPrice, item.costPrice, quantity);
             toggleModal('order-item-modal');
         });
     }
 }
 
-export function addItemToOrder(itemID, itemName, itemPrice, itemQuantity){
+export function addItemToOrder(itemID, itemName, itemPrice, costPrice, itemQuantity){
     const stockItem = allItems.find(i => i.id === itemID);
     if (stockItem && itemQuantity > stockItem.stockLevel) {
         showToast(`Only ${stockItem.stockLevel} ${stockItem.unit || 'units'} available`, 'error');
@@ -61,7 +61,7 @@ export function addItemToOrder(itemID, itemName, itemPrice, itemQuantity){
         updateRow(existingIndex);
     }
     else{
-        orderedItems.push({id: itemID, name: itemName, price: itemPrice, quantity: itemQuantity });
+        orderedItems.push({id: itemID, name: itemName, price: itemPrice, costPrice: costPrice, quantity: itemQuantity });
         appendRow(orderedItems.length - 1);
         if(orderedItems.length === 1){ fullRender(); }
     }
@@ -242,6 +242,7 @@ export async function initSubmitOrder(){
             id: item.id,
             name: item.name,
             price: item.price,
+            cost: item.costPrice,
             quantity: item.quantity,
             subtotal: item.price * item.quantity,
         }));
@@ -258,7 +259,7 @@ export async function initSubmitOrder(){
             taxAmount,
             totalPrice: totalWithTax,
         };
-
+        console.log(orderPayload);
         const originalText = submitBtn.textContent;
         submitBtn.disabled = true;
         submitBtn.textContent = "Submitting...";

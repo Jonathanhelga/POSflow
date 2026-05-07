@@ -159,13 +159,12 @@ function initPrintButton() {
 
 // ─── Init ──────────────────────────────────────────────────────────────────────
 
-export async function initOrderHistory() {
+export async function initOrderHistory(user) {
     const openBtn = document.getElementById('js-order-history-open');
     if (!openBtn) return;
 
     openBtn.addEventListener('click', async () => {
         toggleModal('order-history-modal');
-        const user = auth.currentUser;
         if (!user) return;
 
         // Load profile for bill header (cached centrally in firebase.js)

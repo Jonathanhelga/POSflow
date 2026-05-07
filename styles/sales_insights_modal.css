@@ -1,0 +1,279 @@
+#sales-insights-modal {
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+    background-color: rgba(15, 23, 42, 0.45);
+}
+
+#c-modal-sales {
+    width: 100%;
+    max-width: 960px;
+    max-height: 90vh;
+    display: flex;
+    flex-direction: column;
+    border-radius: var(--radius);
+    background-color: black;
+    box-shadow:
+        0 1px 2px rgba(15, 23, 42, 0.04),
+        0 24px 60px rgba(15, 23, 42, 0.25);
+    border: 1px solid rgba(15, 23, 42, 0.06);
+    overflow: hidden;        /* the body handles scroll */
+}
+
+#c-modal-sales .c-modal__header {
+    flex-shrink: 0;
+    padding: 1.1rem 1.4rem;
+    border-bottom: 1px solid rgba(15, 23, 42, 0.08);
+}
+#c-modal-sales .c-modal__title {
+    font-size: 1.4rem;
+    font-weight: 700;
+    margin: 0;
+    letter-spacing: 0.01em;
+}
+/* #c-modal-sales .c-modal__subtitle {
+    margin: 0.35rem 0 0;
+    color: var(--clr-text-secondary);
+    font-size: 0.875rem;
+    font-weight: 400;
+} */
+
+.c-sales {
+    flex: 1;
+    overflow-y: auto;
+    padding: 1.5rem 2rem 2rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    background-color: var(--clr-modal-panel);
+}
+
+.c-sales__toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 1rem 1.25rem;
+    background-color: var(--clr-panel);
+    border: 1px solid rgba(15, 23, 42, 0.08);
+    border-radius: 12px;
+}
+
+.c-sales__presets {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+.c-chip {
+    padding: 0.5rem 0.9rem;
+    background-color: #f1f5f9;
+    color: var(--clr-text-secondary);
+    border: 1px solid rgba(15, 23, 42, 0.08);
+    border-radius: 999px;
+    font-size: 0.85rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition:
+        background-color 0.15s ease,
+        border-color 0.15s ease,
+        color 0.15s ease;
+}
+.c-chip:hover {
+    background-color: #e2e8f0;
+    color: var(--clr-text-primary);
+}
+.c-chip.is-active {
+    background-color: var(--clr-text-primary);
+    color: #ffffff;
+    border-color: var(--clr-text-primary);
+}
+.c-chip:focus-visible {
+    outline: 2px solid var(--clr-primary);
+    outline-offset: 2px;
+}
+
+/* Custom From / To inputs */
+.c-sales__range {
+    display: flex;
+    align-items: flex-end;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+}
+.c-sales__range-label {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--clr-text-secondary);
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+}
+.c-sales__range-label input {
+    padding: 0.55rem 0.7rem;
+    font-size: 0.875rem;
+    border: 1px solid rgba(15, 23, 42, 0.12);
+    border-radius: 8px;
+    background-color: var(--clr-panel);
+    color: var(--clr-text-primary);
+    width: 9rem;
+}
+.c-sales__range-label input:focus {
+    border-color: var(--clr-primary);
+    outline: none;
+}
+.c-sales__apply {
+    padding: 0.55rem 1.1rem;
+    background-color: var(--clr-text-primary);
+    color: #ffffff;
+    border-radius: 8px;
+    font-size: 0.875rem;
+    font-weight: 600;
+}
+.c-sales__apply:hover { filter: brightness(1.15); }
+
+/* ── KPI grid ─────────────────────────────────────────────────── */
+.c-kpi-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.875rem;
+}
+@media (min-width: 720px) {
+    .c-kpi-grid { grid-template-columns: repeat(4, 1fr); }
+}
+
+.c-kpi {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+    padding: 1.1rem 1.25rem;
+    background-color: var(--clr-panel);
+    border: 1px solid rgba(15, 23, 42, 0.08);
+    border-radius: 12px;
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+.c-kpi:hover {
+    border-color: rgba(15, 23, 42, 0.14);
+    box-shadow: 0 4px 12px rgba(15, 23, 42, 0.06);
+}
+.c-kpi__label {
+    font-size: 0.72rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--clr-text-secondary);
+}
+.c-kpi__value {
+    font-size: 1.55rem;
+    font-weight: 700;
+    color: var(--clr-text-primary);
+    line-height: 1.1;
+    letter-spacing: -0.01em;
+}
+.c-kpi__delta {
+    font-size: 0.78rem;
+    font-weight: 500;
+    color: var(--clr-text-secondary);
+    min-height: 1em;            /* reserve space so layout doesn't jump */
+}
+.c-kpi__delta.is-up   { color: #2f855a; }
+.c-kpi__delta.is-down { color: #c05621; }
+
+/* ── Card primitive (chart + top items share this) ────────────── */
+.c-card {
+    background-color: var(--clr-panel);
+    border: 1px solid rgba(15, 23, 42, 0.08);
+    border-radius: 12px;
+    overflow: hidden;
+}
+.c-card__header {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 1rem 1.25rem;
+    border-bottom: 1px solid rgba(15, 23, 42, 0.06);
+}
+.c-card__title {
+    margin: 0;
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: var(--clr-text-primary);
+}
+.c-card__hint {
+    font-size: 0.78rem;
+    font-weight: 500;
+    color: var(--clr-text-secondary);
+}
+.c-card__body { padding: 1.25rem; }
+
+/* ── Chart card ───────────────────────────────────────────────── */
+.c-sales__chart-body {
+    position: relative;
+    min-height: 260px;
+}
+#charts-design {
+    width: 100% !important;
+    max-height: 320px;
+}
+
+/* ── Top items table ──────────────────────────────────────────── */
+.c-sales__top-card .c-card__body { padding: 0; }
+
+.c-sales__table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.875rem;
+}
+.c-sales__table thead th {
+    padding: 0.75rem 1.25rem;
+    background-color: #f8fafc;
+    color: var(--clr-text-secondary);
+    font-size: 0.72rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    text-align: left;
+    border-bottom: 1px solid rgba(15, 23, 42, 0.08);
+}
+.c-sales__table tbody td {
+    padding: 0.85rem 1.25rem;
+    color: var(--clr-text-primary);
+    border-bottom: 1px solid rgba(15, 23, 42, 0.05);
+}
+.c-sales__table tbody tr:last-child td { border-bottom: none; }
+.c-sales__table tbody tr:hover { background-color: #f8fafc; }
+
+.c-sales__col-rank {
+    width: 3rem;
+    color: var(--clr-text-secondary);
+    font-weight: 600;
+}
+.c-sales__col-num {
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+}
+
+/* ── Empty state (chart card + table card share this) ─────────── */
+.c-empty {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 200px;
+    padding: 2rem;
+    color: var(--clr-text-secondary);
+    font-size: 0.9rem;
+    text-align: center;
+}
+.c-empty p { margin: 0; }
+
+/* ── Responsive — stack toolbar tighter on narrow screens ────── */
+@media (max-width: 600px) {
+    #sales-insights-modal { padding: 0.75rem; }
+    #c-modal-sales { max-height: 95vh; }
+    #c-modal-sales .c-modal__header { padding: 1.1rem 1.25rem; }
+    .c-sales { padding: 1rem 1.25rem 1.5rem; }
+    .c-sales__toolbar { flex-direction: column; align-items: stretch; }
+    .c-sales__range { justify-content: flex-start; }
+}
