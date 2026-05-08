@@ -1,8 +1,8 @@
-import { db, fetchInventory } from './firebase';
+import { db } from './firebase';
 import { doc, updateDoc, increment, serverTimestamp } from 'firebase/firestore';
 import { toggleModal } from './modal-handler';
+import { allItems, loadAllItems, updateLocalStock } from './search_item';
 
-let allItems      = [];
 let filteredItems = [];
 let selectedItem  = null;
 
@@ -12,7 +12,7 @@ const formatCurrency = (value) => new Intl.NumberFormat('id-ID', {
 }).format(value ?? 0);
 
 function getStockStatus(current, min) {
-    return Number(current) >= Number(min) ? 'good' : 'alert';
+    return Number(current ?? 0) >= Number(min ?? 0) ? 'good' : 'alert';
 }
 
 // ─── Render item list
@@ -134,10 +134,7 @@ async function handleSave() {
             lastUpdated: serverTimestamp(),
         });
 
-        // Update local state
-        selectedItem.stockLevel = (selectedItem.stockLevel ?? 0) + qty;
-        const idx = allItems.findIndex(i => i.id === selectedItem.id);
-        if (idx !== -1) allItems[idx].stockLevel = selectedItem.stockLevel;
+        updateLocalStock(selectedItem.id, qty);
 
         // Refresh the card in the list
         const cardEl = document.querySelector(`.iu-card[data-item-id="${selectedItem.id}"]`);
@@ -200,7 +197,7 @@ async function openInventoryUpdate(user) {
     document.getElementById('iu-search').value          = '';
 
     try {
-        allItems      = await fetchInventory(user.uid);
+        await loadAllItems();
         filteredItems = [...allItems];
         renderItemList(filteredItems);
     } catch (err) {
