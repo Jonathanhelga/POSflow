@@ -50,10 +50,11 @@
 
 .c-sales__toolbar {
     display: flex;
+    flex-direction: column;
     flex-wrap: wrap;
     align-items: center;
     justify-content: space-between;
-    gap: 1rem;
+    gap: 2rem;
     padding: 1rem 1.25rem;
     background-color: var(--clr-panel);
     border: 1px solid rgba(15, 23, 42, 0.08);
@@ -63,7 +64,7 @@
 .c-sales__presets {
     display: flex;
     flex-wrap: wrap;
-    gap: 0.5rem;
+    gap: 2rem;
 }
 .c-chip {
     padding: 0.5rem 0.9rem;
@@ -124,19 +125,22 @@
     outline: none;
 }
 .c-sales__apply {
-    padding: 0.55rem 1.1rem;
+    padding: 0.5rem 0.9rem;
     background-color: var(--clr-text-primary);
     color: #ffffff;
     border-radius: 8px;
     font-size: 0.875rem;
     font-weight: 600;
+    padding: 0.5rem 0.9rem;
+    border: 1px solid rgba(15, 23, 42, 0.08);
+    cursor: pointer;
 }
 .c-sales__apply:hover { filter: brightness(1.15); }
 
 /* ── KPI grid ─────────────────────────────────────────────────── */
 .c-kpi-grid {
     display: grid;
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: repeat(3, 1fr);
     gap: 0.875rem;
 }
 @media (min-width: 720px) {
@@ -254,6 +258,23 @@
     text-align: right;
     font-variant-numeric: tabular-nums;
 }
+.c-sales__col-sortable {
+    cursor: pointer;
+    user-select: none;
+    transition: color 120ms ease;
+}
+.c-sales__col-sortable:hover { color: var(--clr-text-primary); }
+.c-sales__col-sortable.is-active { color: var(--clr-text-primary); }
+.c-sales__sort-arrow {
+    display: inline-block;
+    margin-left: 0.35rem;
+    font-size: 0.7rem;
+    opacity: 0;
+    transition: opacity 120ms ease;
+}
+.c-sales__sort-arrow::before { content: "▼"; display: inline-block; transition: transform 120ms ease; }
+.c-sales__col-sortable.is-active .c-sales__sort-arrow { opacity: 1; }
+.c-sales__col-sortable.is-asc .c-sales__sort-arrow::before { transform: rotate(180deg); }
 
 /* ── Empty state (chart card + table card share this) ─────────── */
 .c-empty {
@@ -267,6 +288,7 @@
     text-align: center;
 }
 .c-empty p { margin: 0; }
+.c-empty[hidden] { display: none; }
 
 /* ── Responsive — stack toolbar tighter on narrow screens ────── */
 @media (max-width: 600px) {

@@ -2,6 +2,7 @@ import { toggleModal } from './modal-handler';
 import { formatRupiah } from "./formatRupiah";
 import { allItems, updateLocalStock } from "./search_item";
 import { auth, submitOrder } from "./firebase";
+import { refreshInsights } from './sales_insight';
 
 let orderedItems = [];
 let selectedRowIndex = -1;
@@ -282,6 +283,7 @@ export async function initSubmitOrder(){
         try {
             mappedItems.forEach(item => updateLocalStock(item.id, -item.quantity));
             resetOrderAfterSubmit();
+            refreshInsights(user);
             showToast('Order submitted successfully!');
         } catch (err) {
             console.error("Post-submit local update failed:", err);

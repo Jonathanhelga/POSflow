@@ -671,10 +671,7 @@
     <div id="sales-insights-modal" class="c-modal c-modal--center is-hidden">
       <div class="c-modal__panel" id="c-modal-sales">
         <header class="c-modal__header">
-          <div>
-            <h2 class="c-modal__title">Sales Insight</h2>
-            <!-- <p class="c-modal__subtitle">Review revenue, orders, and best-selling items across a date range.</p> -->
-          </div>
+          <div> <h2 class="c-modal__title">Sales Insight</h2> </div>
           <button type="button" class="c-modal__close" aria-label="Close" data-modal-close="sales-insights-modal">&times;</button>
         </header>
         <div class="c-modal__body c-sales">
@@ -718,10 +715,15 @@
               <span class="c-kpi__value" id="js-kpi-items">0</span>
               <span class="c-kpi__delta" id="js-kpi-items-delta"></span>
             </article>
-            <article class="c-kpi">
+            <!-- <article class="c-kpi">
               <span class="c-kpi__label">Avg Order Value</span>
               <span class="c-kpi__value" id="js-kpi-aov">Rp 0</span>
               <span class="c-kpi__delta" id="js-kpi-aov-delta"></span>
+            </article> -->
+            <article class="c-kpi">
+              <span class="c-kpi__label">Profit</span>
+              <span class="c-kpi__value" id="js-kpi-profit">Rp 0</span>
+              <span class="c-kpi__delta" id="js-kpi-profit-delta"></span>
             </article>
           </section>
 
@@ -751,8 +753,8 @@
                   <tr>
                     <th class="c-sales__col-rank">#</th>
                     <th>Item</th>
-                    <th class="c-sales__col-num">Qty</th>
-                    <th class="c-sales__col-num">Revenue</th>
+                    <th class="c-sales__col-num c-sales__col-sortable" data-sort="quantity">Qty<span class="c-sales__sort-arrow"></span></th>
+                    <th class="c-sales__col-num c-sales__col-sortable is-active" data-sort="revenue">Revenue<span class="c-sales__sort-arrow"></span></th>
                   </tr>
                 </thead>
                 <tbody id="js-sales-top-items">

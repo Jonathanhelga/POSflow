@@ -92,6 +92,11 @@ export async function fetchInventory(uid) {
         where("ownerId", "==", uid),
         orderBy("lastUpdated")
     );
+    //     orderBy("createdAt", "asc") — ascending, oldest → newest:
+
+    // A — 2026-05-01 09:00
+    // B — 2026-05-05 14:30
+    // C — 2026-05-07 08:15
     const snapshot = await getDocs(q);
     return snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
 }
@@ -100,7 +105,7 @@ export async function fetchOrders(uid) {
     const q = query(
         collection(db, "orders"),
         where("ownerId", "==", uid),
-        orderBy("createdAt", "desc")
+        orderBy("createdAt", "asc")
     );
     const snapshot = await getDocs(q);
     return snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
@@ -143,4 +148,3 @@ export async function syncStockToFirestore(itemId, newQuantity) {
     const item = allItems.find(i => i.id === itemId);
     if (item) item.stockLevel = newQuantity;
 }
-
