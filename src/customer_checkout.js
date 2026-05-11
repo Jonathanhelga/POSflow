@@ -1,38 +1,49 @@
 import { toggleModal } from './modal-handler';
 import { formatRupiah } from './formatRupiah';
 import { getOrderedItems } from './order-add_item';
+import { auth, fetchCustomers } from './firebase';
 
 const MODAL_ID = 'customer-checkout-modal';
+const CUSTOMER_FIELDS = ['js-checkout-customer-name', 'js-checkout-customer-phone'];
+
+let customerCache = [];
 
 export function initCustomerCheckout() {
     const discountInput = document.getElementById('js-checkout-discount');
-    if (!discountInput) return;
+    const select = document.getElementById('js-checkout-customer-select');
+    if (!discountInput || !select) return;
     discountInput.addEventListener('input', recalcTotals);
+    select.addEventListener('change', handleCustomerSelect);
 }
 
-export function openCustomerCheckout() {
+export async function openCustomerCheckout() {
     renderOrderRecap();
     resetDiscount();
     recalcTotals();
+    await populateCustomerDropdown();
+    resetCustomerSelection();
     toggleModal(MODAL_ID);
 }
 
 export function closeCustomerCheckout() {
-    document.querySelector(`[data-modal-close="${MODAL_ID}"]`)?.click();
+    // document.querySelector(`[data-modal-close="${MODAL_ID}"]`)?.click();
+    toggleModal(MODAL_ID);
 }
+
 
 export function getCheckoutFormData() {
     const items = getOrderedItems();
     const subtotal = items.reduce((sum, it) => sum + it.price * it.quantity, 0);
     const discountPct = clampDiscount(Number(document.getElementById('js-checkout-discount')?.value) || 0);
     const discountAmount = subtotal * (discountPct / 100);
+    const selectedId = document.getElementById('js-checkout-customer-select')?.value || '';
     return {
+        selectedCustomerId: selectedId,
         customer: {
-            id: document.getElementById('js-checkout-customer-id')?.value.trim() || '',
             name: document.getElementById('js-checkout-customer-name')?.value.trim() || '',
             phone: document.getElementById('js-checkout-customer-phone')?.value.trim() || '',
-            note: document.getElementById('js-checkout-customer-note')?.value.trim() || '',
         },
+        orderNote: document.getElementById('js-checkout-order-note')?.value.trim() || '',
         discountPct,
         discountAmount,
     };
@@ -43,6 +54,72 @@ export function setCheckoutSubmitting(isSubmitting, label) {
     if (!submitBtn) return;
     submitBtn.disabled = isSubmitting;
     if (label !== undefined) submitBtn.textContent = label;
+}
+
+async function populateCustomerDropdown() {
+    const user = auth.currentUser;
+    if (!user) return;
+    const select = document.getElementById('js-checkout-customer-select');
+    if (!select) return;
+
+    try {
+        customerCache = await fetchCustomers(user.uid);
+    } catch (err) {
+        console.error('Failed to load customers:', err);
+        customerCache = [];
+    }
+
+    select.replaceChildren();
+    const placeholder = document.createElement('option');
+    placeholder.value = '';
+    placeholder.textContent = '— New customer —';
+    select.appendChild(placeholder);
+
+    customerCache.forEach(c => {
+        const opt = document.createElement('option');
+        opt.value = c.id;
+        opt.textContent = c.phone ? `${c.name} • ${c.phone}` : c.name;
+        select.appendChild(opt);
+    });
+}
+
+function resetCustomerSelection() {
+    const select = document.getElementById('js-checkout-customer-select');
+    if (select) select.value = '';
+    clearCustomerFields();
+    setCustomerFieldsLocked(false);
+    const noteEl = document.getElementById('js-checkout-order-note');
+    if (noteEl) noteEl.value = '';
+}
+
+function handleCustomerSelect(e) {
+    const id = e.target.value;
+    if (!id) {
+        clearCustomerFields();
+        setCustomerFieldsLocked(false);
+        return;
+    }
+    const customer = customerCache.find(c => c.id === id);
+    if (!customer) return;
+    setFieldValue('js-checkout-customer-name', customer.name || '');
+    setFieldValue('js-checkout-customer-phone', customer.phone || '');
+    setCustomerFieldsLocked(true);
+}
+
+function clearCustomerFields() {
+    CUSTOMER_FIELDS.forEach(id => setFieldValue(id, ''));
+}
+
+function setCustomerFieldsLocked(locked) {
+    CUSTOMER_FIELDS.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.readOnly = locked;
+    });
+}
+
+function setFieldValue(id, value) {
+    const el = document.getElementById(id);
+    if (el) el.value = value;
 }
 
 function renderOrderRecap() {

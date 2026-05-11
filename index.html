@@ -454,22 +454,28 @@
           <section class="c-checkout__section">
             <div class="c-checkout__section-title">Customer Information</div>
             <div class="c-checkout__grid">
-              <div class="c-field">
-                <label class="c-field__label" for="js-checkout-customer-id">Customer ID</label>
-                <input class="c-field__input" id="js-checkout-customer-id" type="text" placeholder="Optional">
-              </div>
-              <div class="c-field">
-                <label class="c-field__label" for="js-checkout-customer-phone">Phone</label>
-                <input class="c-field__input" id="js-checkout-customer-phone" type="tel" placeholder="08xx-xxxx-xxxx">
+              <div class="c-field c-field--full">
+                <label class="c-field__label" for="js-checkout-customer-select">Existing Customer</label>
+                <select class="c-field__select" id="js-checkout-customer-select">
+                  <option value="">— New customer —</option>
+                </select>
               </div>
               <div class="c-field c-field--full">
                 <label class="c-field__label" for="js-checkout-customer-name">Customer Name</label>
-                <input class="c-field__input" id="js-checkout-customer-name" type="text" placeholder="Full name" required>
+                <input class="c-field__input" id="js-checkout-customer-name" type="text" placeholder="Full name">
               </div>
               <div class="c-field c-field--full">
-                <label class="c-field__label" for="js-checkout-customer-note">Note</label>
-                <input class="c-field__input" id="js-checkout-customer-note" type="text" placeholder="Optional note for this order">
+                <label class="c-field__label" for="js-checkout-customer-phone">Phone</label>
+                <input class="c-field__input" id="js-checkout-customer-phone" type="tel" placeholder="08xx-xxxx-xxxx">
               </div>
+            </div>
+          </section>
+
+          <section class="c-checkout__section">
+            <div class="c-checkout__section-title">Order Note</div>
+            <div class="c-field">
+              <input class="c-field__input" id="js-checkout-order-note" type="text"
+                     placeholder="e.g. deliver at 5pm, less sugar, no bag">
             </div>
           </section>
 

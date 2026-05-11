@@ -1,7 +1,7 @@
 import { toggleModal } from './modal-handler';
 import { formatRupiah } from "./formatRupiah";
 import { allItems, updateLocalStock } from "./search_item";
-import { auth, submitOrder } from "./firebase";
+import { auth, submitOrder, upsertCustomerByPhone } from "./firebase";
 import { refreshInsights } from './sales_insight';
 import {
     openCustomerCheckout,
@@ -101,6 +101,7 @@ export function scanAddItem(itemID){
     updateTotals();
     showToast(`${item.itemName} added`);
 }
+
 function fullRender(){
     const tableBody = document.getElementById('order-items');
     if(!tableBody) return;
@@ -117,6 +118,7 @@ function fullRender(){
     tableBody.innerHTML = '';
     orderedItems.forEach((_, index) => appendRow(index));
 }
+
 function appendRow(index){
     const tableBody = document.getElementById('order-items');
     if(!tableBody) return;
@@ -160,6 +162,7 @@ function orderModifier(){
     resetButton.addEventListener('click', () => { resetOrderTable(); })
     removeButton.addEventListener('click', () => { removeSelectedItem(); })
 }
+
 function removeSelectedItem(){
     if(selectedRowIndex === -1) { return; }
 
@@ -172,6 +175,7 @@ function removeSelectedItem(){
     const removeBtn = document.getElementById('js-order-remove');
     if (removeBtn) removeBtn.disabled = true;
 }
+
 function resetOrderTable(){
     if (orderedItems.length === 0) return;
     if (!confirm('Reset the entire order?')) return;
@@ -267,7 +271,21 @@ async function handleCheckoutFormSubmit(e) {
         return;
     }
 
-    const { customer, discountPct, discountAmount } = getCheckoutFormData();
+    const { selectedCustomerId, customer, orderNote, discountPct, discountAmount } = getCheckoutFormData();
+
+    let customerId = selectedCustomerId;
+    let customerSnapshot = customer;
+    const hasCustomerInfo = customer.name || customer.phone;
+    if (!customerId && hasCustomerInfo) {
+        try {
+            const saved = await upsertCustomerByPhone(customer, user.uid);
+            customerId = saved.id;
+            customerSnapshot = { name: saved.name, phone: saved.phone };
+        } catch (err) {
+            console.error("Failed to save customer:", err);
+            showToast("Couldn't save customer info, continuing with order.", 'error');
+        }
+    }
 
     const mappedItems = orderedItems.map(item => ({
         id: item.id,
@@ -293,7 +311,9 @@ async function handleCheckoutFormSubmit(e) {
         taxRate,
         taxAmount,
         totalPrice: totalWithTax,
-        customer,
+        customerId: customerId || null,
+        customer: customerSnapshot,
+        orderNote
     };
     console.log(orderPayload);
 

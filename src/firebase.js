@@ -140,6 +140,39 @@ export async function submitOrder(orderPayload, uid){
     return orderRef.id;
 }
 
+export async function fetchCustomers(uid) {
+    const q = query(
+        collection(db, "customers"),
+        where("ownerId", "==", uid),
+        orderBy("name", "asc")
+    );
+    const snapshot = await getDocs(q);
+    return snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
+}
+
+export async function upsertCustomerByPhone({ name, phone }, uid) {
+    const phoneKey = (phone || '').trim();
+    if (phoneKey) {
+        const q = query(
+            collection(db, "customers"),
+            where("ownerId", "==", uid),
+            where("phone", "==", phoneKey)
+        );
+        const snapshot = await getDocs(q);
+        if (!snapshot.empty) {
+            const existing = snapshot.docs[0];
+            return { id: existing.id, ...existing.data() };
+        }
+    }
+    const docRef = await addDoc(collection(db, "customers"), {
+        ownerId: uid,
+        name: (name || '').trim(),
+        phone: phoneKey,
+        createdAt: serverTimestamp(),
+    });
+    return { id: docRef.id, name, phone: phoneKey };
+}
+
 export async function syncStockToFirestore(itemId, newQuantity) {
     await updateDoc(doc(db, 'inventory', itemId), {
         stockLevel: newQuantity,
