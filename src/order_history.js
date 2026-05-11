@@ -138,6 +138,7 @@ function viewOrderDetails(order, cardEl) {
 
     document.getElementById('oh-total-items').textContent = totalItems;
     document.getElementById('oh-subtotal').textContent = `Rp ${formatRupiah(order?.subtotal || 0)}`;
+    renderDiscountRow(order);
     document.getElementById('oh-business-tax').textContent = `${order?.taxRate || 0}`;
     document.getElementById('oh-tax').textContent = `Rp ${formatRupiah(order?.taxAmount || 0)}`;
     document.getElementById('oh-grand-total').textContent = `Rp ${formatRupiah(order.totalPrice) ?? '-'}`;
@@ -147,6 +148,13 @@ function viewOrderDetails(order, cardEl) {
     // Highlight selected card
     document.querySelectorAll('.oh-card').forEach(c => c.classList.remove('oh-card--active'));
     if (cardEl) cardEl.classList.add('oh-card--active');
+}
+
+function renderDiscountRow(order) {
+    const discountPct = Number(order?.discountPct) || 0;
+    const discountAmount = Number(order?.discountAmount) || 0;
+    document.getElementById('oh-discount-pct').textContent = String(discountPct);
+    document.getElementById('oh-discount-amount').textContent = `- Rp ${formatRupiah(discountAmount)}`;
 }
 
 // ─── Print ─────────────────────────────────────────────────────────────────────
@@ -180,6 +188,8 @@ export async function initOrderHistory(user) {
         document.getElementById('oh-subtotal').textContent = '—';
         document.getElementById('oh-grand-total').textContent = '—';
         document.getElementById('oh-tax').textContent = '—';
+        document.getElementById('oh-discount-amount').textContent = '- Rp 0';
+        document.getElementById('oh-discount-pct').textContent = '0';
         document.getElementById('oh-print-btn').disabled = true;
 
         // Fetch and render orders

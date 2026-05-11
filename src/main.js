@@ -11,6 +11,7 @@ import '../styles/order_history_modal.css';
 import '../styles/inventory_update_modal.css';
 import '../styles/barcode_generator_modal.css';
 import '../styles/sales_insights_modal.css';
+import '../styles/customer_checkout_modal.css';
 import { auth } from "./firebase";
 import { onAuthStateChanged } from "firebase/auth";
 import { switchView, eventDelegation } from "./control_wizard";
@@ -20,6 +21,7 @@ import { initOrderHistory } from './order_history';
 import { initInventoryUpdate } from './inventory_update';
 import { initBarcodeGenerator } from './barcode-generator';
 import { initInsights } from './sales_insight';
+import { initCustomerCheckout } from './customer_checkout';
 
 function initLoggedInApp(user) {
     renderLoggedInState(user);
@@ -27,6 +29,7 @@ function initLoggedInApp(user) {
     initOrderHistory(user);
     initInventoryUpdate(user);
     initBarcodeGenerator(user);
+    initCustomerCheckout();
 }
 
 document.addEventListener('DOMContentLoaded', function(){

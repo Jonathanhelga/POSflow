@@ -407,6 +407,10 @@
                   <span>Subtotal:</span>
                   <span id="oh-subtotal">—</span>
                 </div>
+                <div class="oh-bill__summary-row" id="oh-discount-row">
+                  <span>Discount (<span id="oh-discount-pct">0</span>%):</span>
+                  <span id="oh-discount-amount">- Rp 0</span>
+                </div>
                 <div class="oh-bill__summary-row">
                   <span>Tax (<span id="oh-business-tax"></span>%):</span>
                   <span id="oh-tax">Rp 0</span>
@@ -434,6 +438,87 @@
           </div>
 
         </div>
+      </div>
+    </div>
+
+    <div id="customer-checkout-modal" class="c-modal c-modal--center is-hidden">
+      <div class="c-modal__panel" id="c-modal-customer-checkout">
+        <header class="c-modal__header">
+          <h2 class="c-modal__title">Customer Checkout</h2>
+          <button type="button" class="c-modal__close" aria-label="Close"
+                  data-modal-close="customer-checkout-modal">&times;</button>
+        </header>
+
+        <form id="js-customer-checkout-form" class="c-checkout__body" novalidate>
+
+          <section class="c-checkout__section">
+            <div class="c-checkout__section-title">Customer Information</div>
+            <div class="c-checkout__grid">
+              <div class="c-field">
+                <label class="c-field__label" for="js-checkout-customer-id">Customer ID</label>
+                <input class="c-field__input" id="js-checkout-customer-id" type="text" placeholder="Optional">
+              </div>
+              <div class="c-field">
+                <label class="c-field__label" for="js-checkout-customer-phone">Phone</label>
+                <input class="c-field__input" id="js-checkout-customer-phone" type="tel" placeholder="08xx-xxxx-xxxx">
+              </div>
+              <div class="c-field c-field--full">
+                <label class="c-field__label" for="js-checkout-customer-name">Customer Name</label>
+                <input class="c-field__input" id="js-checkout-customer-name" type="text" placeholder="Full name" required>
+              </div>
+              <div class="c-field c-field--full">
+                <label class="c-field__label" for="js-checkout-customer-note">Note</label>
+                <input class="c-field__input" id="js-checkout-customer-note" type="text" placeholder="Optional note for this order">
+              </div>
+            </div>
+          </section>
+
+          <section class="c-checkout__section">
+            <div class="c-checkout__section-title">Order Recap</div>
+            <table class="c-checkout__recap">
+              <thead>
+                <tr>
+                  <th>Item</th>
+                  <th class="c-checkout__col-qty">Qty</th>
+                  <th class="c-checkout__col-subtotal">Subtotal</th>
+                </tr>
+              </thead>
+              <tbody id="js-checkout-recap-body"></tbody>
+            </table>
+          </section>
+
+          <section class="c-checkout__section">
+            <div class="c-checkout__section-title">Discount &amp; Total</div>
+            <div class="c-checkout__totals">
+              <div class="c-checkout__totals-row">
+                <span>Subtotal</span>
+                <span class="c-checkout__totals-value" id="js-checkout-subtotal">Rp 0</span>
+              </div>
+              <div class="c-checkout__discount">
+                <label for="js-checkout-discount">Discount</label>
+                <input class="c-checkout__discount-input" id="js-checkout-discount"
+                       type="number" min="0" max="100" step="0.5" placeholder="0">
+                <span class="c-checkout__discount-suffix">%</span>
+              </div>
+              <div class="c-checkout__totals-row c-checkout__totals-row--muted">
+                <span>Discount Amount</span>
+                <span class="c-checkout__totals-value" id="js-checkout-discount-amount">- Rp 0</span>
+              </div>
+              <div class="c-checkout__totals-row c-checkout__totals-row--grand">
+                <span>Total</span>
+                <span class="c-checkout__totals-value" id="js-checkout-total">Rp 0</span>
+              </div>
+            </div>
+          </section>
+
+          <div class="c-checkout__footer">
+            <button type="button" class="btn c-checkout__cancel"
+                    data-modal-close="customer-checkout-modal">Cancel</button>
+            <button type="submit" class="btn c-checkout__submit" id="js-checkout-submit">
+              Submit Order
+            </button>
+          </div>
+        </form>
       </div>
     </div>
 

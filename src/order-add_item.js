@@ -3,11 +3,20 @@ import { formatRupiah } from "./formatRupiah";
 import { allItems, updateLocalStock } from "./search_item";
 import { auth, submitOrder } from "./firebase";
 import { refreshInsights } from './sales_insight';
+import {
+    openCustomerCheckout,
+    closeCustomerCheckout,
+    getCheckoutFormData,
+    setCheckoutSubmitting,
+} from './customer_checkout';
 
 let orderedItems = [];
 let selectedRowIndex = -1;
 let taxRate = 0;
 
+export function getOrderedItems(){
+    return orderedItems;
+}
 export function setTaxRate(rate) {
     taxRate = parseFloat(rate) || 0;
     updateTotals();
@@ -226,72 +235,95 @@ function handleRowClick(index, rowElement){
 }
 
 export async function initSubmitOrder(){
-    const submitBtn = document.getElementById('js-order-submit');
-    if (!submitBtn) return;
-    submitBtn.addEventListener('click', async () => {
-        if (orderedItems.length === 0) {
-            alert("No items in the order yet.");
-            return;
-        }
-        const user = auth.currentUser;
-        if (!user) {
-            alert("Session expired. Please log in again.");
-            return;
-        }
+    const printBillBtn = document.getElementById('js-order-submit');
+    const checkoutForm = document.getElementById('js-customer-checkout-form');
+    if (!printBillBtn || !checkoutForm) return;
 
-        const mappedItems = orderedItems.map(item => ({
-            id: item.id,
-            name: item.name,
-            price: item.price,
-            cost: item.costPrice,
-            quantity: item.quantity,
-            subtotal: item.price * item.quantity,
-        }));
+    printBillBtn.addEventListener('click', handlePrintBillClick);
+    checkoutForm.addEventListener('submit', handleCheckoutFormSubmit);
+}
 
-        const subtotal = orderedItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-        const taxAmount = subtotal * (taxRate / 100);
-        const totalWithTax = subtotal + taxAmount;
+function handlePrintBillClick() {
+    if (orderedItems.length === 0) {
+        alert("No items in the order yet.");
+        return;
+    }
+    if (!auth.currentUser) {
+        alert("Session expired. Please log in again.");
+        return;
+    }
+    openCustomerCheckout();
+}
 
-        const orderPayload = {
-            items: mappedItems,
-            totalQuantity: orderedItems.reduce((sum, item) => sum + item.quantity, 0),
-            subtotal,
-            taxRate,
-            taxAmount,
-            totalPrice: totalWithTax,
-        };
-        console.log(orderPayload);
-        const originalText = submitBtn.textContent;
-        submitBtn.disabled = true;
-        submitBtn.textContent = "Submitting...";
-        
-        try {
-            await submitOrder(orderPayload, user.uid);
-        } catch (err) {
-            console.error("Order submission failed:", err);
-            const userMessage = err.code === 'permission-denied'
-                ? "You don't have permission to submit orders."
-                : err.code === 'not-found'
-                ? "One or more items no longer exist in inventory."
-                : err.message;
-            showToast(`Failed to submit order: ${userMessage}`, 'error');
-            submitBtn.disabled = false;
-            submitBtn.textContent = originalText;
-            return;
-        }
+async function handleCheckoutFormSubmit(e) {
+    e.preventDefault();
+    const user = auth.currentUser;
+    if (!user) {
+        alert("Session expired. Please log in again.");
+        return;
+    }
+    if (orderedItems.length === 0) {
+        alert("No items in the order yet.");
+        return;
+    }
 
-        try {
-            mappedItems.forEach(item => updateLocalStock(item.id, -item.quantity));
-            resetOrderAfterSubmit();
-            refreshInsights(user);
-            showToast('Order submitted successfully!');
-        } catch (err) {
-            console.error("Post-submit local update failed:", err);
-            mappedItems.forEach(item => updateLocalStock(item.id, item.quantity));
-            showToast('Order was submitted, but display failed to update. Please refresh.', 'error');
-        } finally {
-            submitBtn.disabled = false;
-            submitBtn.textContent = originalText;
-        }
-    });
+    const { customer, discountPct, discountAmount } = getCheckoutFormData();
+
+    const mappedItems = orderedItems.map(item => ({
+        id: item.id,
+        name: item.name,
+        price: item.price,
+        cost: item.costPrice,
+        quantity: item.quantity,
+        subtotal: item.price * item.quantity,
+    }));
+
+    const subtotal = orderedItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+    const subtotalAfterDiscount = Math.max(0, subtotal - discountAmount);
+    const taxAmount = subtotalAfterDiscount * (taxRate / 100);
+    const totalWithTax = subtotalAfterDiscount + taxAmount;
+
+    const orderPayload = {
+        items: mappedItems,
+        totalQuantity: orderedItems.reduce((sum, item) => sum + item.quantity, 0),
+        subtotal,
+        discountPct,
+        discountAmount,
+        subtotalAfterDiscount,
+        taxRate,
+        taxAmount,
+        totalPrice: totalWithTax,
+        customer,
+    };
+    console.log(orderPayload);
+
+    setCheckoutSubmitting(true, "Submitting...");
+
+    try {
+        await submitOrder(orderPayload, user.uid);
+    } catch (err) {
+        console.error("Order submission failed:", err);
+        const userMessage = err.code === 'permission-denied'
+            ? "You don't have permission to submit orders."
+            : err.code === 'not-found'
+            ? "One or more items no longer exist in inventory."
+            : err.message;
+        showToast(`Failed to submit order: ${userMessage}`, 'error');
+        setCheckoutSubmitting(false, "Submit Order");
+        return;
+    }
+
+    try {
+        mappedItems.forEach(item => updateLocalStock(item.id, -item.quantity));
+        resetOrderAfterSubmit();
+        refreshInsights(user);
+        closeCustomerCheckout();
+        showToast('Order submitted successfully!');
+    } catch (err) {
+        console.error("Post-submit local update failed:", err);
+        mappedItems.forEach(item => updateLocalStock(item.id, item.quantity));
+        showToast('Order was submitted, but display failed to update. Please refresh.', 'error');
+    } finally {
+        setCheckoutSubmitting(false, "Submit Order");
+    }
 }
