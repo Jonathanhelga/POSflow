@@ -105,17 +105,18 @@ export function scanAddItem(itemID){
 function fullRender(){
     const tableBody = document.getElementById('order-items');
     if(!tableBody) return;
-    if(orderedItems.length === 0){ 
-        tableBody.innerHTML = '';
+    if(orderedItems.length === 0){
+        tableBody.replaceChildren();
         const row = document.createElement('tr');
-        row.innerHTML = `        
-            <tr class="c-table__empty">
-                <td colspan="3">No items ordered yet</td>
-            </tr>`;
+        row.className = 'c-table__empty';
+        const tableData = document.createElement('td');
+        tableData.textContent = 'No Items Ordered Yet.';
+        tableData.colSpan = 3;
+        row.appendChild(tableData);
         tableBody.appendChild(row);
         return;
     }
-    tableBody.innerHTML = '';
+    tableBody.replaceChildren();
     orderedItems.forEach((_, index) => appendRow(index));
 }
 

@@ -137,7 +137,7 @@ function renderTopItemsTable(){
     const emptyState = document.getElementById('js-sales-top-empty');
 
     if (topItemsRows.length === 0) {
-        tbody.innerHTML = '';
+        tbody.replaceChildren();
         tbody.parentElement.hidden = true;
         emptyState.hidden = false;
         return;
@@ -148,14 +148,26 @@ function renderTopItemsTable(){
     const dir = topItemsSortDir === 'asc' ? 1 : -1;
     const sorted = [...topItemsRows].sort((a, b) => (a[topItemsSortKey] - b[topItemsSortKey]) * dir);
 
-    tbody.innerHTML = sorted.map((row, i) => `
-        <tr>
-            <td class="c-sales__col-rank">${i + 1}</td>
-            <td>${row.name}</td>
-            <td class="c-sales__col-num">${row.quantity}</td>
-            <td class="c-sales__col-num">Rp ${formatRupiah(row.revenue)}</td>
-        </tr>
-    `).join('');
+    tbody.replaceChildren();
+    sorted.forEach((row, i) => {
+        const tableRow = document.createElement('tr');
+        const tableData1 = document.createElement('td');
+        tableData1.className = 'c-sales__col-rank';
+        tableData1.textContent = i + 1;
+        const tableData2 = document.createElement('td');
+        tableData2.textContent = row.name;
+        const tableData3 = document.createElement('td');
+        tableData3.className = 'c-sales__col-num';
+        tableData3.textContent = row.quantity;
+        const tableData4 = document.createElement('td');
+        tableData4.className = 'c-sales__col-num';
+        tableData4.textContent = `Rp ${formatRupiah(row.revenue)}`;
+        tableRow.appendChild(tableData1);
+        tableRow.appendChild(tableData2);
+        tableRow.appendChild(tableData3);
+        tableRow.appendChild(tableData4);
+        tbody.appendChild(tableRow);
+    });
 }
 function fillInKPI(filtered_orders){
     let revenue = 0;
