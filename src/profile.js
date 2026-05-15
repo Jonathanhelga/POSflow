@@ -4,6 +4,8 @@ import { toggleModal } from './modal-handler';
 import { setTaxRate } from './order-add_item';
 
 export function initProfile(user) {
+    applyPrintPaperSizeFromProfile(user);
+
     document.getElementById('js-profile-open').addEventListener('click', () => {
         loadProfileData(user);
         toggleModal('profile-modal');
@@ -53,6 +55,30 @@ async function loadProfileData(user) {
     document.getElementById('profile-invoice-prefix').value      = data.invoice_prefix      || '';
     document.getElementById('profile-paper-size').value          = data.printer_size        || '80';
     document.getElementById('profile-receipt-footer').value      = data.receipt_footer      || '';
+
+    applyPrintPaperSize(data.printer_size || '80');
+}
+
+async function applyPrintPaperSizeFromProfile(user) {
+    const data = await fetchUserProfile(user.uid);
+    applyPrintPaperSize(data?.printer_size || '80');
+}
+
+function applyPrintPaperSize(size) {
+    const mm = size === '58' ? '58mm' : '80mm';
+    const fontSize = size === '58' ? '8px' : '12px';
+    let styleEl = document.getElementById('print-paper-size');
+    if (!styleEl) {
+        styleEl = document.createElement('style');
+        styleEl.id = 'print-paper-size';
+        document.head.appendChild(styleEl);
+    }
+    styleEl.textContent = `
+        @media print {
+            @page { size: ${mm} auto; margin: 0; }
+            #oh-bill-preview { width: ${mm}; font-size: ${fontSize}; padding: 4mm 3mm; }
+        }
+    `;
 }
 
 async function saveProfileData(uid) {
@@ -86,6 +112,7 @@ async function saveProfileData(uid) {
         setCachedUserProfile(updatedProfile);
 
         setTaxRate(formData.tax_rate);
+        applyPrintPaperSize(formData.printer_size || '80');
         toggleModal('profile-modal');
         saveBtn.textContent = originalText;
         saveBtn.disabled = false;
