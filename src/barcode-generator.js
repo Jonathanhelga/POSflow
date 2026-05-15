@@ -10,7 +10,7 @@ let selectedItem  = null;
 let currentObjectUrl = null;
 let uploadedImageUrl = null;
 let activeSize = 'large';
-
+let backgroundColor = null;
 // helpers 
 
 function cleanupObjectUrl() {
@@ -91,6 +91,7 @@ function updatePreview() {
 
     const preview = document.createElement('div');
     preview.className = `bg-preview bg-preview--${activeSize}`;
+    if (backgroundColor) preview.style.backgroundColor = backgroundColor;
 
     const nameDiv = document.createElement('div');
     nameDiv.className = 'bg-preview__name';
@@ -111,7 +112,6 @@ function updatePreview() {
 
     const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
     svg.id = 'bg-barcode-svg';
-
     preview.append(nameDiv, imgWrap, priceDiv, svg);
     design.replaceChildren(preview);
 
@@ -195,6 +195,7 @@ async function openBarcodeGenerator(user) {
     document.getElementById('bg-search').value        = '';
     document.getElementById('bg-save-btn').disabled   = true;
     document.getElementById('bg-img-upload').value    = '';
+    document.getElementById('bg-color-picker').value = "#ffffff";
     document.getElementById('bg-img-filename').textContent = '';
     const selectMsg = document.createElement('p');
     selectMsg.className = 'bg-empty';
@@ -219,7 +220,7 @@ async function openBarcodeGenerator(user) {
 export async function initBarcodeGenerator(user) {
     const openBtn = document.getElementById('barcode-generator-open');
     if (!openBtn) return;
-
+    backgroundColor = document.getElementById('bg-color-picker').value;
     openBtn.addEventListener('click', () => {
         toggleModal('features-modal');
         toggleModal('barcode-generator-modal');
@@ -227,7 +228,6 @@ export async function initBarcodeGenerator(user) {
         openBarcodeGenerator(user);
     });
 
-    
     document.getElementById('bg-search').addEventListener('input', (e) => {
         const q = e.target.value.trim().toLowerCase();
         filteredItems = q
@@ -252,6 +252,13 @@ export async function initBarcodeGenerator(user) {
         }
         if (selectedItem) updatePreview();
     });
+
+    document.getElementById('bg-color-picker').addEventListener('input', (e) => { 
+        const background_preview = document.querySelector('.bg-preview');
+        backgroundColor = e.target.value;  
+        if(!background_preview) { return; }                                              
+        background_preview.style.backgroundColor = e.target.value;                                                
+    }); 
 
     document.getElementById('bg-size-options').addEventListener('click', (e) => {
         const btn = e.target.closest('.bg-size-btn');

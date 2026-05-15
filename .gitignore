@@ -5,3 +5,5 @@ firebase-debug.log
 dist/
 *.txt
 resume_project_notes_caterflow.md
+CLAUDE.md
+.claude/
