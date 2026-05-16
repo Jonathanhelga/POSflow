@@ -3,6 +3,7 @@ import { setDoc, doc } from 'firebase/firestore';
 import { toggleModal } from './modal-handler';
 import { setTaxRate } from './order-add_item';
 import { showToast } from './toast';
+import { showConfirm } from './confirm_modal';
 export function initProfile(user) {
     applyPrintPaperSizeFromProfile(user);
 
@@ -18,18 +19,27 @@ export function initProfile(user) {
         });
     }
 
+    logOutAccount();
+}
+
+function logOutAccount(){
     const logoutBtn = document.getElementById('js-profile-logout');
-    if (logoutBtn) {
-        logoutBtn.addEventListener('click', async () => {
-            if (!confirm('Are you sure you want to log out?')) {return;}
-            toggleModal('profile-modal');
-            try {
-                await LogOutUser();
-            } catch (error) {
-                alert("Sign out Error: " + error.message);
-            }
+    if(!logoutBtn) return;
+    logoutBtn.addEventListener('click', async () => {
+        const ok = await showConfirm({
+        title: 'Want to log out?',                                                                                                                                   
+        message: 'GoodBye:( See you next time',                                                                                              
+        confirmText: 'Exit',                                      
+        danger: true,     
         });
-    }
+        if (!ok) return;
+        toggleModal('profile-modal');
+        try {
+            await LogOutUser();
+        } catch (error) {
+            showToast('Sign Out Error: please try again later:)', 'error');
+        }
+    });
 }
 
 async function loadProfileData(user) {
@@ -118,7 +128,7 @@ async function saveProfileData(uid) {
         saveBtn.disabled = false;
 
     } catch (error) {
-        alert('Failed to save: ' + error.message);
+        showToast(`Failed to save: ${error.message}`, 'error');
         saveBtn.textContent = originalText;
         saveBtn.disabled = false;
     }

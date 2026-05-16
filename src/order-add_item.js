@@ -255,11 +255,11 @@ export async function initSubmitOrder(){
 
 function handlePrintBillClick() {
     if (orderedItems.length === 0) {
-        alert("No items in the order yet.");
+        showToast('No items in the order yet.', 'error');
         return;
     }
     if (!auth.currentUser) {
-        alert("Session expired. Please log in again.");
+        showToast('Session expired. Please log in again.', 'error');
         return;
     }
     openCustomerCheckout();
@@ -269,11 +269,11 @@ async function handleCheckoutFormSubmit(e) {
     e.preventDefault();
     const user = auth.currentUser;
     if (!user) {
-        alert("Session expired. Please log in again.");
+        showToast('Session expired. Please log in again.', 'error');
         return;
     }
     if (orderedItems.length === 0) {
-        alert("No items in the order yet.");
+        showToast('No items in the order yet.', 'error');
         return;
     }
 

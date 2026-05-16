@@ -3,7 +3,7 @@ import html2canvas from 'html2canvas';
 import { fetchInventory } from './firebase';
 import { toggleModal } from './modal-handler';
 import { formatRupiah } from './formatRupiah';
-
+import { showToast } from './toast';
 let allItems      = [];
 let filteredItems = [];
 let selectedItem  = null;
@@ -170,11 +170,12 @@ async function saveDesign() {
         link.download = `barcode-${name}-${activeSize}.png`;
         link.href = canvas.toDataURL('image/png');
         link.click();
+        showToast('design successfully downloaded');
     } catch (err) {
         console.error('Failed to save design:', err);
+        showToast('Failed to save design', 'error');
     } finally {
         btn.disabled = false;
-        alert('design successfully downloaded')
         btn.textContent = 'Save Design';
     }
 }

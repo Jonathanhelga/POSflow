@@ -2,6 +2,7 @@ import Chart from 'chart.js/auto'
 import { toggleModal } from './modal-handler';
 import { fetchUserProfile, fetchInventory, fetchOrders } from './firebase';
 import { formatRupiah } from './formatRupiah';
+import { showToast } from './toast';
 
 let inventory_item = [];
 let orders = [];
@@ -96,11 +97,11 @@ function applyCustomRange(){
     const endDate = parseDateInput(toInput.value);
 
     if (!startDate || !endDate) {
-        alert('Please pick both a From and a To date.');
+        showToast('Please pick both a From and a To date.', 'error');
         return;
     }
     if (startDate > endDate) {
-        alert('"From" date must be on or before "To" date.');
+        showToast('"From" date must be on or before "To" date.', 'error');
         return;
     }
 

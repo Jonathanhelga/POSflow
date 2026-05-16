@@ -1,6 +1,8 @@
 import { submitItemData, auth } from "./firebase";
 import { addSingleItem } from "./search_item";
 import { toggleModal } from './modal-handler';
+import { showToast } from "./toast";
+
 export function initInventoryForm() {
     document.getElementById('js-item-create-open').addEventListener('click', () => {
         toggleModal('item-create-modal');
@@ -13,7 +15,7 @@ export function initInventoryForm() {
         e.preventDefault();
         const user = auth.currentUser;
         if (!user) {
-            alert("Session expired. Please log in again.");
+            showToast("Session expired. Please log in again.", 'error');
             return;
         }
         const requiredFields = [
@@ -27,7 +29,7 @@ export function initInventoryForm() {
 
         const emptyFields = requiredFields.filter(f => !document.getElementById(f.id).value.trim());
         if (emptyFields.length > 0) {
-            alert(`Please fill in the following required fields:\n• ${emptyFields.map(f => f.label).join('\n• ')}`);
+            showToast(`Please fill in the following required fields:\n• ${emptyFields.map(f => f.label).join('\n• ')}`, 'error');
             document.getElementById(emptyFields[0].id).focus();
             return;
         }
@@ -51,13 +53,13 @@ export function initInventoryForm() {
         try {
             const itemData = await submitItemData(formData, user.uid);
             addSingleItem(itemData);
-            alert("Inventory updated successfully.");
+            showToast('Inventory updated successfully.');
 
             form.reset();
             document.querySelector('[data-modal-close="item-create-modal"]')?.click();
         } catch (err) {
             console.error("Submission Error:", err);
-            alert(`Failed to save: ${err.message}`);
+            showToast(`Failed to save: ${err.message}`, 'error');
         } finally {
             submitBtn.disabled = false;
             submitBtn.textContent = originalText;

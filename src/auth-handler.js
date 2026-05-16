@@ -1,4 +1,5 @@
 import { loginUser, registerUser, submitSettingsData } from "./firebase";
+import { showToast } from "./toast";
 let emailFinal = '';
 let passFinal = '';
 let usernameFinal = '';
@@ -226,7 +227,7 @@ async function submitSettingForm(){
         setTimeout(() => {window.location.reload();}, 800);
     } catch (error) {
         console.error("Submitting failed:", error);
-        alert(error?.message || 'Submitting failed');
+        showToast(error?.message || 'Submitting failed', 'error');
         submitSettingButton.disabled = false;
         submitSettingButton.textContent = originalText;
     }
@@ -261,7 +262,7 @@ export function initUserLogin() {
             await loginUser(email, password);
         } catch (error) {
             console.error("Sign in failed:", error);
-            alert(error?.message || 'Sign in failed');
+            showToast(error?.message || 'Sign in failed', 'error');
             loginButton.disabled = false;
             loginButton.textContent = originalText;
         }
