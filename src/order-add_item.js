@@ -9,6 +9,8 @@ import {
     getCheckoutFormData,
     setCheckoutSubmitting,
 } from './customer_checkout';
+import { showToast } from './toast';
+import { showConfirm } from './confirm_modal';
 
 let orderedItems = [];
 let selectedRowIndex = -1;
@@ -176,15 +178,29 @@ function removeSelectedItem(){
     const removeBtn = document.getElementById('js-order-remove');
     if (removeBtn) removeBtn.disabled = true;
 }
-
-function resetOrderTable(){
-    if (orderedItems.length === 0) return;
-    if (!confirm('Reset the entire order?')) return;
+async function resetOrderTable() {     // ← add `async`                                                                                                              
+    const ok = await showConfirm({                 
+        title: 'Reset order?',                                                                                                                                   
+        message: 'This will clear all items in the current order.',                                                                                              
+        confirmText: 'Reset',                                      
+        danger: true,                                                                                                                                            
+    });                                                                                                                                                        
+    if (!ok) return;                                                                                                                                             
     orderedItems = [];
     selectedRowIndex = -1;
     fullRender();
     updateTotals();
-}
+  }    
+
+// function resetOrderTable(){
+//     if (orderedItems.length === 0) return;
+//     // if (!confirm('Reset the entire order?')) return;
+
+//     orderedItems = [];
+//     selectedRowIndex = -1;
+//     fullRender();
+//     updateTotals();
+// }
 function resetOrderAfterSubmit(){
     orderedItems = [];
     selectedRowIndex = -1;
@@ -208,17 +224,6 @@ function updateTotals(){
     document.getElementById('order-with-tax').textContent = formatRupiah(totalWithTax);
 }
 function rowIdFor(itemID){ return `order-row-${itemID}`; }
-
-function showToast(message, type = 'success') {
-    const toast = document.createElement('div');
-    toast.className = `c-toast c-toast--${type}`;
-    toast.textContent = message;
-    document.body.appendChild(toast);
-    setTimeout(() => {
-        toast.classList.add('is-hiding');
-        toast.addEventListener('animationend', () => toast.remove());
-    }, 2000);
-}
 
 let lastSelectedRow = null;
 function handleRowClick(index, rowElement){

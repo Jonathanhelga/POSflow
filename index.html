@@ -862,7 +862,21 @@
         </div>
       </div>
     </div>
-    
+
+    <div id="confirm-modal" class="c-modal c-modal--center is-hidden">                  
+      <div class="c-modal__panel" id="c-modal-confirm">
+        <header class="c-modal__header">                                                
+          <h2 class="c-modal__title" id="confirm-modal-title">Are you sure?</h2>        
+        </header>
+        <div class="c-modal__body">                                                     
+          <p id="confirm-modal-message">This action cannot be undone.</p>             
+          <div class="c-confirm__actions">                                              
+            <button type="button" class="btn btn--ghost" id="confirm-modal-cancel">Cancel</button>                                           
+            <button type="button" class="btn btn--primary" id="confirm-modal-ok">Confirm</button>                                              
+          </div>                                                                     
+        </div>                                                                          
+      </div>                                                                          
+    </div>
     <main id="pos-app" class="l-app">
       <aside class="l-sidebar">
         <section class="l-sidebar__top">

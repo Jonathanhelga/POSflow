@@ -12,6 +12,7 @@ import '../styles/inventory_update_modal.css';
 import '../styles/barcode_generator_modal.css';
 import '../styles/sales_insights_modal.css';
 import '../styles/customer_checkout_modal.css';
+import '../styles/confirm-modal.css';
 import { auth } from "./firebase";
 import { onAuthStateChanged } from "firebase/auth";
 import { switchView, eventDelegation } from "./control_wizard";

@@ -2,7 +2,7 @@ import { db, fetchUserProfile, getCachedUserProfile, setCachedUserProfile, LogOu
 import { setDoc, doc } from 'firebase/firestore';
 import { toggleModal } from './modal-handler';
 import { setTaxRate } from './order-add_item';
-
+import { showToast } from './toast';
 export function initProfile(user) {
     applyPrintPaperSizeFromProfile(user);
 
