@@ -1,0 +1,25 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    //{uid} / {docId} Filled by the path the client sends. Always the document ID.
+    match /users/{uid} {
+      allow read, write: if request.auth != null && request.auth.uid == uid;
+    }
+    //request.auth = the whole login info of user whose making the request if they are not logged in its a null
+    //request.auth.uid = just the user's ID, pulled out of that login info.
+    //request.resource.data = the new data the client is trying to write. Only exists for create and update, not for read or delete.
+    match /inventory/{docId} {
+      allow read, update, delete: if request.auth != null && request.auth.uid == resource.data.ownerId;
+      allow create: if request.auth != null && request.auth.uid == request.resource.data.ownerId;
+    }
+    
+    match /orders/{docId} {
+      allow read, update, delete: if request.auth != null && request.auth.uid == resource.data.ownerId;
+      allow create: if request.auth != null && request.auth.uid == request.resource.data.ownerId;
+    }
+    match /customers/{docId} {
+      allow read, update, delete: if request.auth != null && request.auth.uid == resource.data.ownerId;
+      allow create: if request.auth != null && request.auth.uid == request.resource.data.ownerId;
+    }
+  }
+}
