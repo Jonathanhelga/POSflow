@@ -21,5 +21,11 @@ service cloud.firestore {
       allow read, update, delete: if request.auth != null && request.auth.uid == resource.data.ownerId;
       allow create: if request.auth != null && request.auth.uid == request.resource.data.ownerId;
     }
+
+    // OTPs are managed exclusively by the backend (firebase-admin bypasses these rules).
+    // Deny all client access so signup codes can't be read or tampered with from the browser.
+    match /otps/{email} {
+      allow read, write: if false;
+    }
   }
 }

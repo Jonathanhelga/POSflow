@@ -16,7 +16,7 @@
     box-shadow:
         0 1px 2px rgba(15, 23, 42, 0.04),
         0 24px 60px rgba(15, 23, 42, 0.25);
-    border: 1px solid rgba(15, 23, 42, 0.06);
+    /* border: 1px solid rgba(15, 23, 42, 0.06); */
     overflow: hidden;        /* the body handles scroll */
 }
 
@@ -40,7 +40,9 @@
 
 .c-sales {
     flex: 1;
+    min-height: 0;
     overflow-y: auto;
+    overscroll-behavior: contain;
     padding: 1.5rem 2rem 2rem;
     display: flex;
     flex-direction: column;
@@ -189,7 +191,7 @@
     background-color: var(--clr-panel);
     border: 1px solid rgba(15, 23, 42, 0.08);
     border-radius: 12px;
-    overflow: hidden;
+    overflow: auto;
 }
 .c-card__header {
     display: flex;
@@ -210,20 +212,28 @@
     font-weight: 500;
     color: var(--clr-text-secondary);
 }
-.c-card__body { padding: 1.25rem; }
+.c-card__body {
+    padding: 1.25rem;
+}
 
 /* ── Chart card ───────────────────────────────────────────────── */
 .c-sales__chart-body {
     position: relative;
     min-height: 260px;
+    max-height: 360px;
+    overflow: auto;
 }
 #charts-design {
     width: 100% !important;
-    max-height: 320px;
 }
+#charts-design[hidden] { display: none; }
 
 /* ── Top items table ──────────────────────────────────────────── */
-.c-sales__top-card .c-card__body { padding: 0; }
+.c-sales__top-card .c-card__body {
+    padding: 0;
+    max-height: 360px;
+    overflow: auto;
+}
 
 .c-sales__table {
     width: 100%;

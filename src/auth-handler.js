@@ -1,5 +1,6 @@
-import { loginUser, registerUser, submitSettingsData } from "./firebase";
+import { auth, loginUser, LogOutUser, registerUser, submitSettingsData, fetchUserProfile } from "./firebase";
 import { showToast } from "./toast";
+const SERVER_URL = import.meta.env.VITE_SERVER_URL;
 let emailFinal = '';
 let passFinal = '';
 let usernameFinal = '';
@@ -109,7 +110,7 @@ function ifButtonIsClicked(){
         buttonVerification.textContent = 'Sending… Check Your Email';
 
         try {
-            const response = await fetch('http://localhost:3000/api/send-otp', {
+            const response = await fetch(`${SERVER_URL}/api/send-otp`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ email: emailFinal })
@@ -139,7 +140,6 @@ function ifButtonIsClicked(){
 
         if (otpAttempts >= MAX_OTP_ATTEMPTS) {
             showMessage(buttonSignUp, 'Too many incorrect attempts. Please request a new code.');
-            
             return;
         }
 
@@ -150,7 +150,7 @@ function ifButtonIsClicked(){
         try {
             // OTP is verified server-side — never compare it on the frontend.
             // Requires POST /api/verify-otp → { email, otp } on your Express server.
-            const verifyResponse = await fetch('http://localhost:3000/api/verify-otp', {
+            const verifyResponse = await fetch(`${SERVER_URL}/api/verify-otp`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ email: emailFinal, otp: verificationInput })
@@ -178,6 +178,8 @@ function ifButtonIsClicked(){
             buttonSignUp.textContent = 'Creating Account…';
             await registerUser(emailFinal, passFinal);
             buttonSignUp.textContent = 'Account Successfully Created';
+            document.getElementById('js-setup-next').click();
+            // LogOutUser();
         } catch (error) {
             showMessage(buttonSignUp, error.message || 'Failed to create account. Please try again.');
             buttonSignUp.textContent = buttonSignUpText;
@@ -265,6 +267,18 @@ export function initUserLogin() {
             showToast(error?.message || 'Sign in failed', 'error');
             loginButton.disabled = false;
             loginButton.textContent = originalText;
+            return;
+        }
+
+        // Login succeeded — surface a friendly notice if the business profile is missing,
+        // so the user understands why they're being routed back into the setup wizard.
+        try {
+            const profile = await fetchUserProfile(auth.currentUser.uid);
+            if (!profile) {
+                showToast('Please complete your business profile setup to continue.', 'info');
+            }
+        } catch (err) {
+            console.warn('Profile check after login failed:', err);
         }
     });
 }

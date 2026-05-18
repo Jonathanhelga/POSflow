@@ -252,4 +252,5 @@ body {
 }
 .c-toast--success { background-color: var(--clr-success); }
 .c-toast--error   { background-color: var(--clr-danger); }
+.c-toast--info    { background-color: var(--clr-primary); }
 .c-toast.is-hiding { animation: toastFadeOut 0.4s ease forwards; }

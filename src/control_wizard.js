@@ -1,4 +1,5 @@
 import { initUserLogin, initSignUpLogic } from "./auth-handler";
+import { auth } from "./firebase";
 
 function controlSignUpWizardPageDirection(){
     const buttonPrev = document.getElementById('js-setup-prev');
@@ -9,7 +10,11 @@ function controlSignUpWizardPageDirection(){
     const totalSteps = 4;
 
     const titles = ["Sign Up as a new user", "Store Identity", "Financial Settings", "Printer Setup"];
-    let currentStep = 1;
+
+    // Step 1 (email + OTP + password) is meaningless once a Firebase Auth account exists —
+    // re-running it would trigger "email-already-in-use". Lock the floor at step 2 in that case.
+    const minStep = () => auth.currentUser ? 2 : 1;
+    let currentStep = minStep();
 
 
     const stepEls = [];
@@ -25,14 +30,14 @@ function controlSignUpWizardPageDirection(){
         if (stepCounter) stepCounter.innerText = currentStep;
         if (titleEl) titleEl.innerText = titles[currentStep - 1] || '';
 
-        if (buttonPrev) buttonPrev.style.display = (currentStep > 1) ? '' : 'none';
+        if (buttonPrev) buttonPrev.style.display = (currentStep > minStep()) ? '' : 'none';
         if (buttonNext) buttonNext.innerText = (currentStep === totalSteps) ? 'Finish Setup' : 'Next Step';
 
         if (submitButton && buttonNext) {
             if (currentStep === totalSteps) {
                 submitButton.classList.add('is-active');
                 buttonNext.classList.add('is-inactive');
-            } 
+            }
             else {
                 submitButton.classList.remove('is-active');
                 buttonNext.classList.remove('is-inactive');
@@ -42,7 +47,7 @@ function controlSignUpWizardPageDirection(){
 
     const changeStep = (direction) => {
         const target = currentStep + direction;
-        if (target < 1 || target > totalSteps) return;
+        if (target < minStep() || target > totalSteps) return;
         currentStep = target;
         updateUI();
     };
