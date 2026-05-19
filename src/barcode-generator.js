@@ -22,7 +22,7 @@ function cleanupObjectUrl() {
 
 // item list
 
-function renderItemList(items) {
+function renderItemList_Barcode(items) {
     const container = document.getElementById('bg-item-list');
     container.replaceChildren();
 
@@ -206,7 +206,7 @@ async function openBarcodeGenerator(user) {
     try {
         allItems      = await fetchInventory(user.uid);
         filteredItems = [...allItems];
-        renderItemList(filteredItems);
+        renderItemList_Barcode(filteredItems);
     } catch (err) {
         console.error('Failed to load inventory:', err);
         const errMsg = document.createElement('p');
@@ -237,7 +237,7 @@ export async function initBarcodeGenerator(user) {
                 (item.sku     ?? '').toLowerCase().includes(q)
               )
             : [...allItems];
-        renderItemList(filteredItems);
+        renderItemList_Barcode(filteredItems);
     });
 
     document.getElementById('bg-img-upload').addEventListener('change', (e) => {

@@ -17,7 +17,7 @@ function getStockStatus(current, min) {
 
 // ─── Render item list
 
-function renderItemList(items) {
+function renderItemList_Inventory(items) {
     const container = document.getElementById('iu-item-list');
     container.replaceChildren();
 
@@ -199,7 +199,7 @@ async function openInventoryUpdate(user) {
     try {
         await loadAllItems();
         filteredItems = [...allItems];
-        renderItemList(filteredItems);
+        renderItemList_Inventory(filteredItems);
     } catch (err) {
         console.error('Failed to load inventory:', err);
         const errMsg = document.createElement('p');
@@ -229,6 +229,6 @@ export function initInventoryUpdate(user) {
                 (item.itemName ?? '').toLowerCase().includes(q) ||
                 (item.sku ?? '').toLowerCase().includes(q))
             : [...allItems];
-        renderItemList(filteredItems);
+        renderItemList_Inventory(filteredItems);
     });
 }

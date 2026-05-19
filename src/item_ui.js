@@ -34,6 +34,6 @@ export function renderItemGrid(items){
     else { items.forEach(item => createItemButton(container, item)); }
 }
 
-function handleSearchInput(event){}
-function updateSearchStats(count, query){}
-function openOrderPanel(item){}
+// function handleSearchInput(event){}
+// function updateSearchStats(count, query){}
+// function openOrderPanel(item){}
