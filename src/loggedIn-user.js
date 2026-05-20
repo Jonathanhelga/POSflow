@@ -4,6 +4,7 @@ import { allItems, loadAllItems, initializeSearch, initGlobalBarcodeListener } f
 import { initializeOrderForm, initSubmitOrder, setTaxRate, scanAddItem } from "./order-add_item";
 import { initProfile } from "./profile";
 import { switchView } from "./control_wizard";
+import { showToast } from "./toast";
 
 export async function renderLoggedInState(user) {
     const profile = await fetchUserProfile(user.uid);
@@ -13,13 +14,13 @@ export async function renderLoggedInState(user) {
         initInventoryForm();
         loadAllItems();
         initializeSearch();
+        initializeOrderForm();
+        initSubmitOrder();
+        initProfile(user);
         initGlobalBarcodeListener((sku) => {
             const item = allItems.find(i => i.sku === sku);
             if (item) scanAddItem(item.id);
         });
-        initializeOrderForm();
-        initSubmitOrder();
-        initProfile(user);
         if (profile.tax_rate) setTaxRate(profile.tax_rate);
         
         const initial = (user.email || '?').charAt(0).toUpperCase();
@@ -27,12 +28,12 @@ export async function renderLoggedInState(user) {
         if (avatar) avatar.textContent = initial;
     }
     else{
-        console.log("not have business profile — resuming setup wizard");
+        showToast('Please complete your business profile setup to continue.', 'info');
+        // console.log("not have business profile — resuming setup wizard");
         const wizard = document.getElementById('setup-wizard');
         wizard.classList.remove('is-hidden');
         wizard.classList.add('is-active');
-        // controlSignUpWizardPageDirection auto-starts at step 2 when auth.currentUser exists,
-        // so we don't need a manual advance here.
+        // controlSignUpWizardPageDirection auto-starts at step 2 when auth.currentUser exists
         switchView('signUp');
     }
 }

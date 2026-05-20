@@ -1,15 +1,21 @@
 const express = require('express');
 const cors = require('cors');
+const fs = require('fs');
+const path = require('path');
 const admin = require('firebase-admin');
 const { sendOTP } = require('./emailServices');
-const serviceAccount = require('./serviceAccountKey.json');
 
-admin.initializeApp({ credential: admin.credential.cert(serviceAccount) });
+const keyPath = path.join(__dirname, 'serviceAccountKey.json');
+if (fs.existsSync(keyPath)) {
+    admin.initializeApp({ credential: admin.credential.cert(require(keyPath)) });
+} else {
+    admin.initializeApp();
+}
 const db = admin.firestore();
 const otpsCol = db.collection('otps');
 
 const app = express();
-const port = 3000;
+const port = process.env.PORT || 3000;
 
 const rateLimit = require('express-rate-limit')
 const sendOtpLimiter = rateLimit({
@@ -86,4 +92,4 @@ app.post('/api/verify-otp', verifyOtpLimiter, async (req, res) => {
     }
 });
 
-app.listen(port, () => console.log('Backend Server running on port 3000'));
+app.listen(port, () => console.log(`Backend Server running on port ${port}`));

@@ -36,6 +36,7 @@ function logOutAccount(){
         toggleModal('profile-modal');
         try {
             await LogOutUser();
+            window.location.reload();
         } catch (error) {
             showToast('Sign Out Error: please try again later:)', 'error');
         }

@@ -23,7 +23,7 @@ import { initInventoryUpdate } from './inventory_update';
 import { initBarcodeGenerator } from './barcode-generator';
 import { initInsights } from './sales_insight';
 import { initCustomerCheckout } from './customer_checkout';
-
+import { showToast } from './toast';
 function initLoggedInApp(user) {
     renderLoggedInState(user);
     initInsights(user);
@@ -40,6 +40,7 @@ document.addEventListener('DOMContentLoaded', function(){
         if (user) {
             if (initialized) return;
             initialized = true;
+            showToast("successfully logging in");
             initLoggedInApp(user);
         } else {
             document.getElementById('pos-app').classList.remove('is-active');
