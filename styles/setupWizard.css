@@ -11,11 +11,15 @@
     display: none;
     flex-direction: column;
     background-color: rgba(110, 163, 195, 0.976);
-    justify-content: center;
+    justify-content: safe center;
     align-items: center;
-    height: 100vh;
+    min-height: 100vh;
+    min-height: 100dvh;
     width: 100%;
     margin: 0;
+    padding: 2rem 1rem;
+    overflow-y: auto;
+    overscroll-behavior: contain;
 }
 #setup-wizard.is-active { display: flex; }
 #setup-wizard.is-hidden { display: none; }

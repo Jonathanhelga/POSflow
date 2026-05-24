@@ -67,7 +67,7 @@
 #c-modal-customer-checkout .c-field__input,
 #c-modal-customer-checkout .c-field__select {
     padding: 9px 11px;
-    font-size: 0.85rem;
+    font-size: 1rem;
     background-color: #ffffff;
 }
 
@@ -145,7 +145,7 @@
     padding: 8px 10px;
     border: 1px solid var(--clr-border);
     border-radius: 8px;
-    font-size: 0.85rem;
+    font-size: 1rem;
     text-align: right;
     font-variant-numeric: tabular-nums;
 }

@@ -115,7 +115,7 @@
 }
 .c-sales__range-label input {
     padding: 0.55rem 0.7rem;
-    font-size: 0.875rem;
+    font-size: 1rem;
     border: 1px solid rgba(15, 23, 42, 0.12);
     border-radius: 8px;
     background-color: var(--clr-panel);

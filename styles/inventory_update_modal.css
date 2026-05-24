@@ -53,7 +53,7 @@
     padding: 8px 12px;
     border: 1px solid var(--clr-border);
     border-radius: var(--radius);
-    font-size: 0.85rem;
+    font-size: 1rem;
     background: var(--clr-panel);
     outline: none;
     transition: border-color 0.15s;
@@ -293,7 +293,7 @@ flex: 0 1 auto	0	1	auto	Don't grow, can shrink, starting from its natural size *
     padding: 10px 13px;
     border: 1px solid var(--clr-border);
     border-radius: var(--radius);
-    font-size: 0.9rem;
+    font-size: 1rem;
     outline: none;
     transition: border-color 0.15s;
     color: var(--clr-text-primary);
