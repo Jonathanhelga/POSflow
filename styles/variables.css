@@ -41,7 +41,7 @@
 
     /* — POS Layout — */
     --pos-border:       4px solid gray;
-    --modal-side-width: 22vw;   /* Consistent width for all side-panel modals */
+    --modal-side-width: clamp(320px, 32vw, 440px);   /* Side-panel modals; clamp keeps it readable on iPad and tame on big monitors */
 
     /* — Elevation — */
     --shadow: 0 6px 18px rgba(18, 24, 40, 1);
@@ -71,6 +71,7 @@ body {
 
 /* — Button — */
 .btn {
+    min-height: 44px;
     padding: 10px 20px;
     border: none;
     border-radius: var(--radius);
@@ -79,7 +80,10 @@ body {
     cursor: pointer;
     transition: background-color 0.2s ease, filter 0.2s, transform 0.1s ease;
 }
-.btn:hover { filter: brightness(0.9); }
+@media (hover: hover) {
+    .btn:hover { filter: brightness(0.9); }
+}
+.btn:active { transform: scale(0.97); filter: brightness(0.85); }
 
 /* — Form Field — */
 .c-field { margin-bottom: var(--margin-bottom); }
@@ -184,19 +188,22 @@ body {
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 32px;
-    height: 32px;
+    width: 40px;
+    height: 40px;
     padding: 0;
     border: none;
     border-radius: 50%;
     background-color: transparent;
     color: var(--clr-text-secondary);
-    font-size: 24px;
+    font-size: 26px;
     line-height: 1;
     cursor: pointer;
     transition: all 0.2s ease;
 }
-.c-modal__close:hover { background-color: rgba(107, 114, 128, 0.1); color: var(--clr-text-primary); }
+@media (hover: hover) {
+    .c-modal__close:hover { background-color: rgba(107, 114, 128, 0.1); color: var(--clr-text-primary); }
+}
+.c-modal__close:active { filter: brightness(0.85); }
 .c-modal__close:focus { outline: 2px solid var(--clr-primary); outline-offset: 2px; }
 
 

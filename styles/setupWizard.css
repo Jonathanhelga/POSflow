@@ -18,8 +18,6 @@
     width: 100%;
     margin: 0;
     padding: 2rem 1rem;
-    overflow-y: auto;
-    overscroll-behavior: contain;
 }
 #setup-wizard.is-active { display: flex; }
 #setup-wizard.is-hidden { display: none; }
@@ -126,8 +124,8 @@
 #js-login-submit {
     display: none;
     width: 100%;
-    background: #0091ff;
-    color: #cfcfcf;
+    background: #0066cc;
+    color: #ffffff;
 }
 #js-email-verify.is-active,
 #js-signup-submit.is-active,

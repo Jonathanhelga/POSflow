@@ -29,4 +29,7 @@
     align-items: center;
     word-wrap: break-word;
 }
-.c-item-button:hover { background-color: #5f5e5e58 !important; color: black; }
+@media (hover: hover) {
+    .c-item-button:hover { background-color: #5f5e5e58 !important; color: black; }
+}
+.c-item-button:active { transform: scale(0.97); filter: brightness(0.85); }
