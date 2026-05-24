@@ -22,7 +22,14 @@ cd server
 npm install
 
 # Deploy. Run from INSIDE server/ with --source .
-gcloud run deploy pos-api --source . --region asia-east1
+# --set-env-vars injects the Gmail SMTP creds into the Cloud Run runtime so
+# Nodemailer can authenticate. .env is excluded from the image by .dockerignore,
+# so without this flag the backend boots but every OTP send fails.
+# (Full explanation of how env vars reach each side lives in Part 4.)
+gcloud run deploy pos-api \
+  --source . \
+  --region asia-east1 \
+  --set-env-vars EMAIL_USER=youremail@gmail.com,EMAIL_PASS="abcd efgh ijkl mnop"
 ```
 
 ### Issues hit and what they meant
@@ -225,3 +232,166 @@ Firebase Hosting (CDN, serves dist/index.html + JS + CSS)
 Two backends in play:
 - **Firebase** — direct from browser, used for everything except OTP. Auth handled by Firestore Rules (the `ownerId == request.auth.uid` checks).
 - **Cloud Run (Express)** — only touched during signup, to gate Firebase account creation behind email-OTP verification. The OTP never reaches the browser.
+## CI/CD Automation Steps
+
+Walkthrough of every command run to wire up GitHub Actions → Workload Identity Federation → Cloud Run + Firebase Hosting. Two workflow files end up in `.github/workflows/` that fire on push based on which paths changed.
+
+### Step 1 — Pre-flight checks
+
+```bash
+gcloud config get-value project
+```
+Confirms which GCP project `gcloud` will target. Every later command uses `--project=minipos-d9d92`, so we verify it matches the Firebase project.
+
+```bash
+gcloud auth list
+```
+Confirms which Google account `gcloud` is authenticated as. Needs to be the project owner (or have IAM Admin + Service Account Admin) for the next steps to work.
+
+### Step 2a — Enable required APIs
+
+```bash
+gcloud services enable \
+  iamcredentials.googleapis.com \
+  cloudresourcemanager.googleapis.com \
+  iam.googleapis.com \
+  --project=minipos-d9d92
+```
+Turns on the three APIs WIF depends on:
+- `iamcredentials` — mints the short-lived tokens GitHub will exchange for.
+- `cloudresourcemanager` — required to add project-level IAM bindings.
+- `iam` — required to create the service account, pool, and provider.
+
+### Step 2b — Create the deploy service account and grant roles
+
+```bash
+gcloud iam service-accounts create github-deployer \
+  --display-name="GitHub Actions Deployer" \
+  --project=minipos-d9d92
+```
+Creates the identity GitHub will impersonate. Email becomes `github-deployer@minipos-d9d92.iam.gserviceaccount.com`. No JSON key generated — that's the point of WIF.
+
+```bash
+for role in \
+  roles/run.admin \
+  roles/iam.serviceAccountUser \
+  roles/cloudbuild.builds.editor \
+  roles/artifactregistry.writer \
+  roles/firebasehosting.admin
+do
+  gcloud projects add-iam-policy-binding minipos-d9d92 \
+    --member="serviceAccount:github-deployer@minipos-d9d92.iam.gserviceaccount.com" \
+    --role="$role" \
+    --condition=None
+done
+```
+Binds the 5 roles `github-deployer` needs across both pipelines:
+
+| Role | Purpose |
+|---|---|
+| `roles/run.admin` | Create/update the `pos-api` Cloud Run service |
+| `roles/iam.serviceAccountUser` | Act as the Cloud Run runtime SA during deploy |
+| `roles/cloudbuild.builds.editor` | Build the container via Cloud Build |
+| `roles/artifactregistry.writer` | Push the built image to Artifact Registry |
+| `roles/firebasehosting.admin` | Deploy `dist/` to Firebase Hosting |
+
+```bash
+gcloud projects get-iam-policy minipos-d9d92 \
+  --flatten="bindings[].members" \
+  --filter="bindings.members:serviceAccount:github-deployer@minipos-d9d92.iam.gserviceaccount.com" \
+  --format="value(bindings.role)"
+```
+Verification command. Prints just the role names bound to `github-deployer` — should show exactly 5 lines.
+
+### Step 2c — Create the Workload Identity Pool and OIDC Provider
+
+```bash
+gcloud iam workload-identity-pools create github-pool \
+  --location=global \
+  --display-name="GitHub Actions Pool" \
+  --project=minipos-d9d92
+```
+Creates the pool — a container that holds external identity providers. `location=global` is fixed (pools aren't regional).
+
+```bash
+gcloud iam workload-identity-pools providers create-oidc github-provider \
+  --location=global \
+  --workload-identity-pool=github-pool \
+  --display-name="GitHub Actions Provider" \
+  --issuer-uri="https://token.actions.githubusercontent.com" \
+  --attribute-mapping="google.subject=assertion.sub,attribute.repository=assertion.repository,attribute.repository_owner=assertion.repository_owner" \
+  --attribute-condition="assertion.repository_owner == 'Jonathanhelga'" \
+  --project=minipos-d9d92
+```
+Creates the OIDC provider inside the pool:
+- `--issuer-uri` — trusts tokens signed by GitHub's official OIDC endpoint.
+- `--attribute-mapping` — extracts the GitHub claims we'll use in IAM (subject, repository, repo owner).
+- `--attribute-condition` — security guard: only mints tokens for repos owned by `Jonathanhelga`. Without this, any GitHub repo could potentially exchange tokens against the pool.
+
+### Step 2d — Allow the GitHub repo to impersonate `github-deployer`
+
+```bash
+PROJECT_NUM=481588556736
+REPO=Jonathanhelga/Small-Business-POS
+MEMBER="principalSet://iam.googleapis.com/projects/${PROJECT_NUM}/locations/global/workloadIdentityPools/github-pool/attribute.repository/${REPO}"
+SA=github-deployer@minipos-d9d92.iam.gserviceaccount.com
+gcloud iam service-accounts add-iam-policy-binding "$SA" \
+  --role=roles/iam.workloadIdentityUser \
+  --member="$MEMBER" \
+  --project=minipos-d9d92
+```
+The final WIF wire-up. Binds the `iam.workloadIdentityUser` role on the service account, scoped to OIDC tokens whose `repository` attribute equals `Jonathanhelga/Small-Business-POS`. Other repos can't impersonate.
+
+**Why the shell-variable form:** zsh's bracketed-paste was mangling the long `principalSet://...` URL when passed inline. Building the URL out of short variables sidesteps the paste problem.
+
+### Step 3 — Firebase Hosting auth
+
+No commands. Skipped on purpose — because `github-deployer` already has `roles/firebasehosting.admin` from Step 2b, the same WIF-issued token deploys both Cloud Run and Firebase Hosting. No separate `firebase login:ci` token needed.
+
+### Step 4 — Add GitHub Secrets and Variables
+
+UI work only — done via `https://github.com/Jonathanhelga/Small-Business-POS/settings/secrets/actions`. Values added:
+
+**Variables tab** (not sensitive, just IDs):
+- `GCP_PROJECT_ID` = `minipos-d9d92`
+- `GCP_PROJECT_NUMBER` = `481588556736`
+- `GCP_WIF_PROVIDER` = `projects/481588556736/locations/global/workloadIdentityPools/github-pool/providers/github-provider`
+- `GCP_SERVICE_ACCOUNT` = `github-deployer@minipos-d9d92.iam.gserviceaccount.com`
+
+**Secrets tab** (masked in logs):
+- `VITE_FIREBASE_API_KEY` — from local `.env`, injected at build time so `src/firebase.js` can initialize.
+- `EMAIL_USER` — Gmail address for Nodemailer.
+- `EMAIL_PASS` — Gmail app password (contains spaces — handled via `env:` block in the workflow).
+
+`VITE_SERVER_URL` is **not** in secrets because `.env.production` is committed to git — Vite picks it up automatically at build time.
+
+### Step 5 — Backend workflow file
+
+Created `.github/workflows/deploy-backend.yml`. Triggers on push to `main` when `server/**` changes. Authenticates via WIF, then runs the same `gcloud run deploy` command from Part 1 of these notes, with `EMAIL_USER` / `EMAIL_PASS` passed as Cloud Run env vars via `--set-env-vars`.
+
+Key YAML pieces:
+- `permissions: id-token: write` — required for the workflow to mint a GitHub OIDC token. Forgetting this is the #1 WIF setup failure.
+- `google-github-actions/auth@v2` with `workload_identity_provider` + `service_account` — performs the OIDC → GCP access-token exchange.
+- `--set-env-vars="EMAIL_USER=${EMAIL_USER},EMAIL_PASS=${EMAIL_PASS}"` — quoted because the Gmail app password contains spaces.
+
+### Step 6 — Frontend workflow file
+
+Created `.github/workflows/deploy-frontend.yml`. Two trigger modes:
+- `push` to `main` (when frontend paths change) → **production deploy** to `https://minipos-d9d92.web.app` via `firebase deploy --only hosting`.
+- `pull_request` to `main` → **preview channel deploy** via `firebase hosting:channel:deploy pr-<N> --expires 7d`. A separate step parses the channel URL out of the CLI's `--json` output and posts it as a PR comment using `peter-evans/create-or-update-comment@v4`.
+
+Key YAML pieces:
+- Step-level `if: github.event_name == 'push'` vs `'pull_request'` — single workflow file, two behaviors.
+- Build step injects `VITE_FIREBASE_API_KEY` into env so Vite can inline it into the bundle.
+- `permissions: pull-requests: write` — needed for the auto-comment step on PRs.
+
+### What's deployed-by-CI vs deployed-by-hand now
+
+| Trigger | What happens | Workflow |
+|---|---|---|
+| Push to `main` touching `server/**` | Cloud Run redeploy | `deploy-backend.yml` |
+| Push to `main` touching frontend files | Firebase Hosting production deploy | `deploy-frontend.yml` |
+| PR to `main` touching frontend files | Preview channel + PR comment with URL | `deploy-frontend.yml` |
+| Anything else | Nothing | — |
+
+Old manual `gcloud run deploy` / `firebase deploy` commands still work — they're now a fallback, not the primary path.
