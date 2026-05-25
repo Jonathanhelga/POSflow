@@ -139,6 +139,7 @@
     align-items: center;
     padding: var(--pos-padding);
     justify-content: space-between;
+    flex-wrap: wrap;
     gap: 1.2rem;
     margin-bottom: 1rem;
 }
@@ -146,10 +147,10 @@
 /* — Search — */
 .c-search {
     display: flex;
-    width: 50%;
-    gap: var(--gap);
+    flex: 1 1 50%;
+    gap: 1rem;
     align-items: center;
-    justify-content:flex-start;
+
 }
 .item-search {
     width: 60%;

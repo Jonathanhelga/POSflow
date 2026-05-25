@@ -11,6 +11,10 @@
     justify-content: start;
     gap: 40px;
     padding: 10px;
+    flex: 1;
+    min-height: 0;
+    align-content: flex-start;
+    overflow-y: auto;
 }
 
 .c-item-button {
