@@ -139,19 +139,21 @@
     align-items: center;
     padding: var(--pos-padding);
     justify-content: space-between;
+    gap: 1.2rem;
     margin-bottom: 1rem;
 }
 
 /* — Search — */
 .c-search {
     display: flex;
-    width: 68%;
+    width: 50%;
     gap: var(--gap);
     align-items: center;
+    justify-content:flex-start;
 }
 .item-search {
     width: 60%;
-    padding: 12px 20px 12px 45px;
+    padding: 12px 10px 12px 10px;
     border: 2px solid #e1e8ed;
     border-radius: var(--radius);
     font-size: 15px;

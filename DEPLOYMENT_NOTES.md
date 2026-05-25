@@ -395,3 +395,102 @@ Key YAML pieces:
 | Anything else | Nothing | — |
 
 Old manual `gcloud run deploy` / `firebase deploy` commands still work — they're now a fallback, not the primary path.
+
+## CI/CD Revisions — Frontend auth simplified
+
+A follow-up session reworked the frontend pipeline. The backend workflow (`deploy-backend.yml`) is untouched — it still uses WIF, since `gcloud` picks up Application Default Credentials cleanly. The changes below all apply to `deploy-frontend.yml` only.
+
+### Context changes that broke the first run
+
+Two things shifted in the repo before the workflow ran:
+- **Repo renamed** on GitHub: `Small-Business-POS` → `POSflow`. The push URL needed updating locally with `git remote set-url origin https://github.com/Jonathanhelga/POSflow.git`. GitHub redirects the old URL for a while, but relying on the redirect long-term is brittle.
+- **Branch renamed**: working branch `clean-version` → `main` (so the workflow's `branches: [main]` trigger actually fires). Done with `git branch -m clean-version main` + `git branch --set-upstream-to=origin/main main` + `git remote set-head origin -a`.
+
+Neither change requires touching the workflow YAML, but both have to happen before pushing to a renamed branch will trigger the pipeline.
+
+### Issue 1 — `vite: not found` during build
+
+Root cause: indentation bug. `npm ci` was nested under `actions/setup-node@v4`'s `with:` block, so it got silently ignored as an unknown input rather than running as its own step. The build then started with no `node_modules`, and `vite` wasn't on PATH.
+
+Fix: pull `npm ci` out into its own step.
+
+```yaml
+- name: Set up Node.js
+  uses: actions/setup-node@v4
+  with:
+    node-version: 20
+    cache: npm
+
+- name: Install dependencies
+  run: npm ci
+```
+
+Lesson: GitHub Actions doesn't error on unknown `with:` keys — it just drops them. A misplaced `run:` under `with:` produces zero feedback in the logs. If a step "did nothing," check the indentation of the step above.
+
+### Issue 2 — `Failed to authenticate, have you run firebase login?`
+
+This was the bigger one. Even after WIF auth succeeded (the `google-github-actions/auth@v2` step wrote `GOOGLE_APPLICATION_CREDENTIALS` correctly), the subsequent `firebase deploy --only hosting` call failed because the Firebase CLI didn't pick up the ADC file. Known papercut with `firebase-tools` + WIF — sometimes works, sometimes doesn't, depending on CLI version and exact role mix.
+
+Two paths out:
+1. Keep WIF and chase down the right combination of roles + CLI flags. Fragile.
+2. Switch to the official `FirebaseExtended/action-hosting-deploy@v0` action, which authenticates via a service account key JSON passed as a secret.
+
+Picked #2. Trades the "no static keys" property of WIF for "auth that actually works." Acceptable for a single-repo, single-project setup; if this grew to multiple Firebase projects, WIF would be worth fighting for.
+
+### New auth flow (frontend only)
+
+```yaml
+- name: Deploy to Firebase Hosting (production)
+  if: github.event_name == 'push'
+  uses: FirebaseExtended/action-hosting-deploy@v0
+  with:
+    repoToken: ${{ secrets.GITHUB_TOKEN }}
+    firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+    projectId: minipos-d9d92
+    channelId: live
+```
+
+The PR-preview step uses the same action without `channelId` (creates a temporary channel automatically) and with `expires: 7d`. The action also posts the preview URL as a PR comment on its own — replaced the `jq` URL-parsing step + `peter-evans/create-or-update-comment@v4` that used to do that by hand.
+
+### What got removed from the frontend workflow
+
+- `permissions: id-token: write` — no more OIDC token minting; not needed.
+- The entire `google-github-actions/auth@v2` step.
+- The `npm install -g firebase-tools` step (the action bundles its own CLI).
+- The hand-rolled `firebase hosting:channel:deploy` shell + `jq` parsing.
+- The `peter-evans/create-or-update-comment@v4` step (the action does it).
+
+Net diff: 87 lines → 68 lines on the workflow file. Plus the brittle auth path is gone.
+
+### New secret to add: `FIREBASE_SERVICE_ACCOUNT`
+
+Generated in Firebase Console → Project Settings → Service Accounts → "Generate new private key" (downloads a JSON file). The **entire JSON contents** go into the secret — not just the `private_key` field. Common mistake when setting this up: pasting only the `-----BEGIN PRIVATE KEY-----...-----END PRIVATE KEY-----` block. That fails with the same "Failed to authenticate" error as before, because the action can't construct a valid credential without `client_email`, `project_id`, etc.
+
+Treat the downloaded JSON file like a credential:
+- Don't save it inside the repo folder. `.gitignore` patterns (`*serviceAccount*.json`, `*firebase-adminsdk*.json`) catch the default filenames as a safety net, but don't rely on it.
+- Once pasted into the GitHub secret, delete the local file.
+- Rotate the key in Firebase Console if it ever gets exposed.
+
+### What's still used vs no-longer-used
+
+| Variable / Secret | Used by frontend workflow? | Used by backend workflow? |
+|---|---|---|
+| `FIREBASE_SERVICE_ACCOUNT` (secret) | **Yes** (new) | No |
+| `VITE_FIREBASE_API_KEY` (secret) | Yes | No |
+| `EMAIL_USER` / `EMAIL_PASS` (secrets) | No | Yes |
+| `GCP_WIF_PROVIDER` (variable) | No (removed) | Yes |
+| `GCP_SERVICE_ACCOUNT` (variable) | No (removed) | Yes |
+| `GCP_PROJECT_ID` (variable) | No (now hardcoded to `minipos-d9d92`) | Yes |
+| `GCP_PROJECT_NUMBER` (variable) | No | Effectively unused |
+
+The three `GCP_*` variables still exist on the repo — leave them, they're free and the backend workflow references them. Only delete them if you ever remove the backend WIF path too.
+
+### Final pipeline summary (updated)
+
+| Trigger | What happens | Workflow | Auth method |
+|---|---|---|---|
+| Push to `main` touching `server/**` | Cloud Run redeploy | `deploy-backend.yml` | WIF |
+| Push to `main` touching frontend files | Firebase Hosting production deploy | `deploy-frontend.yml` | Service account key JSON |
+| PR to `main` touching frontend files | Preview channel + PR comment with URL | `deploy-frontend.yml` | Service account key JSON |
+
+Mixed-auth setup is intentional: WIF works fine for `gcloud` (Cloud Run), the static key is the path of least resistance for `firebase-tools` (Hosting).
