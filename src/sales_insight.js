@@ -170,6 +170,7 @@ function renderTopItemsTable(){
         tbody.appendChild(tableRow);
     });
 }
+
 function fillInKPI(filtered_orders){
     let revenue = 0;
     let totalOrder = filtered_orders.length;
