@@ -40,6 +40,12 @@ export function openOrderItemModal(itemID) {
     document.getElementById('order-item-unit').textContent = ' ' + item.unit;
 
     toggleModal('order-item-modal');
+
+    // Move focus into the quantity field so the user can type a quantity and
+    // press Enter to submit immediately (HTML implicit form submission), instead
+    // of having to click OK. select() highlights the value for quick overwrite.
+    const qtyInput = document.getElementById('js-order-qty');
+    requestAnimationFrame(() => { qtyInput.focus(); qtyInput.select(); });
 }
 
 export function initializeOrderForm(){
