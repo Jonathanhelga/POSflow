@@ -1,4 +1,4 @@
-# POSFlow — Point-of-Sale Web Applicationf
+# POSFlow — Point-of-Sale Web Application
 feel free to try it: https://minipos-d9d92.web.app/
 A full-stack, cloud-based Point-of-Sale system built for small retail businesses. Handles inventory management, order processing, barcode generation, and thermal receipt printing — all from the browser, with zero frontend frameworks.
 
