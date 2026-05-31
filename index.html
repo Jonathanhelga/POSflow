@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <title>POS FLOW Point of Sale</title>
 
 </head>
 <body>
@@ -451,72 +451,161 @@
         </header>
 
         <form id="js-customer-checkout-form" class="c-checkout__body" novalidate>
+          <div class="c-checkout__scroll">
 
-          <section class="c-checkout__section">
-            <div class="c-checkout__section-title">Customer Information</div>
-            <div class="c-checkout__grid">
-              <div class="c-field c-field--full">
-                <label class="c-field__label" for="js-checkout-customer-select">Existing Customer</label>
-                <select class="c-field__select" id="js-checkout-customer-select">
-                  <option value="">— New customer —</option>
-                </select>
+            <section class="c-checkout__section">
+              <div class="c-checkout__section-title">Customer Information</div>
+              <div class="c-checkout__grid">
+                <div class="c-field c-field--full">
+                  <label class="c-field__label" for="js-checkout-customer-select">Existing Customer</label>
+                  <select class="c-field__select" id="js-checkout-customer-select">
+                    <option value="">— New customer —</option>
+                  </select>
+                </div>
+                <div class="c-field c-field--full">
+                  <label class="c-field__label" for="js-checkout-customer-name">Customer Name</label>
+                  <input class="c-field__input" id="js-checkout-customer-name" type="text" placeholder="Full name">
+                </div>
+                <div class="c-field c-field--full">
+                  <label class="c-field__label" for="js-checkout-customer-phone">Phone</label>
+                  <input class="c-field__input" id="js-checkout-customer-phone" type="tel" placeholder="08xx-xxxx-xxxx">
+                </div>
               </div>
-              <div class="c-field c-field--full">
-                <label class="c-field__label" for="js-checkout-customer-name">Customer Name</label>
-                <input class="c-field__input" id="js-checkout-customer-name" type="text" placeholder="Full name">
-              </div>
-              <div class="c-field c-field--full">
-                <label class="c-field__label" for="js-checkout-customer-phone">Phone</label>
-                <input class="c-field__input" id="js-checkout-customer-phone" type="tel" placeholder="08xx-xxxx-xxxx">
-              </div>
-            </div>
-          </section>
+            </section>
 
-          <section class="c-checkout__section">
-            <div class="c-checkout__section-title">Order Note</div>
-            <div class="c-field">
-              <input class="c-field__input" id="js-checkout-order-note" type="text"
-                     placeholder="e.g. deliver at 5pm, less sugar, no bag">
-            </div>
-          </section>
+            <section class="c-checkout__section">
+              <div class="c-checkout__section-title">Order Details</div>
+              <div class="c-checkout__details-stack">
+                <div class="c-field c-field--full">
+                  <label class="c-field__label" for="js-checkout-order-note">Order Note</label>
+                  <input class="c-field__input" id="js-checkout-order-note" type="text"
+                        placeholder="e.g. deliver at 5pm, less sugar, no bag">
+                </div>
 
-          <section class="c-checkout__section">
-            <div class="c-checkout__section-title">Order Recap</div>
-            <table class="c-checkout__recap">
-              <thead>
-                <tr>
-                  <th>Item</th>
-                  <th class="c-checkout__col-qty">Qty</th>
-                  <th class="c-checkout__col-subtotal">Subtotal</th>
-                </tr>
-              </thead>
-              <tbody id="js-checkout-recap-body"></tbody>
-            </table>
-          </section>
+                <div class="c-checkout__fields" id="js-checkout-fields"></div>
 
-          <section class="c-checkout__section">
-            <div class="c-checkout__section-title">Discount &amp; Total</div>
-            <div class="c-checkout__totals">
-              <div class="c-checkout__totals-row">
-                <span>Subtotal</span>
-                <span class="c-checkout__totals-value" id="js-checkout-subtotal">Rp 0</span>
+                <div class="c-checkout__add-wrap">
+                  <button type="button" class="c-checkout__add-field" id="js-checkout-add-field" aria-haspopup="true">
+                    <span class="c-checkout__add-field-icon">+</span>
+                    <span>Add field</span>
+                  </button>
+                  <div class="c-checkout__type-menu is-hidden" id="js-checkout-type-menu" role="menu">
+                    <button type="button" class="c-checkout__type-option" data-field-type="choice">
+                      <span>Multiple Choice</span>
+                      <span class="c-checkout__type-icon">◉</span>
+                    </button>
+                    <button type="button" class="c-checkout__type-option" data-field-type="date">
+                      <span>Date</span>
+                      <span class="c-checkout__type-icon">📅</span>
+                    </button>
+                    <button type="button" class="c-checkout__type-option" data-field-type="time">
+                      <span>Time</span>
+                      <span class="c-checkout__type-icon">🕐</span>
+                    </button>
+                  </div>
+                </div>
               </div>
-              <div class="c-checkout__discount">
-                <label for="js-checkout-discount">Discount</label>
-                <input class="c-checkout__discount-input" id="js-checkout-discount"
-                       type="number" min="0" max="100" step="0.5" placeholder="0">
-                <span class="c-checkout__discount-suffix">%</span>
+            </section>
+
+            <template id="js-checkout-field-card-template">
+              <div class="c-checkout__field-card">
+                <div class="c-checkout__field-card-head">
+                  <span class="c-checkout__field-card-type"></span>
+                  <button type="button" class="c-checkout__field-remove">&times;</button>
+                </div>
+                <div class="c-checkout__field-card-body"></div>
               </div>
-              <div class="c-checkout__totals-row c-checkout__totals-row--muted">
-                <span>Discount Amount</span>
-                <span class="c-checkout__totals-value" id="js-checkout-discount-amount">- Rp 0</span>
+            </template>
+
+            <template id="js-checkout-field-body-date-template">
+              <div class="c-checkout__field-row">
+                <div class="c-field">
+                  <label class="c-field__label">Field label</label>
+                  <input class="c-field__input c-checkout__field-label" type="text" placeholder="e.g. Delivery date">
+                </div>
+                <div class="c-field">
+                  <label class="c-field__label">Date</label>
+                  <input class="c-field__input c-checkout__field-value" type="date">
+                </div>
               </div>
-              <div class="c-checkout__totals-row c-checkout__totals-row--grand">
-                <span>Total</span>
-                <span class="c-checkout__totals-value" id="js-checkout-total">Rp 0</span>
+            </template>
+
+            <template id="js-checkout-field-body-time-template">
+              <div class="c-checkout__field-row">
+                <div class="c-field">
+                  <label class="c-field__label">Field label</label>
+                  <input class="c-field__input c-checkout__field-label" type="text" placeholder="e.g. Pickup time">
+                </div>
+                <div class="c-field">
+                  <label class="c-field__label">Time</label>
+                  <input class="c-field__input c-checkout__field-value" type="time">
+                </div>
               </div>
-            </div>
-          </section>
+            </template>
+
+            <template id="js-checkout-field-body-choice-template">
+              <div class="c-field">
+                <label class="c-field__label">Field label</label>
+                <input class="c-field__input c-checkout__field-label" type="text" placeholder="e.g. Size">
+              </div>
+              <div class="c-checkout__choice">
+                <label class="c-field__label">Options <span class="c-checkout__choice-hint">(max 5)</span></label>
+                <div class="c-checkout__option-add">
+                  <input class="c-field__input c-checkout__option-input" type="text" placeholder="Type an option…">
+                  <button type="button" class="c-checkout__option-add-btn">+ Add</button>
+                </div>
+                <div class="c-checkout__options"></div>
+              </div>
+            </template>
+
+            <template id="js-checkout-option-template">
+              <div class="c-checkout__option">
+                <button type="button" class="c-checkout__option-pick">
+                  <span class="c-checkout__option-dial"></span>
+                  <span class="c-checkout__option-text"></span>
+                </button>
+                <button type="button" class="c-checkout__option-remove">&times;</button>
+              </div>
+            </template>
+
+            <section class="c-checkout__section">
+              <div class="c-checkout__section-title">Order Recap</div>
+              <table class="c-checkout__recap">
+                <thead>
+                  <tr>
+                    <th>Item</th>
+                    <th class="c-checkout__col-qty">Qty</th>
+                    <th class="c-checkout__col-subtotal">Subtotal</th>
+                  </tr>
+                </thead>
+                <tbody id="js-checkout-recap-body"></tbody>
+              </table>
+            </section>
+
+            <section class="c-checkout__section">
+              <div class="c-checkout__section-title">Discount &amp; Total</div>
+              <div class="c-checkout__totals">
+                <div class="c-checkout__totals-row">
+                  <span>Subtotal</span>
+                  <span class="c-checkout__totals-value" id="js-checkout-subtotal">Rp 0</span>
+                </div>
+                <div class="c-checkout__discount">
+                  <label for="js-checkout-discount">Discount</label>
+                  <input class="c-checkout__discount-input" id="js-checkout-discount"
+                        type="number" min="0" max="100" step="0.5" placeholder="0">
+                  <span class="c-checkout__discount-suffix">%</span>
+                </div>
+                <div class="c-checkout__totals-row c-checkout__totals-row--muted">
+                  <span>Discount Amount</span>
+                  <span class="c-checkout__totals-value" id="js-checkout-discount-amount">- Rp 0</span>
+                </div>
+                <div class="c-checkout__totals-row c-checkout__totals-row--grand">
+                  <span>Total</span>
+                  <span class="c-checkout__totals-value" id="js-checkout-total">Rp 0</span>
+                </div>
+              </div>
+            </section>
+          </div>
 
           <div class="c-checkout__footer">
             <button type="button" class="btn c-checkout__cancel"
@@ -878,6 +967,7 @@
         </div>                                                                          
       </div>                                                                          
     </div>
+
     <main id="pos-app" class="l-app">
       <aside class="l-sidebar">
         <section class="l-sidebar__top">

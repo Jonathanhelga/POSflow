@@ -2,6 +2,7 @@ import { toggleModal } from './modal-handler';
 import { formatRupiah } from './formatRupiah';
 import { getOrderedItems } from './order-add_item';
 import { auth, fetchCustomers } from './firebase';
+import { initCustomFields, resetCustomFields } from './checkout_custom_fields';
 
 const MODAL_ID = 'customer-checkout-modal';
 const CUSTOMER_FIELDS = ['js-checkout-customer-name', 'js-checkout-customer-phone'];
@@ -14,12 +15,15 @@ export function initCustomerCheckout() {
     if (!discountInput || !select) return;
     discountInput.addEventListener('input', recalcTotals);
     select.addEventListener('change', handleCustomerSelect);
+
+    initCustomFields();
 }
 
 export async function openCustomerCheckout() {
     renderOrderRecap();
     resetDiscount();
     recalcTotals();
+    resetCustomFields();
     await populateCustomerDropdown();
     resetCustomerSelection();
     toggleModal(MODAL_ID);

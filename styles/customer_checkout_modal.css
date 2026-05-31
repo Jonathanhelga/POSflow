@@ -8,15 +8,19 @@
     width: 100%;
     max-width: 560px;
     max-height: 90vh;
-    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
     border-radius: var(--radius);
     background-color: var(--clr-panel);
     box-shadow: 0 20px 60px rgba(18, 24, 40, 0.35);
 }
 
 #c-modal-customer-checkout .c-modal__header {
+    flex-shrink: 0;
     padding: 1.25rem 1.75rem;
     border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+    background-color: var(--clr-panel);
 }
 #c-modal-customer-checkout .c-modal__title {
     font-size: 1.25rem;
@@ -26,6 +30,16 @@
 }
 
 .c-checkout__body {
+    flex: 1;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+}
+
+.c-checkout__scroll {
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
     padding: 1.5rem 1.75rem 1.75rem;
     display: flex;
     flex-direction: column;
@@ -159,10 +173,13 @@
 
 /* Footer actions */
 .c-checkout__footer {
+    flex-shrink: 0;
     display: flex;
     justify-content: flex-end;
-    gap: 0.6rem;
-    padding-top: 0.25rem;
+    gap: 1rem;
+    padding: 1rem 1.75rem;
+    border-top: 1px solid rgba(0, 0, 0, 0.08);
+    background-color: var(--clr-panel);
 }
 .c-checkout__cancel {
     background-color: #ffffff;
@@ -177,4 +194,262 @@
     opacity: 0.55;
     cursor: not-allowed;
     filter: none;
+}
+
+/* Order Details section: vertical stack of fields + add-field button */
+.c-checkout__details-stack {
+    display: flex;
+    flex-direction: column;
+    gap: 0.85rem;
+}
+
+.c-checkout__add-field {
+    appearance: none;
+    background: transparent;
+    border: 1.5px dashed #cbd5e1;
+    border-radius: 10px;
+    padding: 0.75rem 1rem;
+    width: 100%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.45rem;
+    font-size: 0.88rem;
+    font-weight: 600;
+    color: var(--clr-text-secondary);
+    cursor: pointer;
+    transition: border-color 0.15s ease, color 0.15s ease, background-color 0.15s ease;
+}
+.c-checkout__add-field:hover {
+    border-color: #94a3b8;
+    color: var(--clr-text-primary);
+    background-color: #f8fafc;
+}
+.c-checkout__add-field-icon {
+    font-size: 1.05rem;
+    line-height: 1;
+    font-weight: 700;
+}
+
+/* Dynamic custom fields: stack of cards below Order Note */
+.c-checkout__fields {
+    display: flex;
+    flex-direction: column;
+    gap: 0.85rem;
+}
+.c-checkout__fields:empty { display: none; }
+
+/* Add-field button + its type-picker popover */
+.c-checkout__add-wrap {
+    position: relative;
+}
+
+.c-checkout__type-menu {
+    position: absolute;
+    top: calc(100% + 6px);
+    left: 0;
+    right: 0;
+    z-index: 20;
+    display: flex;
+    flex-direction: column;
+    padding: 0.35rem;
+    background-color: #ffffff;
+    border: 1px solid var(--clr-border);
+    border-radius: 10px;
+    box-shadow: 0 12px 28px rgba(18, 24, 40, 0.18);
+}
+.c-checkout__type-menu.is-hidden { display: none; }
+
+.c-checkout__type-option {
+    appearance: none;
+    background: transparent;
+    border: none;
+    border-radius: 8px;
+    padding: 0.6rem 0.7rem;
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    width: 100%;
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--clr-text-primary);
+    text-align: left;
+    cursor: pointer;
+    transition: background-color 0.12s ease;
+}
+.c-checkout__type-option:hover { background-color: #f1f5f9; }
+
+.c-checkout__type-icon {
+    width: 1.3rem;
+    text-align: center;
+    font-size: 1rem;
+    line-height: 1;
+}
+
+/* Card skeleton for one custom field */
+.c-checkout__field-card {
+    border: 1px solid #cbd5e1;
+    border-radius: 10px;
+    padding: 0.85rem 0.95rem;
+    background-color: #f8fafc;
+}
+.c-checkout__field-card-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+}
+.c-checkout__field-card-type {
+    display: flex;
+    align-items: center;
+    gap: 0.45rem;
+    font-size: 0.72rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--clr-text-secondary);
+}
+.c-checkout__field-remove {
+    appearance: none;
+    background: transparent;
+    border: none;
+    font-size: 1.2rem;
+    line-height: 1;
+    color: var(--clr-text-secondary);
+    cursor: pointer;
+    padding: 0 0.25rem;
+    border-radius: 6px;
+    transition: color 0.12s ease, background-color 0.12s ease;
+}
+.c-checkout__field-remove:hover {
+    color: #ef4444;
+    background-color: #fef2f2;
+}
+
+.c-checkout__field-card-body {
+    margin-top: 0.75rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.85rem;
+}
+.c-checkout__field-card-body .c-field {
+    margin-bottom: 0;
+}
+
+/* Two-column row inside a field card (label input + value input) */
+.c-checkout__field-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.75rem;
+}
+.c-checkout__field-row .c-field {
+    min-width: 0;
+}
+
+/* Multiple Choice: option builder + radio rows */
+.c-checkout__choice-hint {
+    font-weight: 500;
+    color: var(--clr-text-secondary);
+}
+
+.c-checkout__option-add {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 0.6rem;
+}
+.c-checkout__option-input {
+    flex: 1;
+    min-width: 0;
+}
+.c-checkout__option-add-btn {
+    appearance: none;
+    border: 1px solid var(--clr-border);
+    background-color: #ffffff;
+    border-radius: 8px;
+    padding: 0 0.95rem;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--clr-text-primary);
+    white-space: nowrap;
+    cursor: pointer;
+    transition: background-color 0.12s ease, border-color 0.12s ease;
+}
+.c-checkout__option-add-btn:hover:not(:disabled) {
+    background-color: #f1f5f9;
+    border-color: #94a3b8;
+}
+.c-checkout__option-add-btn:disabled,
+.c-checkout__option-input:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.c-checkout__options {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+}
+.c-checkout__options:empty { display: none; }
+
+.c-checkout__option {
+    display: flex;
+    align-items: center;
+    border: 1px solid var(--clr-border);
+    border-radius: 8px;
+    background-color: #ffffff;
+    transition: border-color 0.12s ease, background-color 0.12s ease;
+}
+.c-checkout__option-pick {
+    appearance: none;
+    border: none;
+    background: transparent;
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    padding: 0.55rem 0.75rem;
+    font-size: 0.88rem;
+    color: var(--clr-text-primary);
+    text-align: left;
+    cursor: pointer;
+}
+.c-checkout__option-dial {
+    flex-shrink: 0;
+    width: 1rem;
+    height: 1rem;
+    border-radius: 50%;
+    border: 2px solid #cbd5e1;
+    box-sizing: border-box;
+    transition: border-color 0.12s ease, background-color 0.12s ease;
+}
+.c-checkout__option-text {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+.c-checkout__option-remove {
+    appearance: none;
+    border: none;
+    background: transparent;
+    padding: 0.55rem 0.75rem;
+    font-size: 1.05rem;
+    line-height: 1;
+    color: var(--clr-text-secondary);
+    cursor: pointer;
+}
+.c-checkout__option-remove:hover { color: #ef4444; }
+
+.c-checkout__option.is-selected {
+    border-color: var(--clr-success);
+    background-color: #ecfdf5;
+}
+.c-checkout__option.is-selected .c-checkout__option-dial {
+    border-color: var(--clr-success);
+    background-color: var(--clr-success);
+    box-shadow: inset 0 0 0 2px #ffffff;
+}
+.c-checkout__option.is-selected .c-checkout__option-text {
+    font-weight: 700;
+    color: #166534;
 }
