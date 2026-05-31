@@ -134,24 +134,135 @@ export function resetCustomFields() {
     closeTypeMenu();
 }
 
+// --- Saved field library (Phase 2, Side B) ---
+
+// Re-render the "Saved fields" section of the Add-field menu from the library
+// definitions read off the user doc. Called on every modal open. The divider is
+// hidden when the library is empty so the menu stays clean for new users.
+export function renderSavedFields(library) {
+    const list = document.getElementById('js-checkout-saved-fields');
+    const divider = document.getElementById('js-checkout-saved-divider');
+    if (!list || !divider) return;
+
+    list.replaceChildren();
+    const defs = Array.isArray(library) ? library : [];
+    divider.classList.toggle('is-hidden', defs.length === 0);
+
+    for (const def of defs) list.appendChild(buildSavedOption(def));
+}
+
+function buildSavedOption(def) {
+    const option = document.getElementById('js-checkout-saved-option-template').content.firstElementChild.cloneNode(true);
+    option.querySelector('.c-checkout__saved-label').textContent = def.label;
+    if (def.type === 'choice' && def.options?.length) {
+        option.querySelector('.c-checkout__saved-meta').textContent = `(${def.options.join(' / ')})`;
+    }
+    option.addEventListener('click', () => attachSavedField(def));
+    return option;
+}
+
+// Re-attach a saved definition as a locked card: label + options are fixed
+// (no redefining, spec §4.3); the cashier only fills the value.
+function attachSavedField(def) {
+    const container = document.getElementById('js-checkout-fields');
+    if (!container) return;
+    container.appendChild(buildLockedCard(def));
+    closeTypeMenu();
+}
+
+function buildLockedCard(def) {
+    const card = document.getElementById('js-checkout-field-card-template').content.firstElementChild.cloneNode(true);
+    card.classList.add('c-checkout__field-card--locked');
+    card.dataset.fieldType = def.type;
+    card.dataset.fieldId = def.id;
+    card.dataset.fieldLabel = def.label;
+    card.querySelector('.c-checkout__field-card-type').textContent = FIELD_TYPE_LABELS[def.type] || def.type;
+    card.querySelector('.c-checkout__field-remove').addEventListener('click', handleFieldRemove);
+
+    const body = card.querySelector('.c-checkout__field-card-body');
+    const labelEl = document.createElement('div');
+    labelEl.className = 'c-checkout__field-readonly-label';
+    labelEl.textContent = def.label;
+    body.appendChild(labelEl);
+
+    if (def.type === 'choice') {
+        body.appendChild(buildLockedOptions(def.options || []));
+    } else {
+        const input = document.createElement('input');
+        input.type = def.type; // 'date' or 'time' — native picker
+        input.className = 'c-field__input c-checkout__field-value';
+        body.appendChild(input);
+    }
+    return card;
+}
+
+function buildLockedOptions(options) {
+    const wrap = document.createElement('div');
+    wrap.className = 'c-checkout__options';
+    for (const text of options) {
+        const option = document.getElementById('js-checkout-option-template').content.firstElementChild.cloneNode(true);
+        option.querySelector('.c-checkout__option-text').textContent = text;
+        option.querySelector('.c-checkout__option-remove').remove(); // locked: not removable
+        option.querySelector('.c-checkout__option-pick').addEventListener('click', handleOptionSelect);
+        wrap.appendChild(option);
+    }
+    if (wrap.firstElementChild) selectOption(wrap.firstElementChild);
+    return wrap;
+}
+
 // --- Read values for checkout (Phase 3) ---
 
-// Walk every field card and build the queryable `customFields` map (spec §3.2),
-// keyed by a stable slug derived from the label. Incomplete cards are skipped.
-export function collectCustomFields() {
+// Single source of truth for "what's in the field cards right now". Returns a
+// rich entry per complete card: { id, label, type, value, options? }. Both the
+// per-order values map and the library definitions derive from this, so their
+// slug ids always line up. Incomplete cards (no label or no value) are skipped.
+function readCardEntries() {
     const container = document.getElementById('js-checkout-fields');
-    const result = {};
-    if (!container) return result;
+    const entries = [];
+    if (!container) return entries;
 
+    const usedIds = {};
     for (const card of container.querySelectorAll('.c-checkout__field-card')) {
         const type = card.dataset.fieldType;
-        const label = (card.querySelector('.c-checkout__field-label')?.value || '').trim();
+        // Locked (re-attached) cards carry their label/id on the dataset; new
+        // cards derive both from the editable label input.
+        const presetLabel = card.dataset.fieldLabel;
+        const label = presetLabel !== undefined
+            ? presetLabel
+            : (card.querySelector('.c-checkout__field-label')?.value || '').trim();
         const value = readCardValue(card, type);
         if (!label || !value) continue;
 
-        result[uniqueSlug(slugify(label), result)] = { label, type, value };
+        const id = uniqueSlug(card.dataset.fieldId || slugify(label), usedIds);
+        usedIds[id] = true;
+        const entry = { id, label, type, value };
+        if (type === 'choice') entry.options = readCardOptions(card);
+        entries.push(entry);
     }
-    return result;
+    return entries;
+}
+
+// what gets written on the order doc.
+export function collectCustomFields() {
+    const values = {};
+    for (const entry of readCardEntries()) {
+        values[entry.id] = { label: entry.label, type: entry.type, value: entry.value };
+    }
+    return values;
+}
+
+// what gets saved to the user's library.
+// Carries `options` for choice fields; the per-order value is intentionally dropped.
+export function collectFieldDefinitions() {
+    return readCardEntries().map(entry => {
+        const def = { id: entry.id, label: entry.label, type: entry.type };
+        if (entry.options) def.options = entry.options;
+        return def;
+    });
+}
+
+function readCardOptions(card) {
+    return [...card.querySelectorAll('.c-checkout__option-text')].map(el => el.textContent);
 }
 
 function readCardValue(card, type) {

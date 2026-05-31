@@ -150,9 +150,12 @@ no redefining.
 - [x] **Phase 1 — UI only, in-memory.** Type picker, new-field creation flow
       (incl. the chip builder), appending/removing field rows. No Firebase yet.
       *Done — lives in `src/checkout_custom_fields.js` (split out from `customer_checkout.js`).*
-- [ ] **Phase 2 — Library persistence.** Read `orderFieldLibrary` from the user doc
+- [x] **Phase 2 — Library persistence.** Read `orderFieldLibrary` from the user doc
       on modal open (so saved fields are re-attachable); save new definitions on first use.
-      *Deferred — being done after Phase 3.*
+      *Done — write side: `collectFieldDefinitions()` → `saveOrderFieldDefinitions()` merges
+      new ids into the user doc after a successful order. Read side: `renderSavedFields()`
+      populates the Add-field menu's "Saved fields" list; picking one builds a locked card
+      (static label + fixed options, value-only) via `buildLockedCard()`.*
 - [x] **Phase 3 — Write values on checkout.** Fold `customFields` map into
       `getCheckoutFormData()` → `submitOrder()`. *Done — `collectCustomFields()` in
       `checkout_custom_fields.js`; orders with no fields store `customFields: {}`.*

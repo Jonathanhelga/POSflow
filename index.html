@@ -502,6 +502,8 @@
                       <span>Time</span>
                       <span class="c-checkout__type-icon">🕐</span>
                     </button>
+                    <div class="c-checkout__type-divider is-hidden" id="js-checkout-saved-divider">Saved fields</div>
+                    <div class="c-checkout__type-saved" id="js-checkout-saved-fields"></div>
                   </div>
                 </div>
               </div>
@@ -556,6 +558,13 @@
                 </div>
                 <div class="c-checkout__options"></div>
               </div>
+            </template>
+
+            <template id="js-checkout-saved-option-template">
+              <button type="button" class="c-checkout__type-option c-checkout__saved-option">
+                <span class="c-checkout__saved-label"></span>
+                <span class="c-checkout__saved-meta"></span>
+              </button>
             </template>
 
             <template id="js-checkout-option-template">

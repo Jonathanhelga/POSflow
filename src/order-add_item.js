@@ -1,7 +1,7 @@
 import { toggleModal } from './modal-handler';
 import { formatRupiah } from "./formatRupiah";
 import { allItems, updateLocalStock } from "./search_item";
-import { auth, submitOrder, upsertCustomerByPhone } from "./firebase";
+import { auth, submitOrder, upsertCustomerByPhone, saveOrderFieldDefinitions } from "./firebase";
 import { refreshInsights } from './sales_insight';
 import {
     openCustomerCheckout,
@@ -277,7 +277,7 @@ async function handleCheckoutFormSubmit(e) {
     if (!user) { showToast('Session expired. Please log in again.', 'error'); return; }
     if (orderedItems.length === 0) { showToast('No items in the order yet.', 'error'); return; }
 
-    const { selectedCustomerId, customer, orderNote, customFields, discountPct, discountAmount } = getCheckoutFormData();
+    const { selectedCustomerId, customer, orderNote, customFields, fieldDefinitions, discountPct, discountAmount } = getCheckoutFormData();
 
     let customerId = selectedCustomerId;
     let customerSnapshot = customer;
@@ -339,6 +339,12 @@ async function handleCheckoutFormSubmit(e) {
         setCheckoutSubmitting(false, "Submit Order");
         return;
     }
+
+    // Best-effort: grow the reusable field library. A failure here must never
+    // surface as an order error — the order is already committed.
+    saveOrderFieldDefinitions(fieldDefinitions, user.uid).catch(err =>
+        console.error("Failed to save custom field definitions to library:", err)
+    );
 
     try {
         mappedItems.forEach(item => updateLocalStock(item.id, -item.quantity));

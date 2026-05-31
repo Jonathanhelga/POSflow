@@ -286,6 +286,34 @@
     line-height: 1;
 }
 
+/* Saved-field library section inside the Add-field menu */
+.c-checkout__type-divider {
+    margin: 0.35rem 0.2rem 0.15rem;
+    padding-top: 0.4rem;
+    border-top: 1px solid var(--clr-border);
+    font-size: 0.68rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--clr-text-secondary);
+}
+.c-checkout__type-divider.is-hidden { display: none; }
+
+.c-checkout__saved-option {
+    justify-content: space-between;
+}
+.c-checkout__saved-meta {
+    font-weight: 500;
+    color: var(--clr-text-secondary);
+}
+
+/* Locked (re-attached) card: the field label is fixed, shown as static text */
+.c-checkout__field-readonly-label {
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: var(--clr-text-primary);
+}
+
 /* Card skeleton for one custom field */
 .c-checkout__field-card {
     border: 1px solid #cbd5e1;
