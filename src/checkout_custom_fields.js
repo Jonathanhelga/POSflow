@@ -55,7 +55,7 @@ function handleTypeSelect(e) {
             card.querySelector('.c-checkout__option-input').addEventListener('keydown', handleOptionTrigger);
         }
     }
-
+    
     container.appendChild(card);
     closeTypeMenu();
 }
@@ -132,4 +132,44 @@ export function resetCustomFields() {
     const container = document.getElementById('js-checkout-fields');
     if (container) container.replaceChildren();
     closeTypeMenu();
+}
+
+// --- Read values for checkout (Phase 3) ---
+
+// Walk every field card and build the queryable `customFields` map (spec §3.2),
+// keyed by a stable slug derived from the label. Incomplete cards are skipped.
+export function collectCustomFields() {
+    const container = document.getElementById('js-checkout-fields');
+    const result = {};
+    if (!container) return result;
+
+    for (const card of container.querySelectorAll('.c-checkout__field-card')) {
+        const type = card.dataset.fieldType;
+        const label = (card.querySelector('.c-checkout__field-label')?.value || '').trim();
+        const value = readCardValue(card, type);
+        if (!label || !value) continue;
+
+        result[uniqueSlug(slugify(label), result)] = { label, type, value };
+    }
+    return result;
+}
+
+function readCardValue(card, type) {
+    if (type === 'choice') {
+        const selected = card.querySelector('.c-checkout__option.is-selected .c-checkout__option-text');
+        return selected ? selected.textContent : '';
+    }
+    return (card.querySelector('.c-checkout__field-value')?.value || '').trim();
+}
+
+function slugify(label) {
+    const slug = label.toLowerCase().replace(/[^a-z0-9]+/g, '_').replace(/^_+|_+$/g, '');
+    return slug || 'field';
+}
+
+function uniqueSlug(base, existing) {
+    if (!(base in existing)) return base;
+    let n = 2;
+    while (`${base}_${n}` in existing) n++;
+    return `${base}_${n}`;
 }

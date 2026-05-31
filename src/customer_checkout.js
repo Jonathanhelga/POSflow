@@ -2,7 +2,7 @@ import { toggleModal } from './modal-handler';
 import { formatRupiah } from './formatRupiah';
 import { getOrderedItems } from './order-add_item';
 import { auth, fetchCustomers } from './firebase';
-import { initCustomFields, resetCustomFields } from './checkout_custom_fields';
+import { initCustomFields, resetCustomFields, collectCustomFields } from './checkout_custom_fields';
 
 const MODAL_ID = 'customer-checkout-modal';
 const CUSTOMER_FIELDS = ['js-checkout-customer-name', 'js-checkout-customer-phone'];
@@ -48,6 +48,7 @@ export function getCheckoutFormData() {
             phone: document.getElementById('js-checkout-customer-phone')?.value.trim() || '',
         },
         orderNote: document.getElementById('js-checkout-order-note')?.value.trim() || '',
+        customFields: collectCustomFields(),
         discountPct,
         discountAmount,
     };

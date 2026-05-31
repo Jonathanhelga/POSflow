@@ -1,8 +1,8 @@
 # Feature Spec: Custom Order Fields at Checkout
 
-**Status:** In progress (Phase 1 not started yet)
+**Status:** In progress (Phases 1 & 3 done; Phase 2 next, Phase 4 later)
 **Owner:** project owner
-**Last updated:** 2026-05-29
+**Last updated:** 2026-05-31
 
 ---
 
@@ -147,12 +147,15 @@ no redefining.
 
 ## 6. Build plan (phased — guide one phase at a time)
 
-- [ ] **Phase 1 — UI only, in-memory.** Type picker, new-field creation flow
+- [x] **Phase 1 — UI only, in-memory.** Type picker, new-field creation flow
       (incl. the chip builder), appending/removing field rows. No Firebase yet.
+      *Done — lives in `src/checkout_custom_fields.js` (split out from `customer_checkout.js`).*
 - [ ] **Phase 2 — Library persistence.** Read `orderFieldLibrary` from the user doc
       on modal open (so saved fields are re-attachable); save new definitions on first use.
-- [ ] **Phase 3 — Write values on checkout.** Fold `customFields` map into
-      `getCheckoutFormData()` → `submitOrder()`.
+      *Deferred — being done after Phase 3.*
+- [x] **Phase 3 — Write values on checkout.** Fold `customFields` map into
+      `getCheckoutFormData()` → `submitOrder()`. *Done — `collectCustomFields()` in
+      `checkout_custom_fields.js`; orders with no fields store `customFields: {}`.*
 - [ ] **Phase 4 (later) — Query + display.** Show custom fields in order history;
       add query support + any needed composite indexes.
 
@@ -169,7 +172,11 @@ no redefining.
 - **Definitions created once, then re-attached** — cashier doesn't redefine on reuse. (§2)
 
 ## 8. Open questions / TODO
-- Slug collision handling when two labels slugify to the same id.
+- ~~Slug collision handling when two labels slugify to the same id.~~ **Decided (Phase 3):**
+  slug = lowercase label, non-alphanumeric runs → `_`, trimmed; empty result falls back to
+  `field`. Within a single order's map, a colliding slug gets a numeric suffix (`size`, `size_2`).
 - Editing/deleting a definition from the library (out of scope for now?).
-- Validation rules (required fields? empty values allowed?).
+- ~~Validation rules (required fields? empty values allowed?).~~ **Decided (Phase 3):**
+  a field card is silently skipped at checkout if its label is empty **or** its value is empty
+  (for `choice`, "no option selected" counts as empty). No hard validation / blocking yet.
 - Composite index definitions for Phase 4 queries.

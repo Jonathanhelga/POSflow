@@ -274,16 +274,10 @@ function handlePrintBillClick() {
 async function handleCheckoutFormSubmit(e) {
     e.preventDefault();
     const user = auth.currentUser;
-    if (!user) {
-        showToast('Session expired. Please log in again.', 'error');
-        return;
-    }
-    if (orderedItems.length === 0) {
-        showToast('No items in the order yet.', 'error');
-        return;
-    }
+    if (!user) { showToast('Session expired. Please log in again.', 'error'); return; }
+    if (orderedItems.length === 0) { showToast('No items in the order yet.', 'error'); return; }
 
-    const { selectedCustomerId, customer, orderNote, discountPct, discountAmount } = getCheckoutFormData();
+    const { selectedCustomerId, customer, orderNote, customFields, discountPct, discountAmount } = getCheckoutFormData();
 
     let customerId = selectedCustomerId;
     let customerSnapshot = customer;
@@ -325,7 +319,8 @@ async function handleCheckoutFormSubmit(e) {
         totalPrice: totalWithTax,
         customerId: customerId || null,
         customer: customerSnapshot,
-        orderNote
+        orderNote,
+        customFields
     };
     console.log(orderPayload);
 
