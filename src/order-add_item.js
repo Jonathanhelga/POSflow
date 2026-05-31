@@ -1,7 +1,7 @@
 import { toggleModal } from './modal-handler';
 import { formatRupiah } from "./formatRupiah";
 import { allItems, updateLocalStock } from "./search_item";
-import { auth, submitOrder, upsertCustomerByPhone } from "./firebase";
+import { auth, submitOrder, upsertCustomerByPhone, saveOrderFieldDefinitions } from "./firebase";
 import { refreshInsights } from './sales_insight';
 import {
     openCustomerCheckout,
@@ -40,6 +40,12 @@ export function openOrderItemModal(itemID) {
     document.getElementById('order-item-unit').textContent = ' ' + item.unit;
 
     toggleModal('order-item-modal');
+
+    // Move focus into the quantity field so the user can type a quantity and
+    // press Enter to submit immediately (HTML implicit form submission), instead
+    // of having to click OK. select() highlights the value for quick overwrite.
+    const qtyInput = document.getElementById('js-order-qty');
+    requestAnimationFrame(() => { qtyInput.focus(); qtyInput.select(); });
 }
 
 export function initializeOrderForm(){
@@ -268,16 +274,10 @@ function handlePrintBillClick() {
 async function handleCheckoutFormSubmit(e) {
     e.preventDefault();
     const user = auth.currentUser;
-    if (!user) {
-        showToast('Session expired. Please log in again.', 'error');
-        return;
-    }
-    if (orderedItems.length === 0) {
-        showToast('No items in the order yet.', 'error');
-        return;
-    }
+    if (!user) { showToast('Session expired. Please log in again.', 'error'); return; }
+    if (orderedItems.length === 0) { showToast('No items in the order yet.', 'error'); return; }
 
-    const { selectedCustomerId, customer, orderNote, discountPct, discountAmount } = getCheckoutFormData();
+    const { selectedCustomerId, customer, orderNote, customFields, fieldDefinitions, discountPct, discountAmount } = getCheckoutFormData();
 
     let customerId = selectedCustomerId;
     let customerSnapshot = customer;
@@ -319,7 +319,8 @@ async function handleCheckoutFormSubmit(e) {
         totalPrice: totalWithTax,
         customerId: customerId || null,
         customer: customerSnapshot,
-        orderNote
+        orderNote,
+        customFields
     };
     console.log(orderPayload);
 
@@ -338,6 +339,12 @@ async function handleCheckoutFormSubmit(e) {
         setCheckoutSubmitting(false, "Submit Order");
         return;
     }
+
+    // Best-effort: grow the reusable field library. A failure here must never
+    // surface as an order error — the order is already committed.
+    saveOrderFieldDefinitions(fieldDefinitions, user.uid).catch(err =>
+        console.error("Failed to save custom field definitions to library:", err)
+    );
 
     try {
         mappedItems.forEach(item => updateLocalStock(item.id, -item.quantity));

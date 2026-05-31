@@ -140,6 +140,26 @@ export async function submitOrder(orderPayload, uid){
     return orderRef.id;
 }
 
+// Merge newly-used custom-field definitions into the user's reusable library
+// Definitions are created once then re-attached, so an id already
+// in the library is never overwritten — only genuinely new ids are appended.
+// Keeps cachedUserProfile in sync so the checkout modal can re-offer them.
+export async function saveOrderFieldDefinitions(definitions, uid) {
+    if (!definitions?.length) return;
+
+    const profile = await fetchUserProfile(uid);
+    const library = Array.isArray(profile?.orderFieldLibrary) ? profile.orderFieldLibrary : [];
+    const existingIds = new Set(library.map(def => def.id));
+
+    const additions = definitions.filter(def => !existingIds.has(def.id));
+    if (!additions.length) return;
+
+    const merged = [...library, ...additions];
+    await updateDoc(doc(db, "users", uid), { orderFieldLibrary: merged });
+
+    if (cachedUserProfile) cachedUserProfile.orderFieldLibrary = merged;
+}
+
 export async function fetchCustomers(uid) {
     const q = query(
         collection(db, "customers"),

@@ -1,7 +1,8 @@
 import { toggleModal } from './modal-handler';
 import { formatRupiah } from './formatRupiah';
 import { getOrderedItems } from './order-add_item';
-import { auth, fetchCustomers } from './firebase';
+import { auth, fetchCustomers, getCachedUserProfile, fetchUserProfile } from './firebase';
+import { initCustomFields, resetCustomFields, collectCustomFields, collectFieldDefinitions, renderSavedFields } from './checkout_custom_fields';
 
 const MODAL_ID = 'customer-checkout-modal';
 const CUSTOMER_FIELDS = ['js-checkout-customer-name', 'js-checkout-customer-phone'];
@@ -14,12 +15,16 @@ export function initCustomerCheckout() {
     if (!discountInput || !select) return;
     discountInput.addEventListener('input', recalcTotals);
     select.addEventListener('change', handleCustomerSelect);
+
+    initCustomFields();
 }
 
 export async function openCustomerCheckout() {
     renderOrderRecap();
     resetDiscount();
     recalcTotals();
+    resetCustomFields();
+    await populateSavedFields();
     await populateCustomerDropdown();
     resetCustomerSelection();
     toggleModal(MODAL_ID);
@@ -30,6 +35,13 @@ export function closeCustomerCheckout() {
     toggleModal(MODAL_ID);
 }
 
+
+// Read the reusable field library off the user profile (cached after app init;
+// fall back to a fetch) and render it into the Add-field menu.
+async function populateSavedFields() {
+    const profile = getCachedUserProfile() || (auth.currentUser && await fetchUserProfile(auth.currentUser.uid));
+    renderSavedFields(profile?.orderFieldLibrary || []);
+}
 
 export function getCheckoutFormData() {
     const items = getOrderedItems();
@@ -44,6 +56,8 @@ export function getCheckoutFormData() {
             phone: document.getElementById('js-checkout-customer-phone')?.value.trim() || '',
         },
         orderNote: document.getElementById('js-checkout-order-note')?.value.trim() || '',
+        customFields: collectCustomFields(),
+        fieldDefinitions: collectFieldDefinitions(),
         discountPct,
         discountAmount,
     };
