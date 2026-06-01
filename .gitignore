@@ -38,5 +38,6 @@ firestore-export/
 # Personal notes (not for the repo)
 *.txt
 resume_project_notes_caterflow.md
+question_rewriting.md
 CLAUDE.md
 .claude/

@@ -1,8 +1,8 @@
 # Feature Spec: Custom Order Fields at Checkout
 
-**Status:** In progress (Phases 1 & 3 done; Phase 2 next, Phase 4 later)
+**Status:** COMPLETE — Phases 1–4 done (4a display + 4b client-side search shipped)
 **Owner:** project owner
-**Last updated:** 2026-05-31
+**Last updated:** 2026-06-01
 
 ---
 
@@ -159,8 +159,26 @@ no redefining.
 - [x] **Phase 3 — Write values on checkout.** Fold `customFields` map into
       `getCheckoutFormData()` → `submitOrder()`. *Done — `collectCustomFields()` in
       `checkout_custom_fields.js`; orders with no fields store `customFields: {}`.*
-- [ ] **Phase 4 (later) — Query + display.** Show custom fields in order history;
-      add query support + any needed composite indexes.
+- [~] **Phase 4 — Query + display.**
+      - [x] **4a — Display (done).** Order History detail panel restructured: the receipt
+        now lives in a scrollable `.oh-bill-scroll` wrapper, and a display-only
+        `.oh-info` ("Order Information") block sits below it (above the print bar,
+        *outside* the printed bill). `renderOrderInfo(order)` in `src/order_history.js`
+        shows Customer / Phone / Order Note rows only when present, injects one row per
+        non-empty `customFields` entry, prettifies `date`/`time` values at render
+        (raw Firestore value untouched), and falls back to a "No additional details."
+        line. Block is hidden until an order is selected.
+      - [x] **4b — Query/filter (done).** Attribute-aware search in Order History,
+        **client-side** over the already-loaded `allOrders` array (Option A — chosen
+        over Firestore server-side queries; **no composite indexes needed**). Pinned
+        search bar in the left panel: an attribute `<select>` (4 fixed — Order Date /
+        Customer / Phone / Order Note — plus one per `orderFieldLibrary` field) drives a
+        **type-aware value control** (date/time picker, choice dropdown, or text box).
+        `+`/Enter adds a removable **chip**; chips combine with **AND**; text is
+        case-insensitive *contains*, date/time/choice are *exact*. Re-picking an
+        attribute replaces its chip. All in `src/order_history.js`
+        (`buildSearchAttributes`, `applyFilters`, `orderMatchesFilter`, …) + styles in
+        `styles/order_history_modal.css`.
 
 ---
 

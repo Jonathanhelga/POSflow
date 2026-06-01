@@ -357,6 +357,29 @@
 
           <!-- Left: order card list -->
           <div class="oh-list-panel">
+
+            <!-- Attribute-aware search -->
+            <div class="oh-search">
+              <div class="oh-search__heading">
+                <span class="oh-search__heading-icon">🔍</span> Filter orders
+              </div>
+              <div class="oh-search__row">
+                <!-- attribute + value read as one unified control -->
+                <div class="oh-search__group">
+                  <select class="oh-search__attr" id="oh-search-attr">
+                    <!-- options injected by JS: fixed attributes + library fields -->
+                  </select>
+                  <!-- type-aware value control (date / time / choice / text) injected by JS -->
+                  <div class="oh-search__value" id="oh-search-value"></div>
+                </div>
+                <button type="button" class="oh-search__add" id="oh-search-add" title="Add filter">
+                  <span class="oh-search__add-icon">+</span> Add
+                </button>
+              </div>
+              <!-- active filter chips injected by JS (empty-state hint shown via CSS) -->
+              <div class="oh-search__chips" id="oh-search-chips"></div>
+            </div>
+
             <div id="oh-order-list">
               <p class="oh-empty">Loading orders...</p>
             </div>
@@ -364,6 +387,8 @@
 
           <!-- Right: bill preview -->
           <div class="oh-detail-panel">
+            <!-- Scrollable receipt area -->
+            <div class="oh-bill-scroll">
             <div id="oh-bill-preview" class="oh-bill">
 
               <!-- Bill Header (populated dynamically from profile) -->
@@ -430,6 +455,29 @@
               </div>
 
             </div>
+            </div><!-- /oh-bill-scroll -->
+
+            <!-- Order Information (display only — NOT part of the printed bill) -->
+            <div class="oh-info is-hidden" id="oh-info">
+              <div class="oh-info__title">Order Information</div>
+              <div class="oh-info__row">
+                <span class="oh-info__label">Customer</span>
+                <span class="oh-info__value" id="oh-info-customer-name">—</span>
+              </div>
+              <div class="oh-info__row">
+                <span class="oh-info__label">Phone</span>
+                <span class="oh-info__value" id="oh-info-customer-phone">—</span>
+              </div>
+              <div class="oh-info__row">
+                <span class="oh-info__label">Order Note</span>
+                <span class="oh-info__value" id="oh-info-note">—</span>
+              </div>
+              <!-- custom-order-fields rows injected by JS -->
+              <div class="oh-info__custom" id="oh-custom-fields"></div>
+              <!-- shown only when the order has no customer / note / custom fields -->
+              <div class="oh-info__empty is-hidden" id="oh-info-empty">No additional details.</div>
+            </div>
+
             <!-- Print Button -->
             <div class="oh-print-bar">
               <button id="oh-print-btn" class="btn oh-print-btn" disabled>
@@ -1078,3 +1126,7 @@
 </body>
 <script type="module" src="/src/main.js"></script>
 </html>
+
+<!-- oh by the way, uhmm usually we use search bar right, now since the searching attributes are not only limited to string 
+  characters could be date, time, multiple choice, I want you to help me create a specific attributes search bar. do you 
+  understand what I want  -->

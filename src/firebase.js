@@ -46,23 +46,17 @@ export async function loginUser(email, password) {
 }
 
 export async function LogOutUser(){
-        clearCachedUserProfile();
-        await signOut(auth);
+    clearCachedUserProfile();
+    await signOut(auth);
 }
 
 let cachedUserProfile = null;
 
-export function getCachedUserProfile() {
-    return cachedUserProfile;
-}
+export function getCachedUserProfile() { return cachedUserProfile; }
 
-export function setCachedUserProfile(profile) {
-    cachedUserProfile = profile;
-}
+export function setCachedUserProfile(profile) { cachedUserProfile = profile; }
 
-export function clearCachedUserProfile() {
-    cachedUserProfile = null;
-}
+export function clearCachedUserProfile() {cachedUserProfile = null; } 
 
 export async function submitItemData(itemData, uid){
     try {

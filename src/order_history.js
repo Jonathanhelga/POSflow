@@ -4,6 +4,21 @@ import { toggleModal } from './modal-handler';
 
 let isProcessing = false;
 
+// Search state. `allOrders` is the master array loaded once per modal open;
+// `activeFilters` are the chips currently applied (AND semantics); `searchAttributes`
+// is rebuilt per open from the fixed attributes + the user's field library.
+let allOrders = [];
+let activeFilters = [];
+let searchAttributes = [];
+
+// Fixed attributes always available, regardless of the custom-field library.
+const FIXED_ATTRIBUTES = [
+    { key: 'date',     label: 'Order Date', type: 'date', kind: 'fixed' },
+    { key: 'customer', label: 'Customer',   type: 'text', kind: 'fixed' },
+    { key: 'phone',    label: 'Phone',      type: 'text', kind: 'fixed' },
+    { key: 'note',     label: 'Order Note', type: 'text', kind: 'fixed' },
+];
+
 function formatDate(ts) {
     if (!ts) return '—';
     const d = ts.toDate ? ts.toDate() : new Date(ts);
@@ -145,6 +160,8 @@ function viewOrderDetails(order, cardEl) {
 
     document.getElementById('oh-print-btn').disabled = false;
 
+    renderOrderInfo(order);
+
     // Highlight selected card
     document.querySelectorAll('.oh-card').forEach(c => c.classList.remove('oh-card--active'));
     if (cardEl) cardEl.classList.add('oh-card--active');
@@ -155,6 +172,263 @@ function renderDiscountRow(order) {
     const discountAmount = Number(order?.discountAmount) || 0;
     document.getElementById('oh-discount-pct').textContent = String(discountPct);
     document.getElementById('oh-discount-amount').textContent = `- Rp ${formatRupiah(discountAmount)}`;
+}
+
+// ─── Order Information (display-only; not part of the printed bill) ──────────────
+
+// Populate the info block for the selected order. Each core row is shown only when
+// it has a value; custom fields are injected per order; the whole block falls back
+// to an "empty" line when the order carries no extra details. (Phase 4 display.)
+function renderOrderInfo(order) {
+    const customer = order.customer || {};
+    const hasName = setInfoRow('oh-info-customer-name', customer.name);
+    const hasPhone = setInfoRow('oh-info-customer-phone', customer.phone);
+    const hasNote = setInfoRow('oh-info-note', order.orderNote);
+
+    const customWrap = document.getElementById('oh-custom-fields');
+    customWrap.replaceChildren();
+    let customCount = 0;
+    const fields = order.customFields || {};
+    for (const key of Object.keys(fields)) {
+        const field = fields[key];
+        if (!field || !field.value) continue;
+        customWrap.appendChild(buildCustomFieldRow(field));
+        customCount += 1;
+    }
+
+    const hasAnything = hasName || hasPhone || hasNote || customCount > 0;
+    document.getElementById('oh-info-empty').classList.toggle('is-hidden', hasAnything);
+    document.getElementById('oh-info').classList.remove('is-hidden');
+}
+
+// Set a static info row's value and toggle its visibility based on whether the
+// value is present. Returns true when a value was shown.
+function setInfoRow(valueId, value) {
+    const valueEl = document.getElementById(valueId);
+    const row = valueEl.closest('.oh-info__row');
+    const has = typeof value === 'string' ? value.trim() !== '' : Boolean(value);
+    valueEl.textContent = has ? value : '';
+    if (row) row.classList.toggle('is-hidden', !has);
+    return has;
+}
+
+function buildCustomFieldRow(field) {
+    const row = document.createElement('div');
+    row.className = 'oh-info__custom-row';
+    const label = document.createElement('span');
+    label.className = 'oh-info__label';
+    label.textContent = field.label;
+    const value = document.createElement('span');
+    value.className = 'oh-info__value';
+    value.textContent = formatCustomValue(field);
+    row.append(label, value);
+    return row;
+}
+
+// Prettify queryable values for display: dates "2026-06-05" → "Jun 5, 2026",
+// times "17:00" → "5:00 PM". Falls back to the raw string if it can't parse.
+function formatCustomValue(field) {
+    if (field.type === 'date') return prettifyDate(field.value);
+    if (field.type === 'time') return prettifyTime(field.value);
+    return field.value;
+}
+
+function prettifyDate(value) {
+    const d = new Date(`${value}T00:00:00`);
+    if (isNaN(d.getTime())) return value;
+    return d.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
+}
+
+function prettifyTime(value) {
+    const [h, m] = String(value).split(':').map(Number);
+    if (Number.isNaN(h)) return value;
+    const d = new Date();
+    d.setHours(h, m || 0, 0, 0);
+    return d.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
+}
+
+// ─── Attribute-aware search (Phase 4b) ──────────────────────────────────────────
+
+// Build the searchable attribute list: fixed attributes + one per library field.
+// Choice fields carry their options so the value control can render a dropdown.
+function buildSearchAttributes(library) {
+    const defs = Array.isArray(library) ? library : [];
+    const custom = defs.map(def => ({
+        key: `custom:${def.id}`,
+        id: def.id,
+        label: def.label,
+        type: def.type,
+        options: def.options || [],
+        kind: 'custom',
+    }));
+    return [...FIXED_ATTRIBUTES, ...custom];
+}
+
+function getAttrByKey(key) {
+    return searchAttributes.find(a => a.key === key) || null;
+}
+
+function populateAttributeSelect() {
+    const select = document.getElementById('oh-search-attr');
+    select.replaceChildren();
+    for (const attr of searchAttributes) {
+        const opt = document.createElement('option');
+        opt.value = attr.key;
+        opt.textContent = attr.label;
+        select.appendChild(opt);
+    }
+    renderValueControl();
+}
+
+// Swap the value control to match the selected attribute's type.
+function renderValueControl() {
+    const container = document.getElementById('oh-search-value');
+    container.replaceChildren();
+    const attr = getAttrByKey(document.getElementById('oh-search-attr').value);
+    if (attr) container.appendChild(buildValueControl(attr));
+}
+
+function buildValueControl(attr) {
+    if (attr.type === 'choice') {
+        const select = document.createElement('select');
+        select.id = 'oh-search-input';
+        for (const opt of attr.options) {
+            const o = document.createElement('option');
+            o.value = opt;
+            o.textContent = opt;
+            select.appendChild(o);
+        }
+        return select;
+    }
+    const input = document.createElement('input');
+    input.id = 'oh-search-input';
+    // Pre-fill date/time with today/now so the shown value is the real value and
+    // the user can Add immediately without having to "tweak" the field first.
+    if (attr.type === 'date') {
+        input.type = 'date';
+        input.value = nowDateValue();
+    } else if (attr.type === 'time') {
+        input.type = 'time';
+        input.value = nowTimeValue();
+    } else {
+        input.type = 'text';
+        input.placeholder = `Search ${attr.label.toLowerCase()}...`;
+    }
+    input.addEventListener('keydown', handleSearchEnter);
+    return input;
+}
+
+function nowDateValue() {
+    return orderDateKey(new Date());
+}
+
+function nowTimeValue() {
+    const d = new Date();
+    return `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
+}
+
+function handleSearchEnter(e) {
+    if (e.key !== 'Enter') return;
+    e.preventDefault();
+    addCurrentFilter();
+}
+
+function readValueControl() {
+    const el = document.getElementById('oh-search-input');
+    return el ? el.value : '';
+}
+
+// Add the current attribute+value as a chip. Replaces any existing chip for the
+// same attribute so the user can't stack two filters on one field.
+function addCurrentFilter() {
+    const attr = getAttrByKey(document.getElementById('oh-search-attr').value);
+    if (!attr) return;
+    const value = readValueControl().trim();
+    if (!value) return;
+
+    activeFilters = activeFilters.filter(f => f.key !== attr.key);
+    activeFilters.push({ key: attr.key, attr, value, display: displayFilterValue(attr, value) });
+    renderChips();
+    applyFilters();
+
+    // Reset the value control to its default so the stale value doesn't look
+    // re-addable, and the field is clearly ready for the next criterion.
+    renderValueControl();
+}
+
+function removeFilter(key) {
+    activeFilters = activeFilters.filter(f => f.key !== key);
+    renderChips();
+    applyFilters();
+}
+
+function displayFilterValue(attr, value) {
+    if (attr.type === 'date') return prettifyDate(value);
+    if (attr.type === 'time') return prettifyTime(value);
+    return value;
+}
+
+function renderChips() {
+    const wrap = document.getElementById('oh-search-chips');
+    wrap.replaceChildren();
+    for (const filter of activeFilters) wrap.appendChild(buildChip(filter));
+}
+
+function buildChip(filter) {
+    const chip = document.createElement('span');
+    chip.className = 'oh-search__chip';
+    const text = document.createElement('span');
+    text.textContent = `${filter.attr.label}: ${filter.display}`;
+    const remove = document.createElement('button');
+    remove.type = 'button';
+    remove.className = 'oh-search__chip-remove';
+    remove.textContent = '×';
+    remove.addEventListener('click', () => removeFilter(filter.key));
+    chip.append(text, remove);
+    return chip;
+}
+
+// Re-filter the master array against all active chips (AND) and re-render the list.
+function applyFilters() {
+    const filtered = activeFilters.length
+        ? allOrders.filter(order => activeFilters.every(f => orderMatchesFilter(order, f)))
+        : allOrders;
+    renderOrderList(filtered);
+}
+
+function orderMatchesFilter(order, filter) {
+    const attr = filter.attr;
+    if (attr.kind === 'fixed') {
+        if (attr.key === 'date') return orderDateKey(order.createdAt) === filter.value;
+        return fixedText(order, attr.key).toLowerCase().includes(filter.value.toLowerCase());
+    }
+    const field = order.customFields ? order.customFields[attr.id] : null;
+    if (!field || field.value == null) return false;
+    return String(field.value) === String(filter.value);
+}
+
+function fixedText(order, key) {
+    if (key === 'customer') return order.customer?.name || '';
+    if (key === 'phone') return order.customer?.phone || '';
+    if (key === 'note') return order.orderNote || '';
+    return '';
+}
+
+// Local YYYY-MM-DD key so it lines up with what <input type="date"> produces.
+function orderDateKey(ts) {
+    if (!ts) return '';
+    const d = ts.toDate ? ts.toDate() : new Date(ts);
+    const y = d.getFullYear();
+    const m = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    return `${y}-${m}-${day}`;
+}
+
+function resetSearch(library) {
+    searchAttributes = buildSearchAttributes(library);
+    activeFilters = [];
+    populateAttributeSelect();
+    renderChips();
 }
 
 // ─── Print ─────────────────────────────────────────────────────────────────────
@@ -178,6 +452,7 @@ export async function initOrderHistory(user) {
         // Load profile for bill header (cached centrally in firebase.js)
         const profile = await fetchUserProfile(user.uid);
         populateBillHeader(profile);
+        resetSearch(profile?.orderFieldLibrary);
 
         // Reset bill panel
         document.getElementById('oh-items-list').replaceChildren();
@@ -191,6 +466,7 @@ export async function initOrderHistory(user) {
         document.getElementById('oh-discount-amount').textContent = '- Rp 0';
         document.getElementById('oh-discount-pct').textContent = '0';
         document.getElementById('oh-print-btn').disabled = true;
+        document.getElementById('oh-info').classList.add('is-hidden');
 
         // Fetch and render orders
         const orderList = document.getElementById('oh-order-list');
@@ -200,8 +476,8 @@ export async function initOrderHistory(user) {
         orderList.replaceChildren(loadingMsg);
         try {
             const orders = await fetchOrders(user.uid);
-            console.log("orders : ", orders);
-            renderOrderList(orders);
+            allOrders = orders;
+            applyFilters();
         } catch (err) {
             console.error('Failed to load order history:', err);
             const errorMsg = document.createElement('p');
@@ -210,6 +486,9 @@ export async function initOrderHistory(user) {
             orderList.replaceChildren(errorMsg);
         }
     });
+
+    document.getElementById('oh-search-attr').addEventListener('change', renderValueControl);
+    document.getElementById('oh-search-add').addEventListener('click', addCurrentFilter);
 
     initPrintButton();
 }
