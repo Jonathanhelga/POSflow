@@ -36,8 +36,7 @@ export function closeCustomerCheckout() {
 }
 
 
-// Read the reusable field library off the user profile (cached after app init;
-// fall back to a fetch) and render it into the Add-field menu.
+// Read the reusable field library off the user profile (cached after app init; fall back to a fetch) and render it into the Add-field menu.
 async function populateSavedFields() {
     const profile = getCachedUserProfile() || (auth.currentUser && await fetchUserProfile(auth.currentUser.uid));
     renderSavedFields(profile?.orderFieldLibrary || []);
