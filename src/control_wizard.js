@@ -106,12 +106,10 @@ export function eventDelegation(containerID){
     mainContainer.addEventListener('click', (e) => {
         if (e.target && e.target.id === 'js-to-signUp') {
             e.preventDefault();
-            console.log("Switching to Sign Up...");
             switchView('signUp');
         }
         else if (e.target && e.target.id === 'js-to-logIn') {
             e.preventDefault();
-            console.log("Switching to Log In...");
             switchView('logIn');
         }
     })

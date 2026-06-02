@@ -29,7 +29,6 @@ export async function renderLoggedInState(user) {
     }
     else{
         showToast('Please complete your business profile setup to continue.', 'info');
-        // console.log("not have business profile — resuming setup wizard");
         const wizard = document.getElementById('setup-wizard');
         wizard.classList.remove('is-hidden');
         wizard.classList.add('is-active');

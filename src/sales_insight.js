@@ -11,7 +11,6 @@ let topItemsSortKey = 'revenue';
 let topItemsSortDir = 'desc';
 let topItemsRows = [];
 export async function initInsights(user){
-    console.log(user);
     if(!user){ return; }
     try{
         inventory_item = await fetchInventory(user.uid);

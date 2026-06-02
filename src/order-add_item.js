@@ -322,7 +322,6 @@ async function handleCheckoutFormSubmit(e) {
         orderNote,
         customFields
     };
-    console.log(orderPayload);
 
     setCheckoutSubmitting(true, "Submitting...");
 

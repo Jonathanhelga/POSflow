@@ -27,8 +27,6 @@ export async function loadAllItems() {
         // }
         // END TEMP
 
-        console.log("Total Items Loaded:", allItems.length);
-        console.table(allItems);
         renderItemGrid(allItems);
     }
     catch (error) { console.error("Error pulling data:", error); }

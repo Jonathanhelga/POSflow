@@ -77,7 +77,6 @@ function selectItem(item, cardEl) {
     document.querySelectorAll('.iu-card').forEach(c => c.classList.remove('iu-card--active'));
     cardEl.classList.add('iu-card--active');
     selectedItem = item;
-    console.log(item);
     populateDetail(item);
     
 }

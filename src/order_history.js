@@ -34,8 +34,6 @@ function formatTime(ts) {
 function shortId(id) { return id.slice(-8).toUpperCase(); }
 
 function populateBillHeader(profile) {
-    console.log(profile);
-    
     document.getElementById('oh-shop-name').textContent =
         profile?.business_name || 'My Shop';
     document.getElementById('oh-shop-tagline').textContent = '';
