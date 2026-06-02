@@ -83,10 +83,9 @@
     color: white;
 }
 
-/* Live clock (date + seconds) — grows to fill the space below the buttons.
-   container-type: size lets the text inside scale to the card via cq units. */
 .c-clock {
     flex: 1;
+    min-height: 4.5rem;
     container-type: size;
     display: flex;
     flex-direction: column;
@@ -96,15 +95,17 @@
     padding: var(--pos-padding);
     text-align: center;
     background-color: var(--clr-panel);
-    border: 1px solid var(--clr-border);
     border-radius: var(--radius);
 }
+
 #clock-date {
-    font-size: clamp(0.8rem, 7cqh, 1.3rem);
+    font-size: min(7cqw, 38cqh);
+    white-space: nowrap;
     color: var(--clr-text-secondary);
 }
 #clock-time {
-    font-size: clamp(1.6rem, 20cqh, 4rem);
+    font-size: min(19cqw, 58cqh);
+    white-space: nowrap;
     font-weight: 700;
     font-variant-numeric: tabular-nums;
     color: var(--clr-text-primary);
