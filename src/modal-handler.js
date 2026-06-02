@@ -4,9 +4,13 @@ export function toggleModal(idName){
         if (event.target === modal) toggleModal(idName); 
     };
 
-    if(modal.classList.contains('is-hidden')){  
-        modal.classList.remove('is-hidden'); 
-        modal.addEventListener('click', handleBackdropClick);
+    // Modals that hold unsaved, hard-to-recover input should NOT close on backdrop click,
+    // so a stray click can't discard a checkout in progress.
+    const noBackdropClose = ['customer-checkout-modal'];
+
+    if(modal.classList.contains('is-hidden')){
+        modal.classList.remove('is-hidden');
+        if (!noBackdropClose.includes(idName)) modal.addEventListener('click', handleBackdropClick);
     }
 
     else {
