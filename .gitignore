@@ -39,5 +39,6 @@ firestore-export/
 *.txt
 resume_project_notes_caterflow.md
 question_rewriting.md
+git-merge-workflow.md
 CLAUDE.md
 .claude/

@@ -1,11 +1,41 @@
 import { auth, fetchInventory, db } from './firebase';
 // import { doc, updateDoc, serverTimestamp } from 'firebase/firestore';
-import { createItemButton, renderItemGrid } from './item_ui';
+import { renderItemGrid } from './item_ui';
 import { formatRupiah } from './formatRupiah';
 
 export let allItems = [];
 let searchTimeout = 0;
+let currentQuery = '';
+let currentSortMode = 'color';
 function normalizeText(text){ return String(text || '').toLowerCase().trim(); }
+
+// Sort a copy of the items by the chosen mode. 'color' groups items by their
+// owner colour (tagColor), then alphabetically within each group; items with no
+// colour fall to the end. Other modes are simple single-key sorts.
+function sortItems(items, mode){
+    const sorted = [...items];
+    if (mode === 'name') {
+        sorted.sort((a, b) => normalizeText(a.itemName).localeCompare(normalizeText(b.itemName)));
+    } else if (mode === 'price') {
+        sorted.sort((a, b) => (a.sellPrice || 0) - (b.sellPrice || 0));
+    } else if (mode === 'stock') {
+        sorted.sort((a, b) => (a.stockLevel || 0) - (b.stockLevel || 0));
+    } else {
+        sorted.sort((a, b) => {
+            const colorA = a.tagColor || 'zzz';
+            const colorB = b.tagColor || 'zzz';
+            if (colorA !== colorB) return colorA.localeCompare(colorB);
+            return normalizeText(a.itemName).localeCompare(normalizeText(b.itemName));
+        });
+    }
+    return sorted;
+}
+
+// Single render path: apply the active search filter, then the active sort.
+function refreshGrid(){
+    const filtered = searchedItems(currentQuery);
+    renderItemGrid(sortItems(filtered, currentSortMode));
+}
 
 export async function loadAllItems() {
     try {
@@ -27,16 +57,14 @@ export async function loadAllItems() {
         // }
         // END TEMP
 
-        renderItemGrid(allItems);
+        refreshGrid();
     }
     catch (error) { console.error("Error pulling data:", error); }
 }
 
 export function addSingleItem(item){
-    const container = document.getElementById('item-grid');
-    if(!container) return;
     allItems.push(item);
-    createItemButton(container, item);
+    refreshGrid();
 }
 
 function searchedItems(query){
@@ -49,17 +77,27 @@ function searchedItems(query){
 }
 
 function handleSearchEvent(event){
-    const query = event.target.value;
+    currentQuery = event.target.value;
     clearTimeout(searchTimeout);
-    searchTimeout = setTimeout(() => {
-        const filteredItems = searchedItems(query);
-        renderItemGrid(filteredItems);
-    }, 300);
+    searchTimeout = setTimeout(refreshGrid, 300);
 }
 
 export function initializeSearch(){
     const searchInput = document.getElementById('js-item-search');
     searchInput?.addEventListener('input', (event) => handleSearchEvent(event));
+}
+
+function handleSortClick(event){
+    const button = event.currentTarget;
+    currentSortMode = button.dataset.sort;
+    document.querySelectorAll('.c-sort-bar__btn')
+        .forEach(btn => btn.classList.toggle('is-active', btn === button));
+    refreshGrid();
+}
+
+export function initSort(){
+    document.querySelectorAll('.c-sort-bar__btn')
+        .forEach(btn => btn.addEventListener('click', handleSortClick));
 }
 
 //   1. Listen on document so no manual focus is required

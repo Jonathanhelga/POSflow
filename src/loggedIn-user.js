@@ -1,6 +1,6 @@
 import { db, fetchUserProfile } from "./firebase";
 import { initInventoryForm } from './add_item_ui';
-import { allItems, loadAllItems, initializeSearch, initGlobalBarcodeListener } from './search_item';
+import { allItems, loadAllItems, initializeSearch, initSort, initGlobalBarcodeListener } from './search_item';
 import { initializeOrderForm, initSubmitOrder, setTaxRate, scanAddItem } from "./order-add_item";
 import { initProfile } from "./profile";
 import { switchView } from "./control_wizard";
@@ -14,6 +14,7 @@ export async function renderLoggedInState(user) {
         initInventoryForm();
         loadAllItems();
         initializeSearch();
+        initSort();
         initializeOrderForm();
         initSubmitOrder();
         initProfile(user);

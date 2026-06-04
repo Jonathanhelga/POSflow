@@ -214,6 +214,41 @@
     color: #666;
 }
 
+/* — Sort bar — */
+.c-sort-bar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.6rem;
+    padding: 0 var(--pos-padding);
+    margin-bottom: 1rem;
+}
+.c-sort-bar__label {
+    font-size: 14px;
+    font-weight: 600;
+    color: #2c3e50;
+    margin-right: 0.2rem;
+}
+.c-sort-bar__btn {
+    padding: 8px 16px;
+    border: 2px solid #e1e8ed;
+    border-radius: 100px;
+    background-color: #f8f9fa;
+    font-size: 14px;
+    color: #2c3e50;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+.c-sort-bar__btn:hover {
+    border-color: #4a90e2;
+    background-color: #fff;
+}
+.c-sort-bar__btn.is-active {
+    border-color: #4a90e2;
+    background-color: #4a90e2;
+    color: #fff;
+}
+
 /* — Feature Buttons (Add New Item, Other Features) — */
 .c-actions__features {
     display: flex;
