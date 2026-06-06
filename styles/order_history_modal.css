@@ -68,7 +68,7 @@
     align-items: center;
     gap: 6px;
     margin-bottom: 0.65rem;
-    font-size: 0.72rem;
+    font-size: 0.85rem;
     font-weight: 700;
     letter-spacing: 0.5px;
     text-transform: uppercase;
@@ -76,6 +76,14 @@
 }
 
 .oh-search__heading-icon { font-size: 0.9rem; }
+
+.oh-search__count {
+    margin-left: auto;
+    font-weight: 600;
+    letter-spacing: 0;
+    text-transform: none;
+    color: var(--clr-text-primary);
+}
 
 .oh-search__row {
     display: flex;
@@ -171,7 +179,7 @@
 
 /* CSS-only empty state: tells new users nothing is filtered yet */
 .oh-search__chips:empty::before {
-    content: "Showing all orders — pick a field above to filter.";
+    content: "Showing all orders. Pick a field above to filter.";
     font-size: 0.75rem;
     font-style: italic;
     color: var(--clr-text-secondary);
