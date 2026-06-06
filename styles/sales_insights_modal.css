@@ -265,6 +265,7 @@
 
 .c-sales__col-rank {
     width: 3rem;
+    white-space: nowrap;
     color: var(--clr-text-secondary);
     font-weight: 600;
 }
