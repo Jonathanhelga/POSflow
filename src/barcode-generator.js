@@ -110,20 +110,20 @@ function updatePreview() {
     priceDiv.className = 'bg-preview__price';
     priceDiv.textContent = `Rp ${formatRupiah(selectedItem.sellPrice)}`;
 
-    const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-    svg.id = 'bg-barcode-svg';
-    preview.append(nameDiv, imgWrap, priceDiv, svg);
+    const barcodeCanvas = document.createElement('canvas');
+    barcodeCanvas.id = 'bg-barcode-canvas';
+    preview.append(nameDiv, imgWrap, priceDiv, barcodeCanvas);
     design.replaceChildren(preview);
 
     // show/hide image block
     document.getElementById('bg-preview-img-wrap').style.display = uploadedImageUrl ? 'block' : 'none';
 
     // generate barcode
-    const svgEl = document.getElementById('bg-barcode-svg');
+    const canvasEl = document.getElementById('bg-barcode-canvas');
     const sku   = (selectedItem.sku ?? '').trim();
     if (sku) {
         try {
-            JsBarcode(svgEl, sku, {
+            JsBarcode(canvasEl, sku, {
                 height: 110,
                 fontSize: 14,
                 displayValue: true,
@@ -134,13 +134,13 @@ function updatePreview() {
             const errMsg = document.createElement('p');
             errMsg.className = 'bg-empty bg-empty--error';
             errMsg.textContent = 'Invalid SKU for barcode';
-            svgEl.replaceWith(errMsg);
+            canvasEl.replaceWith(errMsg);
         }
     } else {
         const noSkuMsg = document.createElement('p');
         noSkuMsg.className = 'bg-empty';
         noSkuMsg.textContent = 'No SKU — barcode unavailable';
-        svgEl.replaceWith(noSkuMsg);
+        canvasEl.replaceWith(noSkuMsg);
     }
 }
 
@@ -161,7 +161,7 @@ async function saveDesign() {
         const canvas = await html2canvas(previewEl, {
             scale: 3,
             useCORS: true,
-            backgroundColor: '#d8faff',
+            backgroundColor: null,
         });
 
         // Build filename: e.g. "barcode-SKU123-sticker-s.png"
@@ -257,8 +257,9 @@ export async function initBarcodeGenerator(user) {
     document.getElementById('bg-color-picker').addEventListener('input', (e) => { 
         const background_preview = document.querySelector('.bg-preview');
         backgroundColor = e.target.value;  
-        if(!background_preview) { return; }                                              
-        background_preview.style.backgroundColor = e.target.value;                                                
+        if(!background_preview) { return; }
+        background_preview.style.backgroundColor = e.target.value;
+        background_preview.style.borderColor = e.target.value;
     }); 
 
     document.getElementById('bg-size-options').addEventListener('click', (e) => {

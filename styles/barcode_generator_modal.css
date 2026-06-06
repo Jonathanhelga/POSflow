@@ -247,7 +247,8 @@
     color: #333;
     margin-bottom: 18px;
 }
-.bg-preview svg {
+.bg-preview svg,
+.bg-preview canvas {
     max-width: 100%;
 }
 
