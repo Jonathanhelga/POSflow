@@ -1,6 +1,6 @@
 import { updateItemData } from './firebase';
 import { toggleModal } from './modal-handler';
-import { allItems, loadAllItems, updateLocalItem } from './search_item';
+import { allItems, loadAllItems, updateLocalItem, refreshGrid } from './search_item';
 import { formatRupiah } from './formatRupiah';
 
 let filteredItems  = [];
@@ -183,6 +183,10 @@ async function handleSave() {
         await updateItemData(selectedItem.id, fields);
         updateLocalItem(selectedItem.id, fields);
         Object.assign(selectedItem, fields);
+
+        // Rebuild the POS grid from the now-updated in-memory items so the
+        // button reflects the new colour (and re-sorts) without a page reload.
+        refreshGrid();
 
         // Refresh the selected card's swatch in the list.
         const cardEl = document.querySelector(`.mi-card[data-item-id="${selectedItem.id}"]`);

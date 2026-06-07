@@ -32,7 +32,7 @@ function sortItems(items, mode){
 }
 
 // Single render path: apply the active search filter, then the active sort.
-function refreshGrid(){
+export function refreshGrid(){
     const filtered = searchedItems(currentQuery);
     renderItemGrid(sortItems(filtered, currentSortMode));
 }
