@@ -305,6 +305,7 @@
           <div class="c-modal__body">
             <div class="c-actions c-actions--stack">
               <button id="inventory-update-open" class="btn" type="button">Update Inventory</button>
+              <button id="manage-item-open" class="btn" type="button">Manage Items</button>
               <button id="barcode-generator-open" class="btn" type="button">Generate Barcode</button>
               <button id="sales-insights-open" class="btn" type="button">Sales Insights</button>
               <!-- <button id="item-info-open" class="btn" type="button" disabled>Item Information</button> -->
@@ -757,6 +758,107 @@
                 <p id="iu-feedback" class="iu-feedback"></p>
               </div>
 
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+    <div id="manage-item-modal" class="c-modal c-modal--center is-hidden">
+      <div class="c-modal__panel" id="c-modal-manage-item">
+        <header class="c-modal__header">
+          <h2 class="c-modal__title">Manage Items</h2>
+          <button type="button" class="c-modal__close" aria-label="Close" data-modal-close="manage-item-modal">&times;</button>
+        </header>
+        <div class="c-modal__body mi-body">
+          <!-- Left: Item List -->
+          <div class="mi-list-panel">
+            <div class="mi-search-bar">
+              <input type="search" id="mi-search" class="mi-search-input" placeholder="Search by name or SKU..." />
+            </div>
+            <div id="mi-item-list">
+              <p class="mi-empty">Select an item to begin...</p>
+            </div>
+          </div>
+
+          <!-- Right: Overview + Edit -->
+          <div class="mi-detail-panel">
+
+            <!-- Placeholder (shown until an item is selected) -->
+            <div id="mi-placeholder" class="mi-placeholder">
+              <p>← Select an item to view and edit its details</p>
+            </div>
+
+            <!-- Detail view (hidden until item selected) -->
+            <div id="mi-detail-view" class="mi-detail-view is-hidden">
+
+              <!-- Item header -->
+              <div class="mi-detail-header">
+                <span id="mi-detail-dot" class="mi-detail-header__dot"></span>
+                <div class="mi-detail-header__info">
+                  <h3 class="mi-detail-header__name" id="mi-detail-name">—</h3>
+                  <p class="mi-detail-header__sku" id="mi-detail-sku">—</p>
+                </div>
+              </div>
+
+              <!-- Read-only overview -->
+              <div class="mi-overview-grid">
+                <div class="mi-readonly">
+                  <span class="mi-readonly__label">Current Stock</span>
+                  <span class="mi-readonly__value" id="mi-ro-stock">—</span>
+                </div>
+                <div class="mi-readonly">
+                  <span class="mi-readonly__label">Unit</span>
+                  <span class="mi-readonly__value" id="mi-ro-unit">—</span>
+                </div>
+                <div class="mi-readonly">
+                  <span class="mi-readonly__label">Created</span>
+                  <span class="mi-readonly__value" id="mi-ro-created">—</span>
+                </div>
+                <div class="mi-readonly">
+                  <span class="mi-readonly__label">Last Updated</span>
+                  <span class="mi-readonly__value" id="mi-ro-updated">—</span>
+                </div>
+                <div class="mi-readonly mi-readonly--full">
+                  <span class="mi-readonly__label">Description</span>
+                  <span class="mi-readonly__value" id="mi-ro-desc">—</span>
+                </div>
+              </div>
+
+              <!-- Editable fields -->
+              <div class="mi-edit">
+                <span class="mi-edit__title">Edit Details</span>
+                <div class="mi-edit__grid">
+                  <div class="mi-field">
+                    <label class="mi-field__label" for="mi-edit-cost">Cost Price (IDR)</label>
+                    <input type="number" id="mi-edit-cost" class="mi-field__input" min="0" step="1" placeholder="0" />
+                  </div>
+                  <div class="mi-field">
+                    <label class="mi-field__label" for="mi-edit-sell">Sell Price (IDR)</label>
+                    <input type="number" id="mi-edit-sell" class="mi-field__input" min="0" step="1" placeholder="0" />
+                  </div>
+                  <div class="mi-field">
+                    <label class="mi-field__label" for="mi-edit-min">Minimum Stock</label>
+                    <input type="number" id="mi-edit-min" class="mi-field__input" min="0" step="0.01" placeholder="0" />
+                  </div>
+                  <div class="mi-field"> <!-- mi-field--full -->
+                    <label class="mi-field__label" for="mi-edit-supplier">Supplier</label>
+                    <input type="text" id="mi-edit-supplier" class="mi-field__input" maxlength="255" placeholder="e.g., PT. FreshGoods Supplier" />
+                  </div>
+                  <div class="mi-field">
+                    <span class="mi-field__label">Button Theme</span>
+                    <div id="mi-edit-theme" class="mi-swatches"></div>
+                  </div>
+                </div>
+              </div>
+
+            </div>
+
+            <!-- Footer: always pinned at the bottom of the panel -->
+            <div id="mi-footer" class="mi-edit__footer is-hidden">
+              <p id="mi-feedback" class="mi-feedback"></p>
+              <button type="button" id="mi-save-btn" class="btn mi-save-btn">Save Changes</button>
             </div>
           </div>
 

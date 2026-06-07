@@ -195,3 +195,13 @@ export async function syncStockToFirestore(itemId, newQuantity) {
     const item = allItems.find(i => i.id === itemId);
     if (item) item.stockLevel = newQuantity;
 }
+
+// Update editable metadata on an inventory item (prices, supplier, min stock,
+// tag color). Stock level is intentionally NOT touched here — that flows through
+// the inventory-update modal / syncStockToFirestore.
+export async function updateItemData(itemId, fields) {
+    await updateDoc(doc(db, 'inventory', itemId), {
+        ...fields,
+        lastUpdated: serverTimestamp(),
+    });
+}

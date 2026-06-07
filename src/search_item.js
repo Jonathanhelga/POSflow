@@ -146,3 +146,11 @@ export function updateLocalStock(itemId, quantityChange) {
     if (!item) return;
     item.stockLevel = (item.stockLevel || 0) + quantityChange;
 }
+
+// Merge edited metadata fields into the canonical in-memory item so the grid
+// and other modules reflect the change without a full reload.
+export function updateLocalItem(itemId, fields) {
+    const item = allItems.find(i => i.id === itemId);
+    if (!item) return;
+    Object.assign(item, fields);
+}
