@@ -23,7 +23,7 @@
 
 .mi-body {
     display: grid;
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: 0.7fr 1.3fr;
     gap: 0;
     padding: 0 !important;
     overflow: hidden;
@@ -265,7 +265,6 @@
 
 .mi-swatches {
     display: flex;
-    /* flex-wrap: wrap; */
     gap: 10px;
     padding: 2px 0;
 }
