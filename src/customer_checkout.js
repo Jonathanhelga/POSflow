@@ -1,6 +1,6 @@
 import { toggleModal } from './modal-handler';
 import { formatRupiah } from './formatRupiah';
-import { getOrderedItems } from './order-add_item';
+import { getOrderedItems, getTaxRate } from './order-add_item';
 import { auth, fetchCustomers, getCachedUserProfile, fetchUserProfile } from './firebase';
 import { initCustomFields, resetCustomFields, collectCustomFields, collectFieldDefinitions, renderSavedFields } from './checkout_custom_fields';
 
@@ -187,10 +187,16 @@ function recalcTotals() {
     const discountInput = document.getElementById('js-checkout-discount');
     const discountPct = clampDiscount(Number(discountInput?.value) || 0);
     const discountAmount = subtotal * (discountPct / 100);
-    const total = Math.max(0, subtotal - discountAmount);
+    const subtotalAfterDiscount = Math.max(0, subtotal - discountAmount);
+
+    const taxRate = getTaxRate();
+    const taxAmount = subtotalAfterDiscount * (taxRate / 100);
+    const total = subtotalAfterDiscount + taxAmount;
 
     setText('js-checkout-subtotal', formatRupiah(subtotal));
     setText('js-checkout-discount-amount', `- ${formatRupiah(discountAmount)}`);
+    setText('js-checkout-tax-label', taxRate);
+    setText('js-checkout-tax-amount', formatRupiah(taxAmount));
     setText('js-checkout-total', formatRupiah(total));
 }
 

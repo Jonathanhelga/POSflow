@@ -23,6 +23,7 @@ export function setTaxRate(rate) {
     taxRate = parseFloat(rate) || 0;
     updateTotals();
 }
+export function getTaxRate() { return taxRate; }
 
 export function openOrderItemModal(itemID) {
     const item = allItems.find(item => item.id === itemID); 
