@@ -2,9 +2,10 @@ import { db } from './firebase';
 import { doc, updateDoc, increment, serverTimestamp } from 'firebase/firestore';
 import { toggleModal } from './modal-handler';
 import { allItems, loadAllItems, updateLocalStock } from './search_item';
+import { createSelection } from './selection';
 
 let filteredItems = [];
-let selectedItem  = null;
+const selection   = createSelection();
 
 const formatCurrency = (value) => new Intl.NumberFormat('id-ID', {
     style: 'currency', currency: 'IDR',
@@ -76,7 +77,7 @@ function renderItemList_Inventory(items) {
 function selectItem(item, cardEl) {
     document.querySelectorAll('.iu-card').forEach(c => c.classList.remove('iu-card--active'));
     cardEl.classList.add('iu-card--active');
-    selectedItem = item;
+    selection.set(item);
     populateDetail(item);
     
 }
@@ -113,7 +114,8 @@ function populateDetail(item) {
 // ─── Save stock update
 
 async function handleSave() {
-    if (!selectedItem) return;
+    const item = selection.get();
+    if (!item) return;
 
     const input = document.getElementById('iu-incoming-qty');
     const qty   = Number(input.value);
@@ -128,34 +130,34 @@ async function handleSave() {
     btn.textContent = 'Saving...';
 
     try {
-        await updateDoc(doc(db, 'inventory', selectedItem.id), {
+        await updateDoc(doc(db, 'inventory', item.id), {
             stockLevel:  increment(qty),
             lastUpdated: serverTimestamp(),
         });
 
-        updateLocalStock(selectedItem.id, qty);
+        updateLocalStock(item.id, qty);
 
         // Refresh the card in the list
-        const cardEl = document.querySelector(`.iu-card[data-item-id="${selectedItem.id}"]`);
+        const cardEl = document.querySelector(`.iu-card[data-item-id="${item.id}"]`);
         if (cardEl) {
-            const status = getStockStatus(selectedItem.stockLevel, selectedItem.minStockLevel);
+            const status = getStockStatus(item.stockLevel, item.minStockLevel);
             cardEl.querySelector('.iu-badge').textContent = status === 'good' ? 'GOOD' : 'ALERT';
             cardEl.querySelector('.iu-badge').className   = `iu-badge iu-badge--${status}`;
             const stockInfoEl = cardEl.querySelector('.iu-card__stock-info');
             const updatedUnitSpan = document.createElement('span');
             updatedUnitSpan.className = 'iu-card__unit';
-            updatedUnitSpan.textContent = selectedItem.unit ?? '';
+            updatedUnitSpan.textContent = item.unit ?? '';
             stockInfoEl.replaceChildren(
-                document.createTextNode(`${selectedItem.stockLevel} `),
+                document.createTextNode(`${item.stockLevel} `),
                 updatedUnitSpan,
-                document.createTextNode(` \u00a0/\u00a0 min ${selectedItem.minStockLevel ?? 0}`)
+                document.createTextNode(` \u00a0/\u00a0 min ${item.minStockLevel ?? 0}`)
             );
         }
 
-        populateDetail(selectedItem);
+        populateDetail(item);
         input.value = '';
         showFeedback(
-            `Added ${qty} ${selectedItem.unit ?? 'units'}. New stock: ${selectedItem.stockLevel}.`,
+            `Added ${qty} ${item.unit ?? 'units'}. New stock: ${item.stockLevel}.`,
             'success'
         );
 
@@ -188,7 +190,7 @@ async function openInventoryUpdate(user) {
     if (!user) return;
 
     // Reset panel state
-    selectedItem = null;
+    selection.clear();
     const loadingMsg = document.createElement('p');
     loadingMsg.className = 'iu-empty';
     loadingMsg.textContent = 'Loading...';

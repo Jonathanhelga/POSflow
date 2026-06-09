@@ -2,9 +2,10 @@ import { updateItemData } from './firebase';
 import { toggleModal } from './modal-handler';
 import { allItems, loadAllItems, updateLocalItem, refreshGrid } from './search_item';
 import { formatRupiah } from './formatRupiah';
+import { createSelection } from './selection';
 
 let filteredItems  = [];
-let selectedItem   = null;
+const selection    = createSelection();
 let selectedTheme  = 'primary';
 
 // Maps the stored tagColor token to the swatch shown on cards / header.
@@ -119,7 +120,7 @@ function renderItemList_Manage(items) {
 function selectItem(item, cardEl) {
     document.querySelectorAll('.mi-card').forEach(c => c.classList.remove('mi-card--active'));
     cardEl.classList.add('mi-card--active');
-    selectedItem = item;
+    selection.set(item);
     populateDetail(item);
 }
 
@@ -152,7 +153,8 @@ function populateDetail(item) {
 // ─── Save edits ──────────────────────────────────────────────────
 
 async function handleSave() {
-    if (!selectedItem) return;
+    const item = selection.get();
+    if (!item) return;
 
     const costPrice     = Number(document.getElementById('mi-edit-cost').value);
     const sellPrice     = Number(document.getElementById('mi-edit-sell').value);
@@ -180,16 +182,16 @@ async function handleSave() {
     btn.textContent = 'Saving...';
 
     try {
-        await updateItemData(selectedItem.id, fields);
-        updateLocalItem(selectedItem.id, fields);
-        Object.assign(selectedItem, fields);
+        await updateItemData(item.id, fields);
+        updateLocalItem(item.id, fields);
+        Object.assign(item, fields);
 
         // Rebuild the POS grid from the now-updated in-memory items so the
         // button reflects the new colour (and re-sorts) without a page reload.
         refreshGrid();
 
         // Refresh the selected card's swatch in the list.
-        const cardEl = document.querySelector(`.mi-card[data-item-id="${selectedItem.id}"]`);
+        const cardEl = document.querySelector(`.mi-card[data-item-id="${item.id}"]`);
         if (cardEl) cardEl.querySelector('.mi-card__dot').style.backgroundColor = swatchFor(tagColor);
 
         document.getElementById('mi-detail-dot').style.backgroundColor = swatchFor(tagColor);
@@ -222,7 +224,7 @@ function clearFeedback() {
 async function openManageItem(user) {
     if (!user) return;
 
-    selectedItem = null;
+    selection.clear();
     document.getElementById('mi-detail-view').classList.add('is-hidden');
     document.getElementById('mi-footer').classList.add('is-hidden');
     document.getElementById('mi-placeholder').classList.remove('is-hidden');

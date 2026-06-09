@@ -4,9 +4,10 @@ import { fetchInventory } from './firebase';
 import { toggleModal } from './modal-handler';
 import { formatRupiah } from './formatRupiah';
 import { showToast } from './toast';
+import { createSelection } from './selection';
 let allItems      = [];
 let filteredItems = [];
-let selectedItem  = null;
+const selection   = createSelection();
 let currentObjectUrl = null;
 let uploadedImageUrl = null;
 let activeSize = 'large';
@@ -38,7 +39,7 @@ function renderItemList_Barcode(items) {
     items.forEach(item => {
         const card = document.createElement('div');
         card.className = 'bg-card';
-        if (selectedItem?.id === item.id) card.classList.add('bg-card--active');
+        if (selection.is(item)) card.classList.add('bg-card--active');
         card.dataset.itemId = item.id;
         const topRow = document.createElement('div');
         topRow.className = 'bg-card__top-row';
@@ -74,7 +75,7 @@ function renderItemList_Barcode(items) {
 // selection & preview
 
 function selectItem(item) {
-    selectedItem = item;
+    selection.set(item);
 
     document.querySelectorAll('.bg-card').forEach(c => {
         c.classList.toggle('bg-card--active', c.dataset.itemId === item.id);
@@ -85,7 +86,8 @@ function selectItem(item) {
 }
 
 function updatePreview() {
-    if (!selectedItem) return;
+    const item = selection.get();
+    if (!item) return;
 
     const design = document.getElementById('bg-barcode-design');
 
@@ -95,7 +97,7 @@ function updatePreview() {
 
     const nameDiv = document.createElement('div');
     nameDiv.className = 'bg-preview__name';
-    nameDiv.textContent = selectedItem.itemName ?? '-';
+    nameDiv.textContent = item.itemName ?? '-';
 
     const imgWrap = document.createElement('div');
     imgWrap.className = 'bg-preview__img-wrap';
@@ -108,7 +110,7 @@ function updatePreview() {
 
     const priceDiv = document.createElement('div');
     priceDiv.className = 'bg-preview__price';
-    priceDiv.textContent = `Rp ${formatRupiah(selectedItem.sellPrice)}`;
+    priceDiv.textContent = `Rp ${formatRupiah(item.sellPrice)}`;
 
     const barcodeCanvas = document.createElement('canvas');
     barcodeCanvas.id = 'bg-barcode-canvas';
@@ -120,7 +122,7 @@ function updatePreview() {
 
     // generate barcode
     const canvasEl = document.getElementById('bg-barcode-canvas');
-    const sku   = (selectedItem.sku ?? '').trim();
+    const sku   = (item.sku ?? '').trim();
     if (sku) {
         try {
             JsBarcode(canvasEl, sku, {
@@ -147,7 +149,8 @@ function updatePreview() {
 // save
 
 async function saveDesign() {
-    if (!selectedItem) return;
+    const item = selection.get();
+    if (!item) return;
 
     const previewEl = document.querySelector('.bg-preview');
     if (!previewEl) return;
@@ -165,7 +168,7 @@ async function saveDesign() {
         });
 
         // Build filename: e.g. "barcode-SKU123-sticker-s.png"
-        const name = selectedItem.sku ?? selectedItem.itemName ?? 'barcode';
+        const name = item.sku ?? item.itemName ?? 'barcode';
         const link = document.createElement('a');
         link.download = `barcode-${name}-${activeSize}.png`;
         link.href = canvas.toDataURL('image/png');
@@ -185,7 +188,7 @@ async function saveDesign() {
 async function openBarcodeGenerator(user) {
     if (!user) return;
 
-    selectedItem = null;
+    selection.clear();
     cleanupObjectUrl();
     uploadedImageUrl = null;
 
@@ -251,10 +254,10 @@ export async function initBarcodeGenerator(user) {
             uploadedImageUrl = null;
             document.getElementById('bg-img-filename').textContent = '';
         }
-        if (selectedItem) updatePreview();
+        if (selection.get()) updatePreview();
     });
 
-    document.getElementById('bg-color-picker').addEventListener('input', (e) => { 
+    document.getElementById('bg-color-picker').addEventListener('input', (e) => {
         const background_preview = document.querySelector('.bg-preview');
         backgroundColor = e.target.value;  
         if(!background_preview) { return; }
@@ -269,7 +272,7 @@ export async function initBarcodeGenerator(user) {
         document.querySelectorAll('.bg-size-btn').forEach(b =>
             b.classList.toggle('bg-size-btn--active', b === btn)
         );
-        if (selectedItem) updatePreview();
+        if (selection.get()) updatePreview();
     });
 
     document.getElementById('bg-save-btn').addEventListener('click', saveDesign);

@@ -33,7 +33,9 @@ function sortItems(items, mode){
 
 // Single render path: apply the active search filter, then the active sort.
 export function refreshGrid(){
+    const search_stats_element = document.getElementById('js-search-stats');
     const filtered = searchedItems(currentQuery);
+    search_stats_element.textContent = filtered.length;
     renderItemGrid(sortItems(filtered, currentSortMode));
 }
 
