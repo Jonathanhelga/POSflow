@@ -3,11 +3,158 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>POS FLOW Point of Sale</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <title>POS FLOW — Run your shop from the browser.</title>
+    <!-- I place the styling inside the html not separately so that it paints before the main bundle loads (Flash of Unstyled Content prevention) -->
+    <style>
+      body.is-booting #js-landing { display: none; }
 
+      .c-boot-splash {
+        position: fixed;
+        inset: 0;
+        z-index: 9999;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 30px;
+        background: #FAFAF7;
+      }
+      body:not(.is-booting) .c-boot-splash { display: none; }
+
+      .c-boot-splash__brand {
+        font-family: 'Geist Mono', ui-monospace, 'SF Mono', monospace;
+        font-weight: 500;
+        font-size: 15px;
+        letter-spacing: 0.18em;
+        color: #0A0A0A;
+      }
+      .c-boot-splash__spinner {
+        width: 22px;
+        height: 30px;
+        border-radius: 50%;
+        border: 10px solid rgba(10, 10, 10, 0.12);
+        border-top-color: #0A0A0A;
+        animation: bootSpin 0.7s linear infinite;
+      }
+      @keyframes bootSpin { to { transform: rotate(360deg); } }
+    </style>
 </head>
-<body>
-  <!-- ============= Setup Wizard ============= -->
+<body class="is-booting">
+<div id="js-boot-splash" class="c-boot-splash">
+  <div class="c-boot-splash__brand">POS&nbsp;FLOW</div>
+  <div class="c-boot-splash__spinner"></div>
+</div>
+
+  <!--  Landing Page  -->
+<div id="js-landing" class="c-landing">
+
+  <header class="c-landing__nav">
+    <div class="c-landing__nav-inner">
+      <div class="c-landing__brand">POS&nbsp;FLOW</div>
+      <nav class="c-landing__nav-actions">
+        <button type="button" class="c-btn c-btn--ghost" id="js-landing-login">Log&nbsp;In</button>
+        <button type="button" class="c-btn c-btn--primary" id="js-landing-signup">
+          Sign&nbsp;Up <span class="c-btn__pill">Free</span>
+        </button>
+      </nav>
+    </div>
+  </header>
+
+  <section class="c-landing__hero">
+    <div class="c-landing__hero-inner">
+      <span class="c-landing__eyebrow">Point of Sale &middot; Built for simplicty</span>
+      <h1 class="c-landing__headline">Run your shop<br/>from the browser.</h1>
+      <p class="c-landing__sub">No installs. No servers. No IT.</p>
+      <div class="c-landing__cta-row">
+        <button type="button" class="c-btn c-btn--primary c-btn--lg" id="js-hero-signup">
+          Get Started <span class="c-btn__pill">Free</span>
+        </button>
+        <button type="button" class="c-btn c-btn--ghost c-btn--lg" id="js-hero-login">Log In</button>
+      </div>
+
+      <figure class="c-browser-frame" aria-hidden="true">
+        <div class="c-browser-frame__chrome">
+          <span class="c-browser-frame__dot c-browser-frame__dot--red"></span>
+          <span class="c-browser-frame__dot c-browser-frame__dot--yellow"></span>
+          <span class="c-browser-frame__dot c-browser-frame__dot--green"></span>
+          <div class="c-browser-frame__url">posflow.app</div>
+        </div>
+        <div class="c-browser-frame__body">
+          <img src="assets/landing/hero.png" alt="POS FLOW dashboard" class="c-browser-frame__img"/>
+        </div>
+      </figure>
+    </div>
+  </section>
+
+  <section class="c-landing__features">
+    <div class="c-landing__features-inner">
+      <span class="c-landing__section-label">01 — Features</span>
+      <h2 class="c-landing__section-heading">Everything you need to sell.</h2>
+      <div class="c-landing__feature-grid">
+        <article class="c-feature">
+          <div class="c-feature__thumb">
+            <img src="assets/landing/feature-order-history.png" alt="Order History"/>
+          </div>
+          <h3 class="c-feature__title">Order History</h3>
+          <p class="c-feature__desc">Revisit every past sale.</p>
+        </article>
+        <article class="c-feature">
+          <div class="c-feature__thumb">
+            <img src="assets/landing/feature-insights.png" alt="Insights"/>
+          </div>
+          <h3 class="c-feature__title">Insights</h3>
+          <p class="c-feature__desc">See what's working.</p>
+        </article>
+        <article class="c-feature">
+          <div class="c-feature__thumb">
+            <img src="assets/landing/feature-barcode.png" alt="Barcode"/>
+          </div>
+          <h3 class="c-feature__title">Barcode</h3>
+          <p class="c-feature__desc">Print barcodes in seconds.</p>
+        </article>
+      </div>
+      <ul class="c-feature-list">
+        <li class="c-feature-point">
+          <h3 class="c-feature-point__title">Checkout</h3>
+          <p class="c-feature-point__desc">Build a cart, take payment.</p>
+        </li>
+        <li class="c-feature-point">
+          <h3 class="c-feature-point__title">Inventory</h3>
+          <p class="c-feature-point__desc">Update stock as you sell.</p>
+        </li>
+        <li class="c-feature-point">
+          <h3 class="c-feature-point__title">Customers</h3>
+          <p class="c-feature-point__desc">Track who's buying.</p>
+        </li>
+        <li class="c-feature-point">
+          <h3 class="c-feature-point__title">Receipts &amp; Tax</h3>
+          <p class="c-feature-point__desc">Your rates, your receipt.</p>
+        </li>
+      </ul>
+    </div>
+  </section>
+
+  <section class="c-landing__final-cta">
+    <div class="c-landing__final-cta-inner">
+      <span class="c-landing__section-label">02 — Start</span>
+      <h2 class="c-landing__final-headline">Ready when you are.</h2>
+      <button type="button" class="c-btn c-btn--primary c-btn--xl" id="js-final-signup">
+        Get Started <span class="c-btn__pill">Free</span>
+      </button>
+    </div>
+  </section>
+
+  <footer class="c-landing__footer">
+    <span>POS&nbsp;FLOW &middot; &copy; 2026</span>
+  </footer>
+</div>
+
+  <!--  Setup Wizard  -->
+    <div id="js-wizard-overlay" class="c-wizard-overlay is-hidden" aria-hidden="true">
+      <button type="button" class="c-wizard-overlay__close" id="js-wizard-overlay-close" aria-label="Close">&times;</button>
     <div id="setup-wizard" class="setup-wizard">
         <h1 class="app-title">POS FLOW</h1>
         <div id="setup-wizard-card" class="c-wizard__card">
@@ -35,9 +182,9 @@
             </footer>
         </div>
     </div>
-     
-  <!-- ============= Templates ============= -->
+    </div>
 
+  <!--  Templates  -->
     <template id="logged-in-wizard-template">
         <div class="c-setup__welcome-back" style="text-align: center; padding: 2rem;">
             <h3>Helloo There!</h3>
@@ -216,7 +363,7 @@
       </button>
     </template>
 
-    <!-- ============= Modals ============= -->
+    <!--  Modals  -->
     <div id="item-create-modal" class="c-modal c-modal--center is-hidden">
         <div class="c-modal__panel" id="c-modal-item-create">
           <header class="c-modal__header">
@@ -1241,7 +1388,3 @@
 </body>
 <script type="module" src="/src/main.js"></script>
 </html>
-
-<!-- oh by the way, uhmm usually we use search bar right, now since the searching attributes are not only limited to string 
-  characters could be date, time, multiple choice, I want you to help me create a specific attributes search bar. do you 
-  understand what I want  -->

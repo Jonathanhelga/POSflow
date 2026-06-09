@@ -14,6 +14,7 @@ import '../styles/barcode_generator_modal.css';
 import '../styles/sales_insights_modal.css';
 import '../styles/customer_checkout_modal.css';
 import '../styles/confirm-modal.css';
+import '../styles/landing.css';
 import { auth } from "./firebase";
 import { onAuthStateChanged } from "firebase/auth";
 import { switchView, eventDelegation } from "./control_wizard";
@@ -38,11 +39,45 @@ function initLoggedInApp(user) {
     initClock();
 }
 
+function initLanding() {
+  const overlay = document.getElementById('js-wizard-overlay');
+  if (!overlay) return;
+
+  document.getElementById('js-landing-signup').addEventListener('click', () => openWizardOverlay('signUp'));
+  document.getElementById('js-landing-login').addEventListener('click', () => openWizardOverlay('logIn'));
+  document.getElementById('js-hero-signup').addEventListener('click', () => openWizardOverlay('signUp'));
+  document.getElementById('js-hero-login').addEventListener('click', () => openWizardOverlay('logIn'));
+  document.getElementById('js-final-signup').addEventListener('click', () => openWizardOverlay('signUp'));
+  document.getElementById('js-wizard-overlay-close').addEventListener('click', closeWizardOverlay);
+
+  overlay.addEventListener('click', (e) => { if (e.target === overlay) closeWizardOverlay(); });
+}
+
+function openWizardOverlay(view) {
+  const overlay = document.getElementById('js-wizard-overlay');
+  switchView(view);
+  overlay.classList.remove('is-hidden');
+  overlay.setAttribute('aria-hidden', 'false');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeWizardOverlay() {
+  const overlay = document.getElementById('js-wizard-overlay');
+  overlay.classList.add('is-hidden');
+  overlay.setAttribute('aria-hidden', 'true');
+  document.body.style.overflow = '';
+}
+
+initLanding();
+
 document.addEventListener('DOMContentLoaded', function(){
     eventDelegation('js-wizard__body');
     let initialized = false;
     onAuthStateChanged(auth, (user) => {
+        document.body.classList.remove('is-booting');
         if (user) {
+            document.getElementById('js-landing').style.display = 'none';
+            document.getElementById('js-wizard-overlay').classList.add('is-hidden');
             if (initialized) return;
             initialized = true;
             showToast("successfully logging in");
@@ -52,7 +87,6 @@ document.addEventListener('DOMContentLoaded', function(){
             const wizard = document.getElementById('setup-wizard');
             wizard.classList.remove('is-hidden');
             wizard.classList.add('is-active');
-            switchView('signUp');
         }
     });
     modal_handler();// Open and close modal controller
