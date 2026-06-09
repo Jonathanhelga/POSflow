@@ -1,280 +1,205 @@
-# POSFlow — Point-of-Sale Web Application
-feel free to try it: https://minipos-d9d92.web.app/
-A full-stack, cloud-based Point-of-Sale system built for small retail businesses. Handles inventory management, order processing, barcode generation, and thermal receipt printing — all from the browser, with zero frontend frameworks.
+# POS FLOW
 
-> **Background:** This project started in September 2025 as a migration from an offline Electron + MySQL desktop app to a modern web-based architecture. Early development was done without version control — a lesson learned. All commits from that point forward reflect intentional, incremental feature development and security hardening.
+POS FLOW is a browser-based point-of-sale app for small retail shops. It handles the day-to-day counter workflow — ringing up sales, managing inventory, generating barcode labels, printing receipts, and reviewing sales — with everything synced to the cloud so the data isn't tied to a single machine.
 
----
+**Live demo:** https://minipos-d9d92.web.app
 
-## Why This Project Exists
+![POS dashboard](docs/screenshots/dashboard.png)
+*Caption: the main point-of-sale screen — a color-coded product grid on the right, and a live order cart on the left with running subtotal, tax, and total.*
 
-Most POS software is either expensive, bloated with features small shops don't need, or locked into proprietary hardware. POSFlow is purpose-built for small retail businesses (originally an electric parts shop in Indonesia) that need:
-
-- A cashier interface that works on any device with a browser
-- Barcode scanning with a USB scanner — no special SDK, no mobile app
-- Printable receipts on standard 58mm/80mm thermal printers
-- Inventory tracking with low-stock alerts
-- Cloud sync so data isn't trapped on a single machine
-
----
-
-## Tech Stack
-
-| Layer | Technology |
-|-------|-----------|
-| **Frontend** | Vanilla JavaScript (ES6 Modules) — no React, no Vue, no Angular |
-| **Build Tool** | Vite 6 |
-| **Backend** | Express.js 5 (Node.js) |
-| **Database** | Cloud Firestore (Firebase) |
-| **Authentication** | Firebase Auth + custom server-side OTP email verification |
-| **Email Service** | Nodemailer (Gmail SMTP) |
-| **Barcode** | JsBarcode (SVG generation) + html2canvas (PNG export) |
-| **Currency** | Indonesian Rupiah (IDR) via `Intl.NumberFormat` |
+It started as a real project for a small electrical-parts shop in Indonesia, migrated from an earlier offline Electron + MySQL desktop build to a web app so the shop could run it from any device with a browser. All amounts are in Indonesian Rupiah (IDR).
 
 ---
 
 ## Features
 
-### Authentication & Onboarding
-- **Email sign-up with OTP verification** — a 6-digit code is sent via Gmail SMTP, verified entirely server-side (the OTP never reaches the frontend)
-- **Server-side OTP security** — codes are stored in-memory with a 5-minute TTL, single-use deletion, and expiration enforcement
-- **4-step setup wizard** — guides new users through business identity, financial settings (tax rate, invoice prefix), and printer configuration before reaching the POS interface
-- **Firebase Auth session management** — persistent login state via `onAuthStateChanged`, automatic UI rendering based on auth status
+**Point of sale**
+- Color-coded product grid; tap an item to add it to the order.
+- Search products by name, SKU, or supplier, and sort by color, name, price, or stock.
+- USB barcode scanner support — scanning a product's SKU adds it straight to the cart (no input field needs focus).
+- Live order totals: subtotal, configurable tax, optional discount, and grand total update as you go.
+- Stock is checked on every add, and submitting an order writes the order and decrements stock in a single atomic operation.
 
-### Point-of-Sale Interface
-- **Item grid with color-coded buttons** — each product appears as a tappable button, themed by user-assigned color tags (cobalt, sage, slate, rose, charcoal)
-- **Real-time search** — filter products by name, SKU, supplier, or last update date with 300ms debounced input
-- **Order cart management** — add items via grid click or barcode scan, edit quantities with double-click, remove individual items, or reset the entire order
-- **Dynamic tax calculation** — subtotal, tax (pulled from the business profile), and grand total update live as items are added or removed
-- **Stock validation on submit** — each item's quantity is checked against current Firestore stock levels before the order is committed
+**Checkout**
+- Attach a customer (saved and re-used by phone number) and an order note.
+- Apply a percentage discount.
+- Add ad-hoc custom fields per order (date, time, or multiple-choice) that are saved to a reusable library for next time.
 
-### Barcode System
-- **USB barcode scanner integration** — listens globally on the document for rapid keystroke sequences terminated by Enter; works without focusing any specific input field; ignores input when the user is typing in a form field
-- **Scan-to-order** — scanning a product SKU adds it to the current order (or increments its quantity if already in the cart)
-- **Barcode label generator** — select any inventory item, optionally upload a product photo, choose from 4 label sizes (58x40mm sticker to A4), and export as a high-resolution PNG (3x pixel density via html2canvas)
-- **SVG barcode rendering** — generates CODE128 barcodes from SKU values using JsBarcode
+**Inventory**
+- Add items with SKU, cost/sell price, stock, unit of measure, minimum-stock threshold, supplier, and a color tag.
+- Edit item details, and restock with safe concurrent updates.
+- Low-stock items are flagged with a GOOD / ALERT badge against their minimum threshold.
 
-### Inventory Management
-- **Full CRUD** — add items with SKU, name, cost/sell price, stock quantity, unit of measure (10 options: pieces, kg, liters, meters, etc.), minimum stock threshold, supplier info, and description
-- **Stock update panel** — two-panel modal with searchable item list on the left, detail view + incoming quantity input on the right
-- **Low-stock alerts** — items below their minimum threshold display an "ALERT" badge; items above show "GOOD"
-- **Atomic stock operations** — uses Firestore `increment()` for safe concurrent stock updates
+**Barcode labels**
+- Generate printable CODE128 labels from an item's SKU, with the product name, price, and an optional photo.
+- Choose a label size (58×40 mm sticker up to A4) and export it as a high-resolution PNG.
 
-### Receipt & Order History
-- **Thermal receipt layout** — complete bill format including shop name, address, contact details, cashier name, invoice number, itemized table, tax breakdown, and custom footer message
-- **Configurable paper sizes** — supports 58mm (small thermal) and 80mm (standard thermal) printers
-- **Order history browser** — card-based list of past orders with full bill preview; click any order to see its complete receipt
-- **Print integration** — triggers `window.print()` with the bill preview in view, ready for thermal printer output
+**Receipts & order history**
+- Thermal-receipt layout sized for 58 mm or 80 mm printers, with the shop's details, an itemized table, discount/tax breakdown, and a custom footer.
+- Browse past orders and reprint any receipt through the browser.
+- Filter order history by date, customer, phone, note, or any custom field you've used.
 
-### Business Profile
-- **Editable business settings** — update business name, address, phone, Instagram, email, tax rate, invoice prefix, paper size, and receipt footer at any time
-- **Live tax sync** — changing the tax rate in the profile immediately updates the order form calculations
-- **User avatar** — displays the first letter of the user's email as a profile indicator
+**Sales insights**
+- Revenue, order count, items sold, and profit for a chosen date range (today, last 7/30 days, this month, or a custom range).
+- A revenue-by-day chart and a sortable top-sellers table.
 
----
-
-## Architecture
-
-### Project Structure
-
-```
-Point-of-Sale_Firebase/
-├── index.html              # Single-page app (all HTML templates, 767 lines)
-├── package.json
-├── server/
-│   ├── server.js           # Express API — OTP send & verify endpoints
-│   └── emailServices.js    # Nodemailer transport + OTP generation
-├── src/
-│   ├── main.js             # App entry — CSS imports, auth state listener, module init
-│   ├── firebase.js         # Firestore & Auth — all database operations
-│   ├── auth-handler.js     # Sign-up/login UI logic, OTP flow, form validation
-│   ├── control_wizard.js   # 4-step wizard navigation and view switching
-│   ├── loggedIn-user.js    # Post-login initialization — loads profile, sets up modules
-│   ├── order-add_item.js   # Order cart — add/edit/remove items, submit with stock check
-│   ├── search_item.js      # Item search (debounced) + global barcode scanner listener
-│   ├── item_ui.js          # Item grid rendering — color-coded buttons
-│   ├── add_item_ui.js      # New item creation form
-│   ├── inventory_update.js # Stock management — two-panel detail + update view
-│   ├── barcode-generator.js# Label generator — item select, photo upload, size pick, export
-│   ├── order_history.js    # Order list + thermal receipt preview + print
-│   ├── profile.js          # Business profile editing + logout
-│   ├── modal-handler.js    # Modal open/close with CSS animations
-│   └── formatRupiah.js     # IDR currency formatter (Intl.NumberFormat)
-└── styles/
-    ├── variables.css        # Design tokens — colors, spacing, shadows, animations
-    ├── container.css        # POS layout — 30% sidebar + 70% main grid
-    ├── setupWizard.css      # Onboarding wizard overlay
-    └── [9 more module-specific CSS files]
-```
-
-### Design Decisions
-
-**No frontend framework** — every DOM update is explicit `createElement` + `appendChild` / `textContent`. This was a deliberate choice to build strong JavaScript fundamentals rather than depending on framework abstractions. The tradeoff is more verbose rendering code, but the app's complexity is manageable at this scale and the bundle stays minimal.
-
-**Modular architecture** — each feature lives in its own ES6 module with a clear `init*()` entry point. Modules communicate through direct function imports, not a global event bus or state store. This keeps the dependency graph readable.
-
-**Template cloning** — HTML `<template>` elements are defined in `index.html` and cloned with `content.cloneNode(true)` for the wizard forms. Dynamic content within modals is built programmatically using safe DOM APIs (no `innerHTML` with user data).
-
-**CSS design tokens** — all colors, spacing, shadows, and animation timings are defined as reusable values in `variables.css`. Modal animations use CSS keyframes (`slideInFromRight`, `popIn`) triggered by class toggling from JavaScript.
-
-**Atomic batch writes** — order submission uses Firestore `writeBatch()` to create the order document and decrement stock for every item in a single atomic operation. If any part fails, nothing is committed — no partial orders, no phantom stock deductions.
+**Accounts & onboarding**
+- Email sign-up with a 6-digit code that is generated and verified entirely on the server.
+- A short setup wizard collects the business profile, tax rate, and printer settings before the first sale.
+- Each owner's inventory, orders, and customers are isolated from every other account.
 
 ---
 
-## Database Schema (Cloud Firestore)
+## Tech stack
 
-### `/users/{uid}`
-| Field | Type | Description |
-|-------|------|-------------|
-| `username` | string | Display name / cashier name on receipts |
-| `business_name` | string | Shop name (appears on bill header) |
-| `business_address` | string | Full address |
-| `business_phone` | string | Contact number |
-| `business_instagram` | string | Social media handle |
-| `business_email` | string | Business contact email |
-| `tax_rate` | number | Sales tax percentage |
-| `invoice_prefix` | string | Prefix for invoice numbers |
-| `printer_size` | string | `"58"` or `"80"` (mm) |
-| `receipt_footer` | string | Custom footer message on receipts |
-| `created_at` | string | ISO 8601 timestamp |
-| `ownerId` | string | Firebase Auth UID (for query filtering) |
-
-### `/inventory/{docId}`
-| Field | Type | Description |
-|-------|------|-------------|
-| `sku` | string | Unique product identifier (used for barcodes) |
-| `itemName` | string | Product name |
-| `costPrice` | number | Purchase cost (IDR) |
-| `sellPrice` | number | Retail price (IDR) |
-| `stockLevel` | number | Current quantity in stock |
-| `minStockLevel` | number | Alert threshold |
-| `unit` | string | Unit of measure (`pcs`, `kg`, `m`, `l`, etc.) |
-| `supplier` | string | Supplier name |
-| `description` | string | Product details |
-| `tagColor` | string | UI button color class |
-| `createdAt` | Timestamp | Firestore server timestamp |
-| `lastUpdated` | Timestamp | Firestore server timestamp |
-| `ownerId` | string | Owner's Firebase Auth UID |
-
-### `/orders/{docId}`
-| Field | Type | Description |
-|-------|------|-------------|
-| `items` | array | `[{ id, name, price, quantity, subtotal }]` |
-| `totalQuantity` | number | Sum of all item quantities |
-| `subtotal` | number | Total before tax |
-| `taxRate` | number | Tax percentage at time of sale |
-| `taxAmount` | number | Calculated tax amount |
-| `totalPrice` | number | Grand total (subtotal + tax) |
-| `createdAt` | Timestamp | Firestore server timestamp |
-| `ownerId` | string | Owner's Firebase Auth UID |
-
-All collections use `ownerId` for tenant-level data isolation — each user only sees their own inventory, orders, and profile.
+| Area | Technology |
+|------|------------|
+| Frontend | Vanilla JavaScript (ES modules), Vite 6 |
+| Backend | Node.js + Express 5 (used only for OTP email) |
+| Database | Cloud Firestore |
+| Auth | Firebase Authentication (email/password) + server-side OTP |
+| Email | Nodemailer (Gmail SMTP), otp-generator |
+| Charts | Chart.js |
+| Barcodes | JsBarcode (CODE128) + html2canvas (PNG export) |
+| API hardening | express-rate-limit |
+| Hosting | Firebase Hosting (frontend) + Google Cloud Run (backend) |
+| CI/CD | GitHub Actions |
 
 ---
 
-## Getting Started
+## How it's built
+
+The frontend is a single-page app written in plain JavaScript with no UI framework. All markup lives in one `index.html` (including `<template>` elements that are cloned for modals and the wizard), and each feature is an ES module with an `init*()` entry point that wires up its own DOM. Modules talk to each other through direct imports rather than a shared store or event bus.
+
+A few decisions worth calling out:
+
+- **Firebase from the browser.** All data and auth go directly to Firebase; `src/firebase.js` is the single place that touches Firestore and Auth. The Express server exists only to send and verify the sign-up OTP, so the one-time code never reaches the client.
+- **Atomic orders.** Submitting an order uses a Firestore `writeBatch()` to create the order document and decrement each item's stock together — if anything fails, nothing is written.
+- **Multi-tenant isolation.** Every record carries an `ownerId`, and `firestore.rules` enforces that a user can only read or write their own documents.
+- **XSS-safe rendering.** Dynamic content is built with `createElement` / `textContent`; `innerHTML` is never used with user or database data.
+- **Hardware-friendly.** A global keydown listener interprets a fast burst of keystrokes ending in Enter as a barcode scan, so a standard USB scanner works without any driver or SDK.
+
+---
+
+## Screenshots
+
+![Sales insights](docs/screenshots/sales-insights.png)
+*Caption: the sales dashboard — revenue, orders, items sold, and profit for a date range, with a revenue-by-day chart and a sortable top-sellers table.*
+
+![Barcode label generator](docs/screenshots/barcode-generator.png)
+*Caption: the barcode label generator — pick an item, add a photo and price, choose a label size, and export a print-ready CODE128 label as a PNG.*
+
+![Order history and receipt](docs/screenshots/order-history.png)
+*Caption: order history with a thermal-receipt preview — browse and filter past orders, then reprint any bill.*
+
+---
+
+## Getting started
 
 ### Prerequisites
-- Node.js (v18+)
-- A Firebase project with Firestore and Authentication enabled
-- A Gmail account with an [App Password](https://support.google.com/accounts/answer/185833) for OTP emails
+
+- Node.js 18+ (20 recommended)
+- A Firebase project with Firestore and Email/Password authentication enabled
+- A Gmail account with an [App Password](https://support.google.com/accounts/answer/185833) for sending OTP emails
 
 ### Setup
 
 ```bash
-# Clone the repository
-git clone https://github.com/jonathanhelga/Point-of-Sale_Firebase.git
-cd Point-of-Sale_Firebase
-
-# Install dependencies
+git clone https://github.com/Jonathanhelga/POSflow.git
+cd POSflow
 npm install
-
-# Create environment file
-cp .env.example .env
 ```
 
-Configure your `.env`:
+Create a `.env` file in the project root:
+
 ```env
-EMAIL_USER=your-email@gmail.com
+EMAIL_USER=your-gmail-address@gmail.com
 EMAIL_PASS=your-gmail-app-password
-VITE_FIREBASE_API_KEY=your-firebase-api-key
+VITE_FIREBASE_API_KEY=your-firebase-web-api-key
+VITE_SERVER_URL=http://localhost:3000
 ```
 
-Update the Firebase config in `src/firebase.js` with your own project credentials.
+Then point the app at your own Firebase project:
 
-### Run
+- Update the Firebase config in `src/firebase.js` (the API key is read from `VITE_FIREBASE_API_KEY`; the other values are inline).
+- Add a Firebase Admin service-account key at `server/serviceAccountKey.json` so the backend can write OTP codes.
+- Deploy the security rules and indexes: `firebase deploy --only firestore`.
+
+> The Firebase config, `.env`, and service-account key in my own setup are tied to my project and are gitignored, so running your own instance means supplying your own Firebase project and credentials.
+
+---
+
+## Running locally
 
 ```bash
-# Start both frontend (Vite) and backend (Express) concurrently
 npm run dev
 ```
 
-- Frontend: `http://localhost:5173`
-- Backend API: `http://localhost:3000`
+This starts the Vite frontend and the Express backend together:
 
-### Available Scripts
+- Frontend: http://localhost:5173
+- Backend API: http://localhost:3000
 
-| Command | Description |
-|---------|-------------|
-| `npm run dev` | Start frontend + backend concurrently |
-| `npm run client` | Start Vite dev server only |
-| `npm run server` | Start Express backend only |
-| `npm run build` | Build frontend for production |
-| `npm run preview` | Preview production build |
+| Command | What it does |
+|---------|--------------|
+| `npm run dev` | Frontend + backend together |
+| `npm run client` | Vite dev server only |
+| `npm run server` | Express backend only |
+| `npm run build` | Production build to `dist/` |
+| `npm run preview` | Preview the production build |
 
----
-
-## API Endpoints
-
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| `POST` | `/api/send-otp` | Sends a 6-digit OTP to the provided email. Body: `{ email }` |
-| `POST` | `/api/verify-otp` | Verifies the OTP server-side. Body: `{ email, otp }`. Single-use, 5-min TTL |
+There is no test runner, linter, or formatter configured.
 
 ---
 
-## Security Considerations
+## Project structure
 
-**What's implemented:**
-- Server-side OTP verification — codes never sent to the frontend
-- Single-use OTP tokens with 5-minute expiration
-- XSS mitigation — recent refactor replaced `innerHTML` with safe DOM construction (`createElement`, `textContent`, `appendChild`) across all modules
-- Atomic batch writes — prevents partial order/stock corruption
-- Firebase Auth for credential management (hashing, session tokens handled by Firebase SDK)
-- `ownerId` field on all documents for data isolation
-
-**Known limitations (actively being addressed):**
-- Firestore Security Rules need to be implemented to enforce `ownerId == request.auth.uid` at the database level
-- No rate limiting on the OTP endpoint
-- Backend server URL is hardcoded to `localhost:3000` (needs environment variable for production)
+```
+.
+├── index.html              # SPA shell + all <template> markup
+├── src/                    # one module per feature area
+│   ├── main.js             # entry point: auth state → boots the app
+│   ├── firebase.js         # the only module that talks to Firestore/Auth
+│   ├── order-add_item.js   # order cart + atomic submission
+│   ├── search_item.js      # product search + USB scanner listener
+│   ├── inventory_update.js # restock panel
+│   ├── manage-item.js      # edit item details
+│   ├── add_item_ui.js      # add a new item
+│   ├── barcode-generator.js# label designer + PNG export
+│   ├── order_history.js    # past orders + receipt preview + print
+│   ├── sales_insight.js    # analytics dashboard (Chart.js)
+│   ├── customer_checkout.js# checkout modal
+│   └── ...                 # auth, wizard, profile, helpers
+├── styles/                 # per-feature CSS + variables.css (design tokens)
+├── server/                 # Express OTP API (+ Dockerfile for Cloud Run)
+├── docs/                   # setup notes + screenshots
+├── firestore.rules         # per-user data isolation
+└── firestore.indexes.json  # composite indexes
+```
 
 ---
 
-## Roadmap
+## Deployment
 
-- [ ] Firestore Security Rules enforcement
-- [ ] Sales analytics dashboard (daily revenue, top-selling items)
-- [ ] Order history date filtering
-- [ ] CSV/Excel export for orders and inventory
-- [ ] Deploy to Firebase Hosting + Cloud Run
-- [ ] Google Sign-In integration
+- **Frontend** → Firebase Hosting: `npm run build && firebase deploy --only hosting`.
+- **Backend** → Google Cloud Run: the Express server is containerized (`server/Dockerfile`) and deployed as a service in `asia-east1`.
+- **CI/CD**: GitHub Actions redeploys the affected side on pushes to `main`, and posts a Hosting preview link on pull requests.
+
+See `DEPLOYMENT_NOTES.md` for the full walk-through.
 
 ---
 
-## Commit History Highlights
+## Notes
 
-The git history reflects iterative, feature-driven development with a focus on security hardening in recent commits:
+A few honest caveats:
 
-- `e58a910` — **refactor:** replace `innerHTML` with safe DOM creation across all POS modules (XSS mitigation)
-- `2d8c9e6` — **feat:** add scan-to-order with stock validation
-- `d51cc42` — **fix:** move OTP verification server-side (previously returned to frontend)
-- `8a90706` — **feat:** implement barcode generator with item selection, size picker, and save-to-device
-- `83c0ed1` — **feat:** add inventory update modal with stock alerts
-- `927784d` — **feat:** add tax-aware order totals and toast notifications
-- `d272eed` — **feat:** track order histories and handle tax based on business profile
+- No automated tests yet — the app has been validated by hand.
+- The JS bundle is around 1 MB (most of it the Firebase SDK); there's no code-splitting yet.
+- The API currently allows all origins (CORS), which is fine for the demo but would be locked to the frontend origin for a real production deployment.
+- Amounts are IDR only.
 
 ---
 
 ## License
 
-ISC
+ISC (see `package.json`).
