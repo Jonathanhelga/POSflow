@@ -74,6 +74,7 @@ document.addEventListener('DOMContentLoaded', function(){
     eventDelegation('js-wizard__body');
     let initialized = false;
     onAuthStateChanged(auth, (user) => {
+        // document.body.classList.remove('is-booting');
         document.body.classList.remove('is-booting');
         if (user) {
             document.getElementById('js-landing').style.display = 'none';
