@@ -10,7 +10,7 @@
 #log-in-wizard {
     display: none;
     flex-direction: column;
-    background-color: rgba(110, 163, 195, 0.976);
+    background-color: var(--landing-bg, #FAFAF7);
     justify-content: safe center;
     align-items: center;
     min-height: 100vh;
@@ -24,28 +24,29 @@
 
 /* — App Title — */
 .app-title {
-    font-family: 'Courier New', monospace;
-    color: #00ffea;
+    font-family: var(--landing-font-sans, -apple-system, BlinkMacSystemFont, sans-serif);
+    color: #4A3A00; /* warm brown-ink */
+    font-weight: 600;
     font-size: clamp(3rem, 8vw, 5rem);
-    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+    letter-spacing: -0.03em;
     margin-bottom: 2rem;
     text-align: center;
 }
 
 /* — Wizard Card — */
 .c-wizard__card {
-    background: white;
-    width: 100%;
-    max-width: 500px;
-    border-radius: var(--radius);
-    box-shadow: var(--shadow);
+    background: var(--landing-surface, #FFFFFF);
+    width: min(92vw, 600px);
+    border: 1px solid var(--landing-border-strong, #D4D4D0);
+    border-radius: var(--landing-radius-lg, 16px);
+    box-shadow: var(--landing-shadow-lg, var(--shadow));
     overflow: hidden;
 }
 
 /* — Wizard Header — */
 .c-wizard__header {
-    background: #7db9de;
-    color: white;
+    background: #F1E8D6; /* pale warm sand */
+    color: #4A3A00;      /* warm brown-ink */
     padding: 2rem;
     text-align: center;
 }
@@ -96,19 +97,24 @@
 /* — Wizard Footer (Prev / Next navigation) — */
 .c-wizard__footer {
     padding: 20px 30px;
-    background: #f8f9fa;
-    border-top: 1px solid #e0e0e0;
+    background: var(--landing-bg, #FAFAF7);
+    border-top: 1px solid var(--landing-border, #E7E5E0);
     display: flex;
     justify-content: flex-end;
     gap: 10px;
 }
 .c-wizard__footer.is-hidden { display: none; }
 
-#js-setup-prev { background: #e0e0e0; color: #333; margin-right: auto; }
-#js-setup-next { background: #2c3e50; color: white; }
+#js-setup-prev {
+    background: var(--landing-surface, #FFFFFF);
+    color: var(--landing-ink, #0A0A0A);
+    border: 1px solid var(--landing-border-strong, #D4D4D0);
+    margin-right: auto;
+}
+#js-setup-next { background: var(--landing-ink, #0A0A0A); color: #FFFFFF; }
 
-#js-setup-prev:disabled { background: #ccc; color: #666; cursor: not-allowed; }
-#js-setup-next:disabled { background: #ccc; color: #666; cursor: not-allowed; }
+#js-setup-prev:disabled { background: #F0F0EC; color: var(--landing-muted, #999); cursor: not-allowed; }
+#js-setup-next:disabled { background: #C9C9C4; color: #FFFFFF; cursor: not-allowed; }
 #js-setup-next.is-inactive { display: none; }
 
 /* Submit Settings button — hidden until final step */
@@ -124,7 +130,7 @@
 #js-login-submit {
     display: none;
     width: 100%;
-    background: #0066cc;
+    background: var(--landing-ink, #0A0A0A);
     color: #ffffff;
 }
 #js-email-verify.is-active,
@@ -133,7 +139,7 @@
 
 #js-email-verify:disabled,
 #js-signup-submit:disabled,
-#js-login-submit:disabled   { background: #ccc; color: #666; cursor: not-allowed; }
+#js-login-submit:disabled   { background: #C9C9C4; color: #FFFFFF; cursor: not-allowed; }
 
 /* Google sign-in button */
 .btn--google {
@@ -141,9 +147,9 @@
     align-items: center;
     justify-content: center;
     gap: 10px;
-    background: white;
-    border: 1px solid #757575;
-    color: #333;
+    background: var(--landing-surface, #FFFFFF);
+    border: 1px solid var(--landing-border-strong, #D4D4D0);
+    color: var(--landing-ink, #333);
     width: 100%;
 }
 
@@ -153,16 +159,16 @@
     align-items: center;
     text-align: center;
     margin: 20px 0;
-    color: #888;
+    color: var(--landing-muted, #888);
 }
 .c-separator::before,
-.c-separator::after   { content: ''; flex: 1; border-bottom: 1.2px solid #000000; }
+.c-separator::after   { content: ''; flex: 1; border-bottom: 1px solid var(--landing-border, #E7E5E0); }
 .c-separator__text    { padding: 0 10px; font-size: 0.9rem; }
 
 /* — Field Hint (sub-label) — */
 .c-field__hint {
     font-size: 0.8em;
-    color: #7f8c8d;
+    color: var(--landing-muted, #71717A);
     margin-top: 4px;
 }
 

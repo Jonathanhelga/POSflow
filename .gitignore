@@ -14,13 +14,16 @@ dist/
 *firebase-adminsdk*.json
 
 # OS files
-.DS_Store
+.DS_Store   
 Thumbs.db
 
 # Editor / IDE
 .vscode/
 .idea/
 *.swp
+
+# AI agent tooling
+.opencode/
 
 # Logs
 *.log
