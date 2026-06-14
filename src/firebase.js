@@ -26,6 +26,7 @@ export async function submitSettingsData(formData){
     if (!user) throw new Error("No user logged in!");
     await setDoc(doc(db, "users", user.uid), {
         username: formData.username,
+        currency: formData.currency || 'IDR',
         business_name: formData.businessName,
         business_address: formData.businessAddress,
         business_phone: formData.businessPhone ,

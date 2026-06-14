@@ -262,6 +262,37 @@
 }
 .mi-field__input:focus { border-color: var(--clr-primary); }
 
+/*  Input group: currency symbol prefix + input  */
+
+.mi-input-group {
+    display: flex;
+    align-items: stretch;
+    border: 1px solid var(--clr-border);
+    border-radius: var(--radius);
+    background: var(--clr-panel);
+    transition: border-color 0.15s;
+}
+.mi-input-group:focus-within {
+    border-color: var(--clr-primary);
+}
+.mi-input-group__symbol {
+    display: flex;
+    align-items: center;
+    padding: 0 10px;
+    color: var(--clr-text-secondary);
+    font-weight: 600;
+    font-size: 1rem;
+    background: var(--clr-bg-surface);
+    border-right: 1px solid var(--clr-border);
+    user-select: none;
+    white-space: nowrap;
+}
+.mi-input-group .mi-field__input {
+    border: none;
+    border-radius: 0;
+    padding-left: 10px;
+}
+
 /* ─── Theme swatch picker ────────────────────────────────────── */
 
 .mi-swatches {

@@ -1,5 +1,5 @@
 import { toggleModal } from './modal-handler';
-import { formatRupiah } from './formatRupiah';
+import { formatCurrency, getCurrencySymbol } from './formatCurrency';
 import { getOrderedItems, getTaxRate } from './order-add_item';
 import { auth, fetchCustomers, getCachedUserProfile, fetchUserProfile } from './firebase';
 import { initCustomFields, resetCustomFields, collectCustomFields, collectFieldDefinitions, renderSavedFields } from './checkout_custom_fields';
@@ -8,6 +8,10 @@ const MODAL_ID = 'customer-checkout-modal';
 const CUSTOMER_FIELDS = ['js-checkout-customer-name', 'js-checkout-customer-phone'];
 
 let customerCache = [];
+
+function currentCurrency() {
+    return getCachedUserProfile()?.currency || 'IDR';
+}
 
 export function initCustomerCheckout() {
     const discountInput = document.getElementById('js-checkout-discount');
@@ -167,7 +171,7 @@ function buildRecapRow(item) {
 
     const subtotalTd = document.createElement('td');
     subtotalTd.className = 'c-checkout__col-subtotal';
-    subtotalTd.textContent = formatRupiah(item.price * item.quantity);
+    subtotalTd.textContent = formatCurrency(item.price * item.quantity, currentCurrency());
 
     tr.appendChild(nameTd);
     tr.appendChild(qtyTd);
@@ -193,11 +197,13 @@ function recalcTotals() {
     const taxAmount = subtotalAfterDiscount * (taxRate / 100);
     const total = subtotalAfterDiscount + taxAmount;
 
-    setText('js-checkout-subtotal', formatRupiah(subtotal));
-    setText('js-checkout-discount-amount', `- ${formatRupiah(discountAmount)}`);
+    const currency = currentCurrency();
+    const symbol = getCurrencySymbol(currency);
+    setText('js-checkout-subtotal', `${symbol} ${formatCurrency(subtotal, currency)}`);
+    setText('js-checkout-discount-amount', `- ${symbol} ${formatCurrency(discountAmount, currency)}`);
     setText('js-checkout-tax-label', taxRate);
-    setText('js-checkout-tax-amount', formatRupiah(taxAmount));
-    setText('js-checkout-total', formatRupiah(total));
+    setText('js-checkout-tax-amount', `${symbol} ${formatCurrency(taxAmount, currency)}`);
+    setText('js-checkout-total', `${symbol} ${formatCurrency(total, currency)}`);
 }
 
 function clampDiscount(value) {

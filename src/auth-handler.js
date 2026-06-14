@@ -213,6 +213,7 @@ async function submitSettingForm(){
         businessPhone: document.getElementById('business-phone').value,
         businessInst: document.getElementById('business-instagram').value,
         businessEmail: document.getElementById('business-email').value,
+        currency: document.getElementById('step-currency').value,
         tax_rate: document.getElementById('tax-rate').value,
         invoice_prefix: document.getElementById('invoice-prefix').value,
         paper_size: document.getElementById('paper-size').value,

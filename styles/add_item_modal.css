@@ -55,6 +55,40 @@
     color: var(--clr-text-primary);
 }
 
+/*  Input group: currency symbol prefix + input  */
+
+.c-input-group {
+    display: flex;
+    align-items: stretch;
+    border: 1px solid var(--clr-border);
+    border-radius: 8px;
+    background-color: #ffffff;
+    transition: border-color 0.15s;
+}
+.c-input-group:focus-within {
+    border-color: #3498db;
+}
+.c-input-group__symbol {
+    display: flex;
+    align-items: center;
+    padding: 0 10px;
+    color: var(--clr-text-secondary);
+    font-weight: 600;
+    font-size: 1rem;
+    background: #f7f8fa;
+    border-right: 1px solid var(--clr-border);
+    user-select: none;
+    white-space: nowrap;
+}
+#c-modal-item-create .c-input-group .c-field__input {
+    border: none;
+    padding-left: 10px;
+    background: transparent;
+}
+#c-modal-item-create .c-input-group .c-field__input:focus {
+    border: none;
+}
+
 /* Quantity + Unit inline row */
 .c-qty-unit {
     display: flex;

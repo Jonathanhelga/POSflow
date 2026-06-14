@@ -1,7 +1,6 @@
 import { auth, fetchInventory, db } from './firebase';
 // import { doc, updateDoc, serverTimestamp } from 'firebase/firestore';
 import { renderItemGrid } from './item_ui';
-import { formatRupiah } from './formatRupiah';
 
 export let allItems = [];
 let searchTimeout = 0;

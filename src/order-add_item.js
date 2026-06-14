@@ -1,7 +1,7 @@
 import { toggleModal } from './modal-handler';
-import { formatRupiah } from "./formatRupiah";
+import { formatCurrency, getCurrencySymbol } from "./formatCurrency";
 import { allItems, updateLocalStock } from "./search_item";
-import { auth, submitOrder, upsertCustomerByPhone, saveOrderFieldDefinitions } from "./firebase";
+import { auth, submitOrder, upsertCustomerByPhone, saveOrderFieldDefinitions, getCachedUserProfile } from "./firebase";
 import { refreshInsights } from './sales_insight';
 import {
     openCustomerCheckout,
@@ -25,6 +25,10 @@ export function setTaxRate(rate) {
 }
 export function getTaxRate() { return taxRate; }
 
+function currentCurrency() {
+    return getCachedUserProfile()?.currency || 'IDR';
+}
+
 export function openOrderItemModal(itemID) {
     const item = allItems.find(item => item.id === itemID); 
     if (!item) { return; }
@@ -37,7 +41,7 @@ export function openOrderItemModal(itemID) {
     document.getElementById('order-item-sku').textContent = item.sku || '';
     document.getElementById('order-item-name').textContent = item.itemName;
     document.getElementById('order-item-stock').textContent = item.stockLevel;
-    document.getElementById('order-item-price').textContent = formatRupiah(item.sellPrice);
+    document.getElementById('order-item-price').textContent = `${getCurrencySymbol(currentCurrency())} ${formatCurrency(item.sellPrice, currentCurrency())}`;
     document.getElementById('order-item-unit').textContent = ' ' + item.unit;
 
     toggleModal('order-item-modal');
@@ -54,6 +58,7 @@ export function initializeOrderForm(){
     if(form){
         fullRender();
         orderModifier();
+        updateTotals();
         form.addEventListener('submit', (event) => {
             event.preventDefault();
             
@@ -150,7 +155,7 @@ function appendRow(index){
     const tdQty = document.createElement('td');
     tdQty.textContent = item.quantity;
     const tdTotal = document.createElement('td');
-    tdTotal.textContent = formatRupiah(item.price * item.quantity);
+    tdTotal.textContent = formatCurrency(item.price * item.quantity, currentCurrency());
     row.append(tdName, tdQty, tdTotal);
 
     tableBody.appendChild(row);
@@ -163,7 +168,7 @@ function updateRow(index){
         return;
     }
     row.cells[1].textContent = item.quantity;
-    row.cells[2].textContent = formatRupiah(item.price * item.quantity);
+    row.cells[2].textContent = formatCurrency(item.price * item.quantity, currentCurrency());
 }
 
 function orderModifier(){
@@ -224,11 +229,13 @@ function updateTotals(){
     const taxAmount = subtotal * (taxRate / 100);
     const totalWithTax = subtotal + taxAmount;
 
+    const currency = currentCurrency();
+    const symbol = getCurrencySymbol(currency);
     document.getElementById('order-total-items').textContent = totalQty;
-    document.getElementById('order-total-price').textContent = formatRupiah(subtotal);
+    document.getElementById('order-total-price').textContent = `${symbol} ${formatCurrency(subtotal, currency)}`;
     document.getElementById('order-tax-label').textContent = taxRate;
-    document.getElementById('order-tax-amount').textContent = formatRupiah(taxAmount);
-    document.getElementById('order-with-tax').textContent = formatRupiah(totalWithTax);
+    document.getElementById('order-tax-amount').textContent = `${symbol} ${formatCurrency(taxAmount, currency)}`;
+    document.getElementById('order-with-tax').textContent = `${symbol} ${formatCurrency(totalWithTax, currency)}`;
 }
 function rowIdFor(itemID){ return `order-row-${itemID}`; }
 
@@ -318,6 +325,7 @@ async function handleCheckoutFormSubmit(e) {
         taxRate,
         taxAmount,
         totalPrice: totalWithTax,
+        currency: getCachedUserProfile()?.currency || 'IDR',
         customerId: customerId || null,
         customer: customerSnapshot,
         orderNote,

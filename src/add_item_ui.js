@@ -1,10 +1,15 @@
-import { submitItemData, auth } from "./firebase";
+import { submitItemData, auth, getCachedUserProfile } from "./firebase";
+import { getCurrencySymbol } from './formatCurrency';
 import { addSingleItem } from "./search_item";
 import { toggleModal } from './modal-handler';
 import { showToast } from "./toast";
 
 export function initInventoryForm() {
     document.getElementById('js-item-create-open').addEventListener('click', () => {
+        const currency = getCachedUserProfile()?.currency || 'IDR';
+        const symbol = getCurrencySymbol(currency);
+        document.getElementById('c-cost-currency').textContent = symbol;
+        document.getElementById('c-sell-currency').textContent = symbol;
         toggleModal('item-create-modal');
     });
     const form = document.getElementById('js-item-create-form');
