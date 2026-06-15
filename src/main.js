@@ -37,14 +37,14 @@ function initLoggedInApp(user) {
     initBarcodeGenerator(user);
     initCustomerCheckout();
     initClock();
-    initThemeToggle();
+    initThemeToggle('js-theme-toggle-app');
 }
 
 function initLanding() {
   const overlay = document.getElementById('js-wizard-overlay');
   if (!overlay) return;
 
-  initThemeToggle();
+  initThemeToggle('js-theme-toggle-landing');
 
   document.getElementById('js-landing-signup').addEventListener('click', () => openWizardOverlay('signUp'));
   document.getElementById('js-landing-login').addEventListener('click', () => openWizardOverlay('logIn'));

@@ -20,8 +20,8 @@ export function getCurrentTheme() {
   return document.documentElement.getAttribute('data-theme') || LIGHT;
 }
 
-export function initThemeToggle() {
-  const label = document.getElementById('js-theme-toggle');
+export function initThemeToggle(toggleId) {
+  const label = document.getElementById(toggleId);
   if (!label) return;
   const checkbox = label.querySelector('input[type="checkbox"]');
   if (!checkbox) return;
