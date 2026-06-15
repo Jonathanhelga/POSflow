@@ -1,7 +1,7 @@
 import Chart from 'chart.js/auto'
 import { toggleModal } from './modal-handler';
-import { fetchUserProfile, fetchInventory, fetchOrders } from './firebase';
-import { formatRupiah } from './formatRupiah';
+import { fetchUserProfile, fetchInventory, fetchOrders, getCachedUserProfile } from './firebase';
+import { formatCurrency, getCurrencySymbol } from './formatCurrency';
 import { showToast } from './toast';
 
 let inventory_item = [];
@@ -10,9 +10,15 @@ let chartInstance = null;
 let topItemsSortKey = 'revenue';
 let topItemsSortDir = 'desc';
 let topItemsRows = [];
+
+function currentCurrency() {
+    return getCachedUserProfile()?.currency || 'IDR';
+}
+
 export async function initInsights(user){
     if(!user){ return; }
     try{
+        await fetchUserProfile(user.uid);
         inventory_item = await fetchInventory(user.uid);
         orders = await fetchOrders(user.uid);
         setupToolBar();
@@ -161,7 +167,7 @@ function renderTopItemsTable(){
         tableData3.textContent = row.quantity;
         const tableData4 = document.createElement('td');
         tableData4.className = 'c-sales__col-num';
-        tableData4.textContent = `Rp ${formatRupiah(row.revenue)}`;
+        tableData4.textContent = `${getCurrencySymbol(currentCurrency())} ${formatCurrency(row.revenue, currentCurrency())}`;
         tableRow.appendChild(tableData1);
         tableRow.appendChild(tableData2);
         tableRow.appendChild(tableData3);
@@ -183,10 +189,11 @@ function fillInKPI(filtered_orders){
         })
     })
 
-    document.getElementById('js-kpi-revenue').textContent = `Rp ${formatRupiah(revenue)}`;
+    const symbol = getCurrencySymbol(currentCurrency());
+    document.getElementById('js-kpi-revenue').textContent = `${symbol} ${formatCurrency(revenue, currentCurrency())}`;
     document.getElementById('js-kpi-orders').textContent = totalOrder;
     document.getElementById('js-kpi-items').textContent = totalItemSold;
-    document.getElementById('js-kpi-profit').textContent = `Rp ${formatRupiah(profit)}`;
+    document.getElementById('js-kpi-profit').textContent = `${symbol} ${formatCurrency(profit, currentCurrency())}`;
 }
 
 function filterOrders(startingDate, endDate){
@@ -267,14 +274,14 @@ function renderChart(filtered_orders, startDate, endDate){
                 legend: { display: false },
                 tooltip: {
                     callbacks: {
-                        label: (ctx) => `Rp ${formatRupiah(ctx.parsed.y)}`,
+                        label: (ctx) => `${getCurrencySymbol(currentCurrency())} ${formatCurrency(ctx.parsed.y, currentCurrency())}`,
                     },
                 },
             },
             scales: {
                 y: {
                     beginAtZero: true,
-                    ticks: { callback: (v) => `Rp ${formatRupiah(v)}` },
+                    ticks: { callback: (v) => `${getCurrencySymbol(currentCurrency())} ${formatCurrency(v, currentCurrency())}` },
                 },
             },
         },

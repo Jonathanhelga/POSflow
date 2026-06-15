@@ -32,7 +32,7 @@
 /* Item info banner (gradient header inside the form) */
 #item-information {
     padding: var(--padding);
-    background: linear-gradient(135deg, var(--clr-primary), #00d4ff);
+    background: linear-gradient(135deg, var(--clr-primary), var(--clr-focus-ring));
     color: white;
     display: flex;
     flex-direction: column;
@@ -79,6 +79,7 @@
 #order-item-price               { color: var(--clr-success); }
 #order-item-stock,
 #order-item-unit                { color: var(--clr-text-secondary); }
-
+#order-items tr.selected td { background-color: var(--clr-selected);}
 /* Tighten field spacing inside this modal */
 .order-form-content .c-field { margin-bottom: var(--gap); }
+

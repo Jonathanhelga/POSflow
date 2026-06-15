@@ -81,11 +81,10 @@
 }
 .mi-card:hover {
     border-color: var(--clr-primary);
-    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
 }
 .mi-card--active {
     border-color: var(--clr-primary);
-    background-color: #eef7fb;
+    background-color: var(--clr-surface-alt);
 }
 .mi-card__top {
     display: flex;
@@ -262,6 +261,37 @@
 }
 .mi-field__input:focus { border-color: var(--clr-primary); }
 
+/*  Input group: currency symbol prefix + input  */
+
+.mi-input-group {
+    display: flex;
+    align-items: stretch;
+    border: 1px solid var(--clr-border);
+    border-radius: var(--radius);
+    background: var(--clr-panel);
+    transition: border-color 0.15s;
+}
+.mi-input-group:focus-within {
+    border-color: var(--clr-primary);
+}
+.mi-input-group__symbol {
+    display: flex;
+    align-items: center;
+    padding: 0 10px;
+    color: var(--clr-text-secondary);
+    font-weight: 600;
+    font-size: 1rem;
+    background: var(--clr-bg-surface);
+    border-right: 1px solid var(--clr-border);
+    user-select: none;
+    white-space: nowrap;
+}
+.mi-input-group .mi-field__input {
+    border: none;
+    border-radius: 0;
+    padding-left: 10px;
+}
+
 /* ─── Theme swatch picker ────────────────────────────────────── */
 
 .mi-swatches {
@@ -273,7 +303,7 @@
     width: 26px;
     height: 26px;
     border-radius: 50%;
-    border: 1px solid rgba(0, 0, 0, 0.12);
+    border: 1px solid var(--clr-border);
     cursor: pointer;
     padding: 0;
     transition: transform 0.12s, box-shadow 0.12s;
@@ -292,13 +322,13 @@
     justify-content: flex-end;
     gap: 0.75rem;
     padding: 1rem 1.4rem;
-    border-top: 1px solid rgba(0, 0, 0, 0.08);
+    border-top: 1px solid var(--clr-border);
     background: var(--clr-panel);
 }
 .mi-edit__footer.is-hidden { display: none; }
 .mi-save-btn {
     background-color: var(--clr-success);
-    color: #1f2937;
+    color: var(--clr-text-primary);
     padding: 10px 22px;
     font-size: 0.875rem;
     white-space: nowrap;

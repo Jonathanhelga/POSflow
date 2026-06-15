@@ -1,7 +1,8 @@
 import { db, fetchUserProfile, getCachedUserProfile, setCachedUserProfile, LogOutUser } from './firebase';
 import { setDoc, doc } from 'firebase/firestore';
 import { toggleModal } from './modal-handler';
-import { setTaxRate } from './order-add_item';
+import { setTaxRate, clearOrderTable } from './order-add_item';
+import { refreshInsights } from './sales_insight';
 import { showToast } from './toast';
 import { showConfirm } from './confirm_modal';
 export function initProfile(user) {
@@ -15,7 +16,7 @@ export function initProfile(user) {
     if (form) {
         form.addEventListener('submit', async (e) => {
             e.preventDefault();
-            await saveProfileData(user.uid);
+            await saveProfileData(user);
         });
     }
 
@@ -57,6 +58,7 @@ async function loadProfileData(user) {
     if (!data) return;
 
     document.getElementById('profile-username').value            = data.username            || '';
+    document.getElementById('profile-currency').value            = data.currency            || 'IDR';
     document.getElementById('profile-business-name').value       = data.business_name       || '';
     document.getElementById('profile-business-address').value    = data.business_address    || '';
     document.getElementById('profile-business-phone').value      = data.business_phone      || '';
@@ -92,7 +94,25 @@ function applyPrintPaperSize(size) {
     `;
 }
 
-async function saveProfileData(uid) {
+async function saveProfileData(user) {
+    const uid = user.uid;
+    const previousCurrency = (getCachedUserProfile() || {}).currency || 'IDR';
+    const newCurrency = document.getElementById('profile-currency').value;
+    const currencyChanged = newCurrency !== previousCurrency;
+
+    if (currencyChanged) {
+        const ok = await showConfirm({
+            title: 'Change currency?',
+            message: `Warning: item prices won't be converted to ${newCurrency}. Existing item prices keep their numbers, please update item prices manually in (Manage Items), be careful. Your current order will also be cleared. Thank You`,
+            confirmText: 'Change Currency',
+            danger: true,
+        });
+        if (!ok) {
+            document.getElementById('profile-currency').value = previousCurrency;
+            return;
+        }
+    }
+
     const saveBtn = document.getElementById('js-profile-save');
     const originalText = saveBtn.textContent;
     saveBtn.disabled = true;
@@ -100,6 +120,7 @@ async function saveProfileData(uid) {
 
     const formData = {
         username:           document.getElementById('profile-username').value.trim(),
+        currency:           document.getElementById('profile-currency').value,
         business_name:      document.getElementById('profile-business-name').value.trim(),
         business_address:   document.getElementById('profile-business-address').value.trim(),
         business_phone:     document.getElementById('profile-business-phone').value.trim(),
@@ -121,6 +142,11 @@ async function saveProfileData(uid) {
         const previousProfile = getCachedUserProfile() || {};
         const updatedProfile = { ...previousProfile, ...formData };
         setCachedUserProfile(updatedProfile);
+
+        if (currencyChanged) {
+            refreshInsights(user);
+            clearOrderTable();
+        }
 
         setTaxRate(formData.tax_rate);
         applyPrintPaperSize(formData.printer_size || '80');

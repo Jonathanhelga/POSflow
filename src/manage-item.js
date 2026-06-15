@@ -1,7 +1,7 @@
-import { updateItemData } from './firebase';
+import { updateItemData, getCachedUserProfile } from './firebase';
+import { getCurrencySymbol } from './formatCurrency';
 import { toggleModal } from './modal-handler';
 import { allItems, loadAllItems, updateLocalItem, refreshGrid } from './search_item';
-import { formatRupiah } from './formatRupiah';
 import { createSelection } from './selection';
 
 let filteredItems  = [];
@@ -229,6 +229,12 @@ async function openManageItem(user) {
     document.getElementById('mi-footer').classList.add('is-hidden');
     document.getElementById('mi-placeholder').classList.remove('is-hidden');
     document.getElementById('mi-search').value = '';
+
+    // Set currency symbol from user profile
+    const currency = getCachedUserProfile()?.currency || 'IDR';
+    const symbol = getCurrencySymbol(currency);
+    document.getElementById('mi-cost-currency').textContent = symbol;
+    document.getElementById('mi-sell-currency').textContent = symbol;
 
     const loadingMsg = document.createElement('p');
     loadingMsg.className = 'mi-empty';

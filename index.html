@@ -7,6 +7,16 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
     <title>POS FLOW — Run your shop from the browser.</title>
+    <meta name="theme-color" content="#FAFAF7">
+    <script>
+      (function(){
+        var theme = localStorage.getItem('theme');
+        if (!theme) theme = matchMedia('(prefers-color-scheme:dark)').matches ? 'dark' : 'light';
+        document.documentElement.setAttribute('data-theme', theme);
+        var meta = document.querySelector('meta[name="theme-color"]');
+        if (meta) meta.content = theme === 'dark' ? '#0f172a' : '#FAFAF7';
+      })();
+    </script>
     <!-- I place the styling inside the html not separately so that it paints before the main bundle loads (Flash of Unstyled Content prevention) -->
     <style>
       body.is-booting #js-landing { display: none; }
@@ -32,10 +42,11 @@
         color: #0A0A0A;
       }
       .c-boot-splash__spinner {
-        width: 22px;
-        height: 30px;
+        width: 15px;
+        height: 15px;
         border-radius: 50%;
         border: 10px solid rgba(10, 10, 10, 0.12);
+        border: 3px solid white;
         border-top-color: #0A0A0A;
         animation: bootSpin 0.7s linear infinite;
       }
@@ -284,6 +295,27 @@
                   <label class="c-field__label" for="invoice-prefix">Invoice Prefix</label>
                   <input class="c-field__input" type="text" id="invoice-prefix" placeholder="INV-" />
               </div>
+
+              <div class="c-field">
+                  <label class="c-field__label" for="step-currency">Currency</label>
+                  <select class="c-field__select" id="step-currency">
+                    <option value="IDR">IDR - Indonesian Rupiah</option>
+                    <option value="USD">USD - US Dollar</option>
+                    <option value="EUR">EUR - Euro</option>
+                    <option value="GBP">GBP - British Pound</option>
+                    <option value="JPY">JPY - Japanese Yen</option>
+                    <option value="SGD">SGD - Singapore Dollar</option>
+                    <option value="MYR">MYR - Malaysian Ringgit</option>
+                    <option value="AUD">AUD - Australian Dollar</option>
+                    <option value="CNY">CNY - Chinese Yuan</option>
+                    <option value="KRW">KRW - South Korean Won</option>
+                    <option value="THB">THB - Thai Baht</option>
+                    <option value="PHP">PHP - Philippine Peso</option>
+                    <option value="VND">VND - Vietnamese Dong</option>
+                    <option value="INR">INR - Indian Rupee</option>
+                  </select>
+                  <div class="c-field__hint">Prices and totals will display in this currency.</div>
+              </div>
           </section>
 
           <section class="c-wizard__step" id="setup-step-4">
@@ -395,12 +427,18 @@
                   <input class="c-field__input" type="text" id="item-name" placeholder="Item Name" />
                 </div>
                 <div class="c-field">
-                  <label class="c-field__label" for="cost-price">Cost Price (IDR)</label>
-                  <input class="c-field__input" type="text" id="cost-price" placeholder="Cost Price (IDR)" />
+                  <label class="c-field__label" for="cost-price">Cost Price</label>
+                  <div class="c-input-group">
+                    <span class="c-input-group__symbol" id="c-cost-currency">Rp</span>
+                    <input class="c-field__input" type="text" id="cost-price" placeholder="Cost Price" />
+                  </div>
                 </div>
                 <div class="c-field">
-                  <label class="c-field__label" for="sell-price">Selling Price (IDR)</label>
-                  <input class="c-field__input" type="text" id="sell-price" placeholder="Selling Price (IDR)" />
+                  <label class="c-field__label" for="sell-price">Selling Price</label>
+                  <div class="c-input-group">
+                    <span class="c-input-group__symbol" id="c-sell-currency">Rp</span>
+                    <input class="c-field__input" type="text" id="sell-price" placeholder="Selling Price" />
+                  </div>
                 </div>
                 <div class="c-field">
                   <label class="c-field__label" for="min-stock-level">Minimum Stock Level</label>
@@ -450,6 +488,15 @@
             <button type="button" class="c-modal__close" aria-label="Close" data-modal-close="features-modal">&times;</button>
           </header>
           <div class="c-modal__body">
+            <label class="c-theme-toggle" id="js-theme-toggle">
+              <span class="c-theme-toggle__label">Dark Mode</span>
+              <span class="c-theme-toggle__switch">
+                <input type="checkbox">
+                <span class="c-theme-toggle__track">
+                  <span class="c-theme-toggle__knob"></span>
+                </span>
+              </span>
+            </label>
             <div class="c-actions c-actions--stack">
               <button id="inventory-update-open" class="btn" type="button">Update Inventory</button>
               <button id="manage-item-open" class="btn" type="button">Manage Items</button>
@@ -460,7 +507,6 @@
           </div>
         </div>
     </div>
-
     <div id="order-item-modal" class="c-modal c-modal--center is-hidden">
       <div class="c-modal__panel" id="c-modal-order-item">
           <header class="c-modal__header">
@@ -476,7 +522,7 @@
                     <h3 id="order-item-name">Item 1</h3>
                 </div>
                 <div class="c-detail">
-                  <h3>Price: Rp. <span id="order-item-price"></span></h3>
+                  <h3>Price: <span id="order-item-price"></span></h3>
                   <h3>Stock: <span id="order-item-stock"></span><span id="order-item-unit"></span></h3>
                 </div>
                 <div class="c-field">
@@ -494,7 +540,6 @@
       </div>
 
     </div>
-
     <div id="order-history-modal" class="c-modal c-modal--center is-hidden">
       <div class="c-modal__panel" id="c-modal-order-history">
         <header class="c-modal__header">
@@ -584,11 +629,11 @@
                 </div>
                 <div class="oh-bill__summary-row" id="oh-discount-row">
                   <span>Discount (<span id="oh-discount-pct">0</span>%):</span>
-                  <span id="oh-discount-amount">- Rp 0</span>
+                  <span id="oh-discount-amount">- 0</span>
                 </div>
                 <div class="oh-bill__summary-row">
                   <span>Tax (<span id="oh-business-tax"></span>%):</span>
-                  <span id="oh-tax">Rp 0</span>
+                  <span id="oh-tax">0</span>
                 </div>
                 <div class="oh-bill__summary-total">
                   <span>GRAND TOTAL:</span>
@@ -638,7 +683,6 @@
         </div>
       </div>
     </div>
-
     <div id="customer-checkout-modal" class="c-modal c-modal--center is-hidden">
       <div class="c-modal__panel" id="c-modal-customer-checkout">
         <header class="c-modal__header">
@@ -793,7 +837,7 @@
               <div class="c-checkout__totals">
                 <div class="c-checkout__totals-row">
                   <span>Subtotal</span>
-                  <span class="c-checkout__totals-value" id="js-checkout-subtotal">Rp 0</span>
+                  <span class="c-checkout__totals-value" id="js-checkout-subtotal">0</span>
                 </div>
                 <div class="c-checkout__discount">
                   <label for="js-checkout-discount">Discount</label>
@@ -803,15 +847,15 @@
                 </div>
                 <div class="c-checkout__totals-row c-checkout__totals-row--muted">
                   <span>Discount Amount</span>
-                  <span class="c-checkout__totals-value" id="js-checkout-discount-amount">- Rp 0</span>
+                  <span class="c-checkout__totals-value" id="js-checkout-discount-amount">- 0</span>
                 </div>
                 <div class="c-checkout__totals-row c-checkout__totals-row--muted">
                   <span>Tax (<span id="js-checkout-tax-label">0</span>%)</span>
-                  <span class="c-checkout__totals-value" id="js-checkout-tax-amount">Rp 0</span>
+                  <span class="c-checkout__totals-value" id="js-checkout-tax-amount">0</span>
                 </div>
                 <div class="c-checkout__totals-row c-checkout__totals-row--grand">
                   <span>Total</span>
-                  <span class="c-checkout__totals-value" id="js-checkout-total">Rp 0</span>
+                  <span class="c-checkout__totals-value" id="js-checkout-total">0</span>
                 </div>
               </div>
             </section>
@@ -827,7 +871,6 @@
         </form>
       </div>
     </div>
-
     <div id="inventory-update-modal" class="c-modal c-modal--center is-hidden">
       <div class="c-modal__panel" id="c-modal-inventory-update">
         <header class="c-modal__header">
@@ -847,12 +890,6 @@
 
           <!-- Right: Detail + Update Form -->
           <div class="iu-detail-panel">
-
-            <!-- Empty state -->
-            <!-- <div id="iu-empty-state" class="iu-empty-state">
-              <p>← Select an item to view details and update stock</p>
-            </div>  -->
-
             <!-- Detail view (hidden until item selected) -->
             <div id="iu-detail-view" class="iu-detail-view">
 
@@ -915,7 +952,6 @@
         </div>
       </div>
     </div>
-
     <div id="manage-item-modal" class="c-modal c-modal--center is-hidden">
       <div class="c-modal__panel" id="c-modal-manage-item">
         <header class="c-modal__header">
@@ -982,12 +1018,18 @@
                 <span class="mi-edit__title">Edit Details</span>
                 <div class="mi-edit__grid">
                   <div class="mi-field">
-                    <label class="mi-field__label" for="mi-edit-cost">Cost Price (IDR)</label>
-                    <input type="number" id="mi-edit-cost" class="mi-field__input" min="0" step="1" placeholder="0" />
+                    <label class="mi-field__label" for="mi-edit-cost">Cost Price</label>
+                    <div class="mi-input-group">
+                      <span class="mi-input-group__symbol" id="mi-cost-currency">Rp</span>
+                      <input type="number" id="mi-edit-cost" class="mi-field__input" min="0" step="1" placeholder="0" />
+                    </div>
                   </div>
                   <div class="mi-field">
-                    <label class="mi-field__label" for="mi-edit-sell">Sell Price (IDR)</label>
-                    <input type="number" id="mi-edit-sell" class="mi-field__input" min="0" step="1" placeholder="0" />
+                    <label class="mi-field__label" for="mi-edit-sell">Sell Price</label>
+                    <div class="mi-input-group">
+                      <span class="mi-input-group__symbol" id="mi-sell-currency">Rp</span>
+                      <input type="number" id="mi-edit-sell" class="mi-field__input" min="0" step="1" placeholder="0" />
+                    </div>
                   </div>
                   <div class="mi-field">
                     <label class="mi-field__label" for="mi-edit-min">Minimum Stock</label>
@@ -1127,6 +1169,25 @@
             </div>
 
             <div class="c-profile__section-title">Financial Settings</div>
+            <div class="c-field">
+              <label class="c-field__label" for="profile-currency">Currency</label>
+              <select class="c-field__select" id="profile-currency">
+                <option value="IDR">IDR - Indonesian Rupiah</option>
+                <option value="USD">USD - US Dollar</option>
+                <option value="EUR">EUR - Euro</option>
+                <option value="GBP">GBP - British Pound</option>
+                <option value="JPY">JPY - Japanese Yen</option>
+                <option value="SGD">SGD - Singapore Dollar</option>
+                <option value="MYR">MYR - Malaysian Ringgit</option>
+                <option value="AUD">AUD - Australian Dollar</option>
+                <option value="CNY">CNY - Chinese Yuan</option>
+                <option value="KRW">KRW - South Korean Won</option>
+                <option value="THB">THB - Thai Baht</option>
+                <option value="PHP">PHP - Philippine Peso</option>
+                <option value="VND">VND - Vietnamese Dong</option>
+                <option value="INR">INR - Indian Rupee</option>
+              </select>
+            </div>
             <div class="c-field">
               <label class="c-field__label" for="profile-tax-rate">Tax Rate (%)</label>
               <input class="c-field__input" type="number" id="profile-tax-rate" placeholder="0" min="0" max="100" />
@@ -1311,15 +1372,15 @@
               </tr>
               <tr>
                 <td>Subtotal</td>
-                <td><span id="order-total-price">Rp 0</span></td>
+                <td><span id="order-total-price">0</span></td>
               </tr>
               <tr>
                 <td>Tax (<span id="order-tax-label">0</span>%)</td>
-                <td><span id="order-tax-amount">Rp 0</span></td>
+                <td><span id="order-tax-amount">0</span></td>
               </tr>
               <tr>
                 <td><strong>Total</strong></td>
-                <td><strong><span id="order-with-tax">Rp 0</span></strong></td>
+                <td><strong><span id="order-with-tax">0</span></strong></td>
               </tr>
             </tbody>
           </table>

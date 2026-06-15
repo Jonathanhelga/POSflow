@@ -85,11 +85,10 @@ flex: 0 1 auto	0	1	auto	Don't grow, can shrink, starting from its natural size *
 }
 .iu-card:hover {
     border-color: var(--clr-primary);
-    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
 }
 .iu-card--active {
     border-color: var(--clr-primary);
-    background-color: #eef7fb;
+    background-color: var(--clr-surface-alt);
 }
 
 .iu-card__top {
@@ -296,6 +295,7 @@ flex: 0 1 auto	0	1	auto	Don't grow, can shrink, starting from its natural size *
     font-size: 1rem;
     outline: none;
     transition: border-color 0.15s;
+    background-color: var(--clr-input-bg);
     color: var(--clr-text-primary);
 }
 .iu-update-form__input:focus { border-color: var(--clr-primary); }

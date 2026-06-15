@@ -1,13 +1,17 @@
 import JsBarcode from 'jsbarcode';
 import html2canvas from 'html2canvas';
-import { fetchInventory } from './firebase';
+import { fetchInventory, getCachedUserProfile } from './firebase';
 import { toggleModal } from './modal-handler';
-import { formatRupiah } from './formatRupiah';
+import { formatCurrency, getCurrencySymbol } from './formatCurrency';
 import { showToast } from './toast';
 import { createSelection } from './selection';
 let allItems      = [];
 let filteredItems = [];
 const selection   = createSelection();
+
+function currentCurrency() {
+    return getCachedUserProfile()?.currency || 'IDR';
+}
 let currentObjectUrl = null;
 let uploadedImageUrl = null;
 let activeSize = 'large';
@@ -55,7 +59,7 @@ function renderItemList_Barcode(items) {
         secondRow.className = 'bg-card__second-row';
         const priceSpan = document.createElement('span');
         priceSpan.className = 'bg-card__price';
-        priceSpan.textContent = `Rp ${formatRupiah(item.sellPrice)}`;
+        priceSpan.textContent = `${getCurrencySymbol(currentCurrency())} ${formatCurrency(item.sellPrice, currentCurrency())}`;
         const stockSpan = document.createElement('span');
         stockSpan.className = 'bg-card__stock';
         stockSpan.textContent = `${item.stockLevel ?? 0} `;
@@ -110,7 +114,7 @@ function updatePreview() {
 
     const priceDiv = document.createElement('div');
     priceDiv.className = 'bg-preview__price';
-    priceDiv.textContent = `Rp ${formatRupiah(item.sellPrice)}`;
+    priceDiv.textContent = `${getCurrencySymbol(currentCurrency())} ${formatCurrency(item.sellPrice, currentCurrency())}`;
 
     const barcodeCanvas = document.createElement('canvas');
     barcodeCanvas.id = 'bg-barcode-canvas';

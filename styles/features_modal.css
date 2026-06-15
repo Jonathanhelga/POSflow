@@ -2,7 +2,7 @@
     align-items: flex-start;
     justify-content: flex-end;
     padding: 2rem;
-    background-color: rgba(15, 23, 42, 0.35);
+    background-color: var(--clr-overlay);
 }
 
 #c-modal-features {
@@ -13,15 +13,13 @@
     overflow-y: auto;
     border-radius: var(--radius);
     background-color: var(--clr-modal-panel);
-    box-shadow:
-        0 1px 2px rgba(15, 23, 42, 0.04),
-        0 12px 32px rgba(15, 23, 42, 0.18);
-    border: 1px solid rgba(15, 23, 42, 0.06);
+    box-shadow: var(--shadow);
+    border: 1px solid var(--clr-border);
 }
 
 #c-modal-features .c-modal__header {
     padding: 1.1rem 1.4rem;
-    border-bottom: 1px solid rgba(15, 23, 42, 0.08);
+    border-bottom: 1px solid var(--clr-border);
 }
 #c-modal-features .c-modal__title {
     font-size: 1.4rem;
@@ -31,6 +29,80 @@
 }
 
 #c-modal-features .c-modal__body { padding: 1rem 1rem 1.25rem; }
+
+/*  Theme toggle */
+.c-theme-toggle {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.85rem 1.1rem;
+    margin-bottom: 1rem;
+    cursor: pointer;
+    border-radius: 10px;
+    background-color: var(--clr-surface-alt);
+    border: 1px solid var(--clr-border);
+    user-select: none;
+    transition: border-color 0.15s, background-color 0.15s;
+}
+.c-theme-toggle:hover {
+    background-color: var(--clr-panel);
+    border-color: var(--clr-border);
+}
+
+.c-theme-toggle__label {
+    font-size: 0.95rem;
+    font-weight: 500;
+    color: var(--clr-text-primary);
+    letter-spacing: 0.01em;
+}
+
+.c-theme-toggle__switch {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    flex-shrink: 0;
+}
+
+.c-theme-toggle__switch input {
+    position: absolute;
+    opacity: 0;
+    width: 0;
+    height: 0;
+    pointer-events: none;
+}
+
+.c-theme-toggle__track {
+    position: relative;
+    width: 44px;
+    height: 24px;
+    border-radius: 12px;
+    background-color: #cbd5e1;
+    transition: background-color 0.25s ease;
+}
+
+.c-theme-toggle__knob {
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background-color: #ffffff;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.2);
+    transition: transform 0.25s ease, background-color 0.25s ease;
+}
+
+.c-theme-toggle__switch input:checked + .c-theme-toggle__track {
+    background-color: var(--clr-success);
+}
+.c-theme-toggle__switch input:checked + .c-theme-toggle__track .c-theme-toggle__knob {
+    transform: translateX(20px);
+}
+
+.c-theme-toggle__switch input:focus-visible + .c-theme-toggle__track {
+    outline: 2px solid var(--clr-primary);
+    outline-offset: 3px;
+}
 
 .c-actions--stack {
     display: flex;
@@ -43,13 +115,13 @@
     position: relative;
     height: auto;
     padding: 0.85rem 2.25rem 0.85rem 1.1rem;
-    background-color: #f1f5f9;
-    color: #1f2937;
+    background-color: var(--clr-surface-alt);
+    color: var(--clr-text-primary);
     font-size: 0.95rem;
     font-weight: 500;
     text-align: left;
     letter-spacing: 0.01em;
-    border: 1px solid rgba(15, 23, 42, 0.08);
+    border: 1px solid var(--clr-border);
     border-radius: 10px;
     cursor: pointer;
     transition:
@@ -59,28 +131,11 @@
         transform 0.05s ease;
 }
 
-/* .c-actions--stack button::after {
-    content: "›";
-    position: absolute;
-    right: 1rem;
-    top: 50%;
-    transform: translateY(-50%);
-    color: #94a3b8;
-    font-size: 1.15rem;
-    font-weight: 400;
-    transition: color 0.15s ease, transform 0.15s ease;
-} */
-
 .c-actions--stack button:hover {
-    background-color: #ffffff;
-    border-color: rgba(15, 23, 42, 0.14);
-    box-shadow: 0 4px 12px rgba(15, 23, 42, 0.08);
+    background-color: var(--clr-panel);
+    border-color: var(--clr-border);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
     filter: none;
 }
-/* .c-actions--stack button:hover::after {
-    color: var(--clr-text-primary);
-    transform: translateY(-50%) translateX(2px);
-} */
-
-.c-actions--stack button:active { transform: translateY(1px); box-shadow: 0 1px 3px rgba(15, 23, 42, 0.08); }
+.c-actions--stack button:active { transform: translateY(1px); box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08); }
 .c-actions--stack button:focus-visible { outline: 2px solid var(--clr-primary); outline-offset: 2px;    }

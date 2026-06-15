@@ -1,16 +1,16 @@
-import { db } from './firebase';
+import { db, getCachedUserProfile } from './firebase';
 import { doc, updateDoc, increment, serverTimestamp } from 'firebase/firestore';
 import { toggleModal } from './modal-handler';
 import { allItems, loadAllItems, updateLocalStock } from './search_item';
 import { createSelection } from './selection';
+import { formatCurrency, getCurrencySymbol } from './formatCurrency';
 
 let filteredItems = [];
 const selection   = createSelection();
 
-const formatCurrency = (value) => new Intl.NumberFormat('id-ID', {
-    style: 'currency', currency: 'IDR',
-    minimumFractionDigits: 0, maximumFractionDigits: 0
-}).format(value ?? 0);
+function currentCurrency() {
+    return getCachedUserProfile()?.currency || 'IDR';
+}
 
 function getStockStatus(current, min) {
     return Number(current ?? 0) >= Number(min ?? 0) ? 'good' : 'alert';
@@ -104,8 +104,10 @@ function populateDetail(item) {
     document.getElementById('iu-unit').textContent          = item.unit || '—';
     document.getElementById('iu-supplier').textContent      = item.supplier || '—';
 
-    document.getElementById('iu-cost-price').textContent = formatCurrency(item.costPrice);
-    document.getElementById('iu-sell-price').textContent = formatCurrency(item.sellPrice);
+    const currency = currentCurrency();
+    const symbol = getCurrencySymbol(currency);
+    document.getElementById('iu-cost-price').textContent = `${symbol} ${formatCurrency(item.costPrice, currency)}`;
+    document.getElementById('iu-sell-price').textContent = `${symbol} ${formatCurrency(item.sellPrice, currency)}`;
 
     document.getElementById('iu-incoming-qty').value = '';
     clearFeedback();

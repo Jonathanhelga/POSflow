@@ -1,5 +1,5 @@
 import { auth, fetchOrders, fetchUserProfile } from './firebase';
-import { formatRupiah } from './formatRupiah';
+import { formatCurrency, getCurrencySymbol } from './formatCurrency';
 import { toggleModal } from './modal-handler';
 
 let isProcessing = false;
@@ -32,6 +32,8 @@ function formatTime(ts) {
 }
 
 function shortId(id) { return id.slice(-8).toUpperCase(); }
+
+function orderCurrency(order) { return order?.currency || 'IDR'; }
 
 function populateBillHeader(profile) {
     document.getElementById('oh-shop-name').textContent =
@@ -79,7 +81,7 @@ function renderOrderList(orders) {
 
         const totalDiv = document.createElement('div');
         totalDiv.className = 'oh-card__total';
-        totalDiv.textContent = `Rp. ${formatRupiah(order.totalPrice)}`;
+        totalDiv.textContent = `${getCurrencySymbol(orderCurrency(order))} ${formatCurrency(order.totalPrice, orderCurrency(order))}`;
 
         const bottomRow = document.createElement('div');
         bottomRow.className = 'oh-card__bottom-row';
@@ -122,6 +124,9 @@ function viewOrderDetails(order, cardEl) {
     document.getElementById('oh-bill-date').textContent = formatDate(order.createdAt);
     document.getElementById('oh-bill-time').textContent = formatTime(order.createdAt);
 
+    const currency = orderCurrency(order);
+    const symbol = getCurrencySymbol(currency);
+
     let totalItems = 0;
     (order.items || []).forEach(item => {
         totalItems += Number(item.quantity);
@@ -136,11 +141,11 @@ function viewOrderDetails(order, cardEl) {
         itemQuantity.textContent = item.quantity;
 
         const itemPrice = document.createElement('div');
-        itemPrice.textContent = formatRupiah(item.price);
+        itemPrice.textContent = formatCurrency(item.price, currency);
 
         const itemSubtotal = document.createElement('div');
-        itemSubtotal.textContent = formatRupiah(item.subtotal);
-        
+        itemSubtotal.textContent = formatCurrency(item.subtotal, currency);
+
         row.appendChild(itemName);
         row.appendChild(itemQuantity);
         row.appendChild(itemPrice);
@@ -150,11 +155,11 @@ function viewOrderDetails(order, cardEl) {
     });
 
     document.getElementById('oh-total-items').textContent = totalItems;
-    document.getElementById('oh-subtotal').textContent = `Rp ${formatRupiah(order?.subtotal || 0)}`;
+    document.getElementById('oh-subtotal').textContent = `${symbol} ${formatCurrency(order?.subtotal || 0, currency)}`;
     renderDiscountRow(order);
     document.getElementById('oh-business-tax').textContent = `${order?.taxRate || 0}`;
-    document.getElementById('oh-tax').textContent = `Rp ${formatRupiah(order?.taxAmount || 0)}`;
-    document.getElementById('oh-grand-total').textContent = `Rp ${formatRupiah(order.totalPrice) ?? '-'}`;
+    document.getElementById('oh-tax').textContent = `${symbol} ${formatCurrency(order?.taxAmount || 0, currency)}`;
+    document.getElementById('oh-grand-total').textContent = `${symbol} ${formatCurrency(order.totalPrice, currency)}`;
 
     document.getElementById('oh-print-btn').disabled = false;
 
@@ -168,8 +173,9 @@ function viewOrderDetails(order, cardEl) {
 function renderDiscountRow(order) {
     const discountPct = Number(order?.discountPct) || 0;
     const discountAmount = Number(order?.discountAmount) || 0;
+    const currency = orderCurrency(order);
     document.getElementById('oh-discount-pct').textContent = String(discountPct);
-    document.getElementById('oh-discount-amount').textContent = `- Rp ${formatRupiah(discountAmount)}`;
+    document.getElementById('oh-discount-amount').textContent = `- ${getCurrencySymbol(currency)} ${formatCurrency(discountAmount, currency)}`;
 }
 
 // ─── Order Information (display-only; not part of the printed bill) ──────────────
@@ -472,7 +478,7 @@ export async function initOrderHistory(user) {
         document.getElementById('oh-subtotal').textContent = '—';
         document.getElementById('oh-grand-total').textContent = '—';
         document.getElementById('oh-tax').textContent = '—';
-        document.getElementById('oh-discount-amount').textContent = '- Rp 0';
+        document.getElementById('oh-discount-amount').textContent = '- 0';
         document.getElementById('oh-discount-pct').textContent = '0';
         document.getElementById('oh-print-btn').disabled = true;
         document.getElementById('oh-info').classList.add('is-hidden');

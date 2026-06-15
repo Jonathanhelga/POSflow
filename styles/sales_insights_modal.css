@@ -2,7 +2,7 @@
     align-items: center;
     justify-content: center;
     padding: 2rem;
-    background-color: rgba(15, 23, 42, 0.45);
+    background-color: var(--clr-overlay);
 }
 
 #c-modal-sales {
@@ -12,18 +12,15 @@
     display: flex;
     flex-direction: column;
     border-radius: var(--radius);
-    background-color: black;
-    box-shadow:
-        0 1px 2px rgba(15, 23, 42, 0.04),
-        0 24px 60px rgba(15, 23, 42, 0.25);
-    /* border: 1px solid rgba(15, 23, 42, 0.06); */
+    background-color: var(--clr-panel);
+    box-shadow: var(--shadow);
     overflow: hidden;        /* the body handles scroll */
 }
 
 #c-modal-sales .c-modal__header {
     flex-shrink: 0;
     padding: 1.1rem 1.4rem;
-    border-bottom: 1px solid rgba(15, 23, 42, 0.08);
+    border-bottom: 1px solid var(--clr-border);
 }
 #c-modal-sales .c-modal__title {
     font-size: 1.4rem;
@@ -59,7 +56,7 @@
     gap: 2rem;
     padding: 1rem 1.25rem;
     background-color: var(--clr-panel);
-    border: 1px solid rgba(15, 23, 42, 0.08);
+    border: 1px solid var(--clr-border);
     border-radius: 12px;
 }
 
@@ -74,9 +71,9 @@
     align-items: center;
     justify-content: center;
     padding: 0.5rem 0.9rem;
-    background-color: #f1f5f9;
+    background-color: var(--clr-surface-alt);
     color: var(--clr-text-secondary);
-    border: 1px solid rgba(15, 23, 42, 0.08);
+    border: 1px solid var(--clr-border);
     border-radius: 999px;
     font-size: 0.85rem;
     font-weight: 500;
@@ -87,7 +84,7 @@
         color 0.15s ease;
 }
 .c-chip:hover {
-    background-color: #e2e8f0;
+    background-color: var(--clr-hover);
     color: var(--clr-text-primary);
 }
 .c-chip.is-active {
@@ -120,9 +117,9 @@
 .c-sales__range-label input {
     padding: 0.55rem 0.7rem;
     font-size: 1rem;
-    border: 1px solid rgba(15, 23, 42, 0.12);
+    border: 1px solid var(--clr-border);
     border-radius: 8px;
-    background-color: var(--clr-panel);
+    background-color: var(--clr-input-bg);
     color: var(--clr-text-primary);
     width: 9rem;
 }
@@ -138,7 +135,7 @@
     font-size: 0.875rem;
     font-weight: 600;
     padding: 0.5rem 0.9rem;
-    border: 1px solid rgba(15, 23, 42, 0.08);
+    border: 1px solid var(--clr-border);
     cursor: pointer;
 }
 .c-sales__apply:hover { filter: brightness(1.15); }
@@ -159,13 +156,13 @@
     gap: 0.4rem;
     padding: 1.1rem 1.25rem;
     background-color: var(--clr-panel);
-    border: 1px solid rgba(15, 23, 42, 0.08);
+    border: 1px solid var(--clr-border);
     border-radius: 12px;
     transition: border-color 0.15s ease, box-shadow 0.15s ease;
 }
 .c-kpi:hover {
-    border-color: rgba(15, 23, 42, 0.14);
-    box-shadow: 0 4px 12px rgba(15, 23, 42, 0.06);
+    border-color: var(--clr-border);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
 }
 .c-kpi__label {
     font-size: 0.72rem;
@@ -193,7 +190,7 @@
 /* ── Card primitive (chart + top items share this) ────────────── */
 .c-card {
     background-color: var(--clr-panel);
-    border: 1px solid rgba(15, 23, 42, 0.08);
+    border: 1px solid var(--clr-border);
     border-radius: 12px;
     overflow: auto;
 }
@@ -203,7 +200,7 @@
     justify-content: space-between;
     gap: 1rem;
     padding: 1rem 1.25rem;
-    border-bottom: 1px solid rgba(15, 23, 42, 0.06);
+    border-bottom: 1px solid var(--clr-border);
 }
 .c-card__title {
     margin: 0;
@@ -246,22 +243,22 @@
 }
 .c-sales__table thead th {
     padding: 0.75rem 1.25rem;
-    background-color: #f8fafc;
+    background-color: var(--clr-surface-alt);
     color: var(--clr-text-secondary);
     font-size: 0.72rem;
     font-weight: 600;
     text-transform: uppercase;
     letter-spacing: 0.06em;
     text-align: left;
-    border-bottom: 1px solid rgba(15, 23, 42, 0.08);
+    border-bottom: 1px solid var(--clr-border);
 }
 .c-sales__table tbody td {
     padding: 0.85rem 1.25rem;
     color: var(--clr-text-primary);
-    border-bottom: 1px solid rgba(15, 23, 42, 0.05);
+    border-bottom: 1px solid color-mix(in srgb, var(--clr-border) 50%, transparent);
 }
 .c-sales__table tbody tr:last-child td { border-bottom: none; }
-.c-sales__table tbody tr:hover { background-color: #f8fafc; }
+.c-sales__table tbody tr:hover { background-color: var(--clr-surface-alt); }
 
 .c-sales__col-rank {
     width: 3rem;
