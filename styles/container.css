@@ -1,10 +1,10 @@
-/* ═══════════════════════════════════════════════════════════════
+/* 
    POS APP LAYOUT
    The two-column layout for the main POS screen:
      .l-app          — root flex container (hidden until logged in)
        .l-sidebar    — left 30%: order table, totals, actions
        .l-main       — right 70%: search bar + item grid
-   ═══════════════════════════════════════════════════════════════ */
+ */
 
 /* — Root App Container — */
 .l-app { display: none; }
@@ -18,7 +18,7 @@
 }
 
 
-/* ── Sidebar ────────────────────────────────────────────────── */
+/* ── Sidebar  */
 .l-sidebar {
     display: flex;
     flex-direction: column;
@@ -58,7 +58,7 @@
 }
 .l-sidebar__summary .c-table th,
 .l-sidebar__summary .c-table td {
-    border: 2px solid black;
+    border: 2px solid var(--clr-table-border);
     text-align: center;
     vertical-align: top;
 }
@@ -150,7 +150,7 @@
 .c-hint {
     padding: 10px;
     font-size: 0.8rem;
-    color: #666;
+    color: var(--clr-text-secondary);
     margin-top: 5px;
     text-align: center;
     font-style: italic;
@@ -192,26 +192,26 @@
 .item-search {
     width: 60%;
     padding: 12px 10px 12px 10px;
-    border: 2px solid #e1e8ed;
+    border: 2px solid var(--clr-border);
     border-radius: var(--radius);
     font-size: 15px;
-    background-color: #f8f9fa;
+    background-color: var(--clr-input-bg);
     transition: all 0.3s ease;
     outline: none;
-    color: #2c3e50;
+    color: var(--clr-text-primary);
 }
 .item-search:focus {
-    border-color: #4a90e2;
-    background-color: #fff;
-    box-shadow: 0 0 0 3px rgba(74, 144, 226, 0.1);
+    border-color: var(--clr-focus-ring);
+    background-color: var(--clr-input-bg);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--clr-focus-ring) 20%, transparent);
     transform: translateY(-1px);
 }
 .search-stats {
     padding: var(--pos-padding);
-    background: #b8b9bb;
+    background: var(--clr-border);
     border-radius: 5px;
     font-size: 14px;
-    color: #666;
+    color: var(--clr-text-secondary);
 }
 
 /* — Sort bar — */
@@ -226,26 +226,26 @@
 .c-sort-bar__label {
     font-size: 14px;
     font-weight: 600;
-    color: #2c3e50;
+    color: var(--clr-text-primary);
     margin-right: 0.2rem;
 }
 .c-sort-bar__btn {
     padding: 8px 16px;
-    border: 2px solid #e1e8ed;
+    border: 2px solid var(--clr-border);
     border-radius: 100px;
-    background-color: #f8f9fa;
+    background-color: var(--clr-bg-surface);
     font-size: 14px;
-    color: #2c3e50;
+    color: var(--clr-text-primary);
     cursor: pointer;
     transition: all 0.2s ease;
 }
 .c-sort-bar__btn:hover {
-    border-color: #4a90e2;
-    background-color: #fff;
+    border-color: var(--clr-focus-ring);
+    background-color: var(--clr-panel);
 }
 .c-sort-bar__btn.is-active {
-    border-color: #4a90e2;
-    background-color: #4a90e2;
+    border-color: var(--clr-focus-ring);
+    background-color: var(--clr-focus-ring);
     color: #fff;
 }
 
@@ -257,7 +257,7 @@
 }
 .c-actions__features button {
     font-size: 0.9rem;
-    background-color: #b6b6b6;
+    background-color: var(--clr-feature-buttons);
     border-radius: 100px;
     color: white;
 }

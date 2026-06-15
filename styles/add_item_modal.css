@@ -11,12 +11,12 @@
     overflow-y: auto;
     border-radius: var(--radius);
     background-color: var(--clr-modal-panel);
-    box-shadow: 0 20px 60px rgba(18, 24, 40, 0.35);
+    box-shadow: var(--shadow);
 }
 
 #c-modal-item-create .c-modal__header {
     padding: 1.75rem 2.25rem;
-    border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+    border-bottom: 1px solid var(--clr-border);
 }
 #c-modal-item-create .c-modal__title {
     font-size: 1.4rem;
@@ -47,7 +47,7 @@
 #c-modal-item-create .c-field__textarea {
     padding: 12px 14px;
     font-size: 1rem;
-    background-color: #ffffff;
+    background-color: var(--clr-input-bg);
 }
 
 #c-modal-item-create .c-field__label {
@@ -62,11 +62,11 @@
     align-items: stretch;
     border: 1px solid var(--clr-border);
     border-radius: 8px;
-    background-color: #ffffff;
+    background-color: var(--clr-input-bg);
     transition: border-color 0.15s;
 }
 .c-input-group:focus-within {
-    border-color: #3498db;
+    border-color: var(--clr-focus-ring);
 }
 .c-input-group__symbol {
     display: flex;
@@ -75,7 +75,7 @@
     color: var(--clr-text-secondary);
     font-weight: 600;
     font-size: 1rem;
-    background: #f7f8fa;
+    background: var(--clr-surface-alt);
     border-right: 1px solid var(--clr-border);
     user-select: none;
     white-space: nowrap;
@@ -104,7 +104,7 @@
 #c-modal-item-create .c-modal__footer {
     margin-top: 0.5rem;
     padding: 1.25rem 0 0.25rem;
-    border-top: 1px solid rgba(0, 0, 0, 0.08);
+    border-top: 1px solid var(--clr-border);
 }
 #c-modal-item-create .c-actions {
     justify-content: flex-end;
@@ -114,7 +114,7 @@
 }
 
 #js-add-new-item   { background-color: var(--clr-success); color: white; }
-#js-reset-new-item { background-color: #ddd; }
+#js-reset-new-item { background-color: var(--clr-border); }
 
 
 .btn--primary    { background-color: #4E7397; color: white; }

@@ -76,7 +76,6 @@
 }
 .bg-card:hover {
     border-color: var(--clr-primary);
-    box-shadow: 0 2px 10px rgba(0,0,0,0.07);
 }
 .bg-card--active {
     border-color: var(--clr-primary);

@@ -13,13 +13,13 @@
     overflow: hidden;
     border-radius: var(--radius);
     background-color: var(--clr-panel);
-    box-shadow: 0 20px 60px rgba(18, 24, 40, 0.35);
+    box-shadow: var(--shadow);
 }
 
 #c-modal-customer-checkout .c-modal__header {
     flex-shrink: 0;
     padding: 1.25rem 1.75rem;
-    border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+    border-bottom: 1px solid var(--clr-border);
     background-color: var(--clr-panel);
 }
 #c-modal-customer-checkout .c-modal__title {
@@ -48,10 +48,10 @@
 
 /* Section blocks */
 .c-checkout__section {
-    border: 1px solid #e2e8f0;
+    border: 1px solid var(--clr-border);
     border-radius: 10px;
     padding: 1rem 1.1rem 1.1rem;
-    background-color: #ffffff;
+    background-color: var(--clr-panel);
 }
 
 .c-checkout__section-title {
@@ -82,7 +82,7 @@
 #c-modal-customer-checkout .c-field__select {
     padding: 9px 11px;
     font-size: 1rem;
-    background-color: #ffffff;
+    background-color: var(--clr-input-bg);
 }
 
 /* Order recap table */
@@ -99,11 +99,11 @@
     text-transform: uppercase;
     letter-spacing: 0.06em;
     padding: 0 0 0.5rem;
-    border-bottom: 1px solid #e2e8f0;
+    border-bottom: 1px solid var(--clr-border);
 }
 .c-checkout__recap tbody td {
     padding: 0.55rem 0;
-    border-bottom: 1px dashed #eef2f7;
+    border-bottom: 1px dashed color-mix(in srgb, var(--clr-border) 40%, transparent);
     color: var(--clr-text-primary);
 }
 .c-checkout__recap tbody tr:last-child td { border-bottom: none; }
@@ -137,7 +137,7 @@
 .c-checkout__totals-row--grand {
     margin-top: 0.4rem;
     padding-top: 0.7rem;
-    border-top: 1px solid #e2e8f0;
+    border-top: 1px solid var(--clr-border);
     font-size: 1.05rem;
     font-weight: 700;
 }
@@ -163,7 +163,7 @@
     text-align: right;
     font-variant-numeric: tabular-nums;
 }
-.c-checkout__discount-input:focus { border-color: #3498db; outline: none; }
+.c-checkout__discount-input:focus { border-color: var(--clr-focus-ring); outline: none; }
 .c-checkout__discount-suffix {
     color: var(--clr-text-secondary);
     font-size: 0.85rem;
@@ -178,17 +178,17 @@
     justify-content: flex-end;
     gap: 1rem;
     padding: 1rem 1.75rem;
-    border-top: 1px solid rgba(0, 0, 0, 0.08);
+    border-top: 1px solid var(--clr-border);
     background-color: var(--clr-panel);
 }
 .c-checkout__cancel {
-    background-color: #ffffff;
+    background-color: var(--clr-panel);
     color: var(--clr-text-primary);
     border: 1px solid var(--clr-border);
 }
 .c-checkout__submit {
     background-color: var(--clr-success);
-    color: #1f2937;
+    color: var(--clr-text-primary);
 }
 .c-checkout__submit:disabled {
     opacity: 0.55;
@@ -206,7 +206,7 @@
 .c-checkout__add-field {
     appearance: none;
     background: transparent;
-    border: 1.5px dashed #cbd5e1;
+    border: 1.5px dashed var(--clr-border);
     border-radius: 10px;
     padding: 0.75rem 1rem;
     width: 100%;
@@ -221,9 +221,9 @@
     transition: border-color 0.15s ease, color 0.15s ease, background-color 0.15s ease;
 }
 .c-checkout__add-field:hover {
-    border-color: #94a3b8;
+    border-color: var(--clr-text-secondary);
     color: var(--clr-text-primary);
-    background-color: #f8fafc;
+    background-color: var(--clr-bg-surface);
 }
 .c-checkout__add-field-icon {
     font-size: 1.05rem;
@@ -253,10 +253,10 @@
     display: flex;
     flex-direction: column;
     padding: 0.35rem;
-    background-color: #ffffff;
+    background-color: var(--clr-panel);
     border: 1px solid var(--clr-border);
     border-radius: 10px;
-    box-shadow: 0 12px 28px rgba(18, 24, 40, 0.18);
+    box-shadow: var(--shadow);
 }
 .c-checkout__type-menu.is-hidden { display: none; }
 
@@ -277,7 +277,7 @@
     cursor: pointer;
     transition: background-color 0.12s ease;
 }
-.c-checkout__type-option:hover { background-color: #f1f5f9; }
+.c-checkout__type-option:hover { background-color: var(--clr-surface-alt); }
 
 .c-checkout__type-icon {
     width: 1.3rem;
@@ -316,10 +316,10 @@
 
 /* Card skeleton for one custom field */
 .c-checkout__field-card {
-    border: 1px solid #cbd5e1;
+    border: 1px solid var(--clr-border);
     border-radius: 10px;
     padding: 0.85rem 0.95rem;
-    background-color: #f8fafc;
+    background-color: var(--clr-bg-surface);
 }
 .c-checkout__field-card-head {
     display: flex;
@@ -350,8 +350,8 @@
     transition: color 0.12s ease, background-color 0.12s ease;
 }
 .c-checkout__field-remove:hover {
-    color: #ef4444;
-    background-color: #fef2f2;
+    color: var(--clr-danger);
+    background-color: color-mix(in srgb, var(--clr-danger) 15%, transparent);
 }
 
 .c-checkout__field-card-body {
@@ -392,7 +392,7 @@
 .c-checkout__option-add-btn {
     appearance: none;
     border: 1px solid var(--clr-border);
-    background-color: #ffffff;
+    background-color: var(--clr-panel);
     border-radius: 8px;
     padding: 0 0.95rem;
     font-size: 0.85rem;
@@ -403,8 +403,8 @@
     transition: background-color 0.12s ease, border-color 0.12s ease;
 }
 .c-checkout__option-add-btn:hover:not(:disabled) {
-    background-color: #f1f5f9;
-    border-color: #94a3b8;
+    background-color: var(--clr-surface-alt);
+    border-color: var(--clr-text-secondary);
 }
 .c-checkout__option-add-btn:disabled,
 .c-checkout__option-input:disabled {
@@ -424,7 +424,7 @@
     align-items: center;
     border: 1px solid var(--clr-border);
     border-radius: 8px;
-    background-color: #ffffff;
+    background-color: var(--clr-panel);
     transition: border-color 0.12s ease, background-color 0.12s ease;
 }
 .c-checkout__option-pick {
@@ -447,7 +447,7 @@
     width: 1rem;
     height: 1rem;
     border-radius: 50%;
-    border: 2px solid #cbd5e1;
+    border: 2px solid var(--clr-border);
     box-sizing: border-box;
     transition: border-color 0.12s ease, background-color 0.12s ease;
 }
@@ -470,14 +470,14 @@
 
 .c-checkout__option.is-selected {
     border-color: var(--clr-success);
-    background-color: #ecfdf5;
+    background-color: color-mix(in srgb, var(--clr-success) 20%, transparent);
 }
 .c-checkout__option.is-selected .c-checkout__option-dial {
     border-color: var(--clr-success);
     background-color: var(--clr-success);
-    box-shadow: inset 0 0 0 2px #ffffff;
+    box-shadow: inset 0 0 0 2px var(--clr-panel);
 }
 .c-checkout__option.is-selected .c-checkout__option-text {
     font-weight: 700;
-    color: #166534;
+    color: var(--clr-text-primary);
 }

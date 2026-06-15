@@ -26,6 +26,7 @@ import { initBarcodeGenerator } from './barcode-generator';
 import { initInsights } from './sales_insight';
 import { initCustomerCheckout } from './customer_checkout';
 import { initClock } from './clock';
+import { initThemeToggle } from './theme';
 import { showToast } from './toast';
 function initLoggedInApp(user) {
     renderLoggedInState(user);
@@ -36,6 +37,7 @@ function initLoggedInApp(user) {
     initBarcodeGenerator(user);
     initCustomerCheckout();
     initClock();
+    initThemeToggle();
 }
 
 function initLanding() {

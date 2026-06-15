@@ -7,6 +7,16 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
     <title>POS FLOW — Run your shop from the browser.</title>
+    <meta name="theme-color" content="#FAFAF7">
+    <script>
+      (function(){
+        var theme = localStorage.getItem('theme');
+        if (!theme) theme = matchMedia('(prefers-color-scheme:dark)').matches ? 'dark' : 'light';
+        document.documentElement.setAttribute('data-theme', theme);
+        var meta = document.querySelector('meta[name="theme-color"]');
+        if (meta) meta.content = theme === 'dark' ? '#0f172a' : '#FAFAF7';
+      })();
+    </script>
     <!-- I place the styling inside the html not separately so that it paints before the main bundle loads (Flash of Unstyled Content prevention) -->
     <style>
       body.is-booting #js-landing { display: none; }
@@ -478,6 +488,15 @@
             <button type="button" class="c-modal__close" aria-label="Close" data-modal-close="features-modal">&times;</button>
           </header>
           <div class="c-modal__body">
+            <label class="c-theme-toggle" id="js-theme-toggle">
+              <span class="c-theme-toggle__label">Dark Mode</span>
+              <span class="c-theme-toggle__switch">
+                <input type="checkbox">
+                <span class="c-theme-toggle__track">
+                  <span class="c-theme-toggle__knob"></span>
+                </span>
+              </span>
+            </label>
             <div class="c-actions c-actions--stack">
               <button id="inventory-update-open" class="btn" type="button">Update Inventory</button>
               <button id="manage-item-open" class="btn" type="button">Manage Items</button>
@@ -521,7 +540,6 @@
       </div>
 
     </div>
-
     <div id="order-history-modal" class="c-modal c-modal--center is-hidden">
       <div class="c-modal__panel" id="c-modal-order-history">
         <header class="c-modal__header">
@@ -665,7 +683,6 @@
         </div>
       </div>
     </div>
-
     <div id="customer-checkout-modal" class="c-modal c-modal--center is-hidden">
       <div class="c-modal__panel" id="c-modal-customer-checkout">
         <header class="c-modal__header">
@@ -854,7 +871,6 @@
         </form>
       </div>
     </div>
-
     <div id="inventory-update-modal" class="c-modal c-modal--center is-hidden">
       <div class="c-modal__panel" id="c-modal-inventory-update">
         <header class="c-modal__header">
@@ -936,7 +952,6 @@
         </div>
       </div>
     </div>
-
     <div id="manage-item-modal" class="c-modal c-modal--center is-hidden">
       <div class="c-modal__panel" id="c-modal-manage-item">
         <header class="c-modal__header">

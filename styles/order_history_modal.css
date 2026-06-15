@@ -106,7 +106,7 @@
 
 .oh-search__group:focus-within {
     border-color: var(--clr-primary);
-    box-shadow: 0 0 0 3px rgba(152, 210, 230, 0.35);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--clr-primary) 35%, transparent);
 }
 
 .oh-search__attr,
@@ -191,7 +191,7 @@
     gap: 6px;
     padding: 5px 6px 5px 12px;
     border-radius: 999px;
-    background: #eef7fb;
+    background: var(--clr-surface-alt);
     border: 1px solid var(--clr-primary);
     font-size: 0.75rem;
     color: var(--clr-text-primary);
@@ -233,12 +233,11 @@
 
 .oh-card:hover {
     border-color: var(--clr-primary);
-    box-shadow: 0 2px 8px rgba(0,0,0,0.07);
 }
 
 .oh-card--active {
     border-color: var(--clr-primary);
-    background-color: #eef7fb;
+    background-color: var(--clr-surface-alt);
 }
 
 /* Top row: date on left, order ID on right */
@@ -313,6 +312,13 @@
     background: rgb(253, 255, 216);
     padding: 30px 30px 50px 30px;
     line-height: 1.5;
+}
+
+/* Receipt stays light-on-cream regardless of app theme so the printed-paper look doesn't invert */
+[data-theme="dark"] #oh-bill-preview {
+    --clr-text-primary: #1f2937;
+    --clr-text-secondary: #6b7280;
+    color: var(--clr-text-primary);
 }
 
 /* Bill header */

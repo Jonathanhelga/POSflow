@@ -32,7 +32,7 @@
 /* Item info banner (gradient header inside the form) */
 #item-information {
     padding: var(--padding);
-    background: linear-gradient(135deg, var(--clr-primary), #00d4ff);
+    background: linear-gradient(135deg, var(--clr-primary), var(--clr-focus-ring));
     color: white;
     display: flex;
     flex-direction: column;
