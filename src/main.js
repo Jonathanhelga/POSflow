@@ -44,6 +44,8 @@ function initLanding() {
   const overlay = document.getElementById('js-wizard-overlay');
   if (!overlay) return;
 
+  initThemeToggle();
+
   document.getElementById('js-landing-signup').addEventListener('click', () => openWizardOverlay('signUp'));
   document.getElementById('js-landing-login').addEventListener('click', () => openWizardOverlay('logIn'));
   document.getElementById('js-hero-signup').addEventListener('click', () => openWizardOverlay('signUp'));

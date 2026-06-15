@@ -172,6 +172,27 @@
     margin-top: 4px;
 }
 
+[data-theme="dark"] .app-title {
+    color: #f1f5f9;
+}
+[data-theme="dark"] .c-wizard__card {
+    border-color: var(--landing-border-strong);
+}
+[data-theme="dark"] .c-wizard__header {
+    background: #334155;
+    color: #f1f5f9;
+}
+[data-theme="dark"] .c-wizard__step-indicator {
+    color: #94a3b8;
+}
+[data-theme="dark"] .c-wizard__login-header h2,
+[data-theme="dark"] .c-wizard__login-header p {
+    color: #f1f5f9;
+}
+[data-theme="dark"] #login-password {
+    color: #f1f5f9;
+}
+
 /* — Auth Footer ("Already have an account?") — */
 .c-auth-footer {
     text-align: center;

@@ -70,6 +70,15 @@
         <button type="button" class="c-btn c-btn--primary" id="js-landing-signup">
           Sign&nbsp;Up <span class="c-btn__pill">Free</span>
         </button>
+        <label class="c-landing__theme-toggle" id="js-theme-toggle">
+          <span class="c-landing__theme-toggle-label">Dark Mode</span>
+          <span class="c-theme-toggle__switch">
+            <input type="checkbox" />
+            <span class="c-theme-toggle__track">
+              <span class="c-theme-toggle__knob"></span>
+            </span>
+          </span>
+        </label>
       </nav>
     </div>
   </header>
@@ -581,6 +590,13 @@
 
           <!-- Right: bill preview -->
           <div class="oh-detail-panel">
+            <!-- Zoom controls for the receipt below -->
+            <div class="oh-bill-zoom">
+              <button type="button" class="oh-bill-zoom__btn" id="oh-zoom-out">−</button>
+              <button type="button" class="oh-bill-zoom__level" id="oh-zoom-level">100%</button>
+              <button type="button" class="oh-bill-zoom__btn" id="oh-zoom-in">+</button>
+            </div>
+
             <!-- Scrollable receipt area -->
             <div class="oh-bill-scroll">
             <div id="oh-bill-preview" class="oh-bill">
