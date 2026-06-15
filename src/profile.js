@@ -1,7 +1,7 @@
 import { db, fetchUserProfile, getCachedUserProfile, setCachedUserProfile, LogOutUser } from './firebase';
 import { setDoc, doc } from 'firebase/firestore';
 import { toggleModal } from './modal-handler';
-import { setTaxRate } from './order-add_item';
+import { setTaxRate, clearOrderTable } from './order-add_item';
 import { refreshInsights } from './sales_insight';
 import { showToast } from './toast';
 import { showConfirm } from './confirm_modal';
@@ -103,7 +103,7 @@ async function saveProfileData(user) {
     if (currencyChanged) {
         const ok = await showConfirm({
             title: 'Change currency?',
-            message: `Warning: item prices won't be converted to ${newCurrency}. Existing item prices keep their numbers, please update item prices manually in (Manage Items), be careful. Thank You`,
+            message: `Warning: item prices won't be converted to ${newCurrency}. Existing item prices keep their numbers, please update item prices manually in (Manage Items), be careful. Your current order will also be cleared. Thank You`,
             confirmText: 'Change Currency',
             danger: true,
         });
@@ -143,7 +143,10 @@ async function saveProfileData(user) {
         const updatedProfile = { ...previousProfile, ...formData };
         setCachedUserProfile(updatedProfile);
 
-        if (currencyChanged) refreshInsights(user);
+        if (currencyChanged) {
+            refreshInsights(user);
+            clearOrderTable();
+        }
 
         setTaxRate(formData.tax_rate);
         applyPrintPaperSize(formData.printer_size || '80');

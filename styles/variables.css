@@ -1,9 +1,3 @@
-/* ═══════════════════════════════════════════════════════════════
-   DESIGN TOKENS
-   All values (colors, spacing, radius, shadow) are defined here.
-   Never hardcode these values in component files — always use a
-   variable. This makes global restyling a one-file change.
-   ═══════════════════════════════════════════════════════════════ */
 :root {
     /* — Background Colors — */
     --clr-bg-app:      antiquewhite;  /* Page / app-level background  */
@@ -207,9 +201,7 @@ body {
 .c-modal__close:focus { outline: 2px solid var(--clr-primary); outline-offset: 2px; }
 
 
-/* ═══════════════════════════════════════════════════════════════
-   ANIMATIONS
-   ═══════════════════════════════════════════════════════════════ */
+/* ANIMATIONS */
 @keyframes slideInFromRight {
     from { opacity: 0; transform: translateX(100%); }
     to   { opacity: 1; transform: translateX(0); }
@@ -239,9 +231,7 @@ body {
     to   { opacity: 0; }
 }
 
-/* ═══════════════════════════════════════════════════════════════
-   TOAST NOTIFICATION
-   ═══════════════════════════════════════════════════════════════ */
+/* TOAST NOTIFICATION */
 .c-toast {
     position: fixed;
     top: 50%;

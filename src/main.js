@@ -5,7 +5,6 @@ import '../styles/add_item_modal.css';
 import '../styles/features_modal.css';
 import '../styles/item_button.css';
 import '../styles/order_item_modal.css';
-import '../styles/ordering_items.css';
 import '../styles/profile_modal.css';
 import '../styles/order_history_modal.css';
 import '../styles/inventory_update_modal.css';

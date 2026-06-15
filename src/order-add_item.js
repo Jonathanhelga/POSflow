@@ -213,7 +213,7 @@ async function resetOrderTable() {     // ← add `async`
 //     fullRender();
 //     updateTotals();
 // }
-function resetOrderAfterSubmit(){
+export function clearOrderTable(){
     orderedItems = [];
     selectedRowIndex = -1;
     fullRender();
@@ -356,7 +356,7 @@ async function handleCheckoutFormSubmit(e) {
 
     try {
         mappedItems.forEach(item => updateLocalStock(item.id, -item.quantity));
-        resetOrderAfterSubmit();
+        clearOrderTable();
         refreshInsights(user);
         closeCustomerCheckout();
         showToast('Order submitted successfully!');

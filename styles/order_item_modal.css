@@ -79,6 +79,7 @@
 #order-item-price               { color: var(--clr-success); }
 #order-item-stock,
 #order-item-unit                { color: var(--clr-text-secondary); }
-
+#order-items tr.selected td { background-color: var(--clr-selected);}
 /* Tighten field spacing inside this modal */
 .order-form-content .c-field { margin-bottom: var(--gap); }
+
