@@ -115,6 +115,9 @@
 
 #js-setup-prev:disabled { background: #F0F0EC; color: var(--landing-muted, #999); cursor: not-allowed; }
 #js-setup-next:disabled { background: #C9C9C4; color: #FFFFFF; cursor: not-allowed; }
+[data-theme="dark"] #js-setup-next { background: #1e293b; color: #ffffff; }
+[data-theme="dark"] #js-setup-next:disabled { background: #475569; color: #94a3b8; }
+[data-theme="dark"] #js-setup-prev:disabled { background: #475569; color: #94a3b8; border-color: #475569; }
 #js-setup-next.is-inactive { display: none; }
 
 /* Submit Settings button — hidden until final step */
@@ -140,6 +143,12 @@
 #js-email-verify:disabled,
 #js-signup-submit:disabled,
 #js-login-submit:disabled   { background: #C9C9C4; color: #FFFFFF; cursor: not-allowed; }
+[data-theme="dark"] #js-email-verify,
+[data-theme="dark"] #js-signup-submit,
+[data-theme="dark"] #js-login-submit { background: #1e293b; color: #ffffff; }
+[data-theme="dark"] #js-email-verify:disabled,
+[data-theme="dark"] #js-signup-submit:disabled,
+[data-theme="dark"] #js-login-submit:disabled { background: #475569; color: #94a3b8; }
 
 /* Google sign-in button */
 .btn--google {

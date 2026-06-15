@@ -312,6 +312,9 @@
     background: rgb(253, 255, 216);
     padding: 30px 30px 50px 30px;
     line-height: 1.5;
+    transform: scale(var(--bill-zoom, 1));
+    transform-origin: top left;
+    transition: transform 0.15s ease;
 }
 
 /* Receipt stays light-on-cream regardless of app theme so the printed-paper look doesn't invert */
@@ -432,12 +435,70 @@
     margin-bottom: 4px;
 }
 
+/* ─── Bill zoom controls ─────────────────────────────────────── */
+
+.oh-bill-zoom {
+    flex: 0 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    padding: 10px 16px;
+    border-bottom: 1px solid var(--clr-border);
+    background: var(--clr-bg-surface);
+}
+
+.oh-bill-zoom__btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border: 1px solid var(--clr-border);
+    border-radius: var(--radius);
+    background: var(--clr-panel);
+    color: var(--clr-text-primary);
+    font-size: 1.1rem;
+    font-weight: 700;
+    line-height: 1;
+    cursor: pointer;
+    transition: filter 0.15s;
+}
+
+@media (hover: hover) {
+    .oh-bill-zoom__btn:hover { filter: brightness(0.96); }
+}
+.oh-bill-zoom__btn:active { transform: scale(0.97); }
+.oh-bill-zoom__btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+.oh-bill-zoom__level {
+    min-width: 52px;
+    border: none;
+    background: transparent;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--clr-text-secondary);
+    cursor: pointer;
+}
+@media (hover: hover) {
+    .oh-bill-zoom__level:hover { color: var(--clr-text-primary); }
+}
+
 /* ─── Scrollable receipt area ─────────────────────────────────── */
 
 .oh-bill-scroll {
     flex: 1 1 auto;      /* take the leftover height in the panel */
     min-height: 0;       /* allow it to actually shrink so overflow kicks in */
-    overflow-y: auto;
+    overflow: auto;      
+    touch-action: none;  /* disable native touch scroll/zoom — panning is handled by initBillPan */
+    cursor: grab;
+    user-select: none;
+    -webkit-user-select: none;
+    -webkit-touch-callout: none;
+}
+
+.oh-bill-scroll.is-dragging {
+    cursor: grabbing;
 }
 
 /* ─── Order Information (display-only, NOT printed) ───────────── */
@@ -535,6 +596,7 @@
         padding: 0;
         box-shadow: none;
         border: none;
+        transform: none;
         -webkit-print-color-adjust: exact;
         print-color-adjust: exact;
     }

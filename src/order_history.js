@@ -446,6 +446,76 @@ function resetSearch(library) {
     renderChips();
 }
 
+// ─── Bill zoom ─────────────────────────────────────────────────────────────────
+
+const ZOOM_MIN = 0.5;
+const ZOOM_MAX = 2;
+const ZOOM_STEP = 0.1;
+let billZoom = 1;
+
+function applyBillZoom() {
+    document.getElementById('oh-bill-preview').style.setProperty('--bill-zoom', billZoom);
+    document.getElementById('oh-zoom-level').textContent = `${Math.round(billZoom * 100)}%`;
+    document.getElementById('oh-zoom-out').disabled = billZoom <= ZOOM_MIN;
+    document.getElementById('oh-zoom-in').disabled = billZoom >= ZOOM_MAX;
+}
+
+function resetBillZoom() {
+    billZoom = 1;
+    applyBillZoom();
+}
+
+function initBillZoom() {
+    document.getElementById('oh-zoom-out').addEventListener('click', () => {
+        billZoom = Math.max(ZOOM_MIN, Math.round((billZoom - ZOOM_STEP) * 100) / 100);
+        applyBillZoom();
+    });
+    document.getElementById('oh-zoom-in').addEventListener('click', () => {
+        billZoom = Math.min(ZOOM_MAX, Math.round((billZoom + ZOOM_STEP) * 100) / 100);
+        applyBillZoom();
+    });
+    document.getElementById('oh-zoom-level').addEventListener('click', resetBillZoom);
+}
+
+// ─── Bill pan (drag like a PDF/map viewer) ──────────────────────────────────────
+
+let panState = null;
+
+function startBillPan(e) {
+    const scrollEl = document.getElementById('oh-bill-scroll');
+    panState = {
+        startX: e.clientX,
+        startY: e.clientY,
+        scrollLeft: scrollEl.scrollLeft,
+        scrollTop: scrollEl.scrollTop,
+    };
+    scrollEl.classList.add('is-dragging');
+    scrollEl.setPointerCapture(e.pointerId);
+}
+
+function moveBillPan(e) {
+    if (!panState) return;
+    const scrollEl = document.getElementById('oh-bill-scroll');
+    scrollEl.scrollLeft = panState.scrollLeft - (e.clientX - panState.startX);
+    scrollEl.scrollTop = panState.scrollTop - (e.clientY - panState.startY);
+}
+
+function endBillPan(e) {
+    if (!panState) return;
+    panState = null;
+    const scrollEl = document.getElementById('oh-bill-scroll');
+    scrollEl.classList.remove('is-dragging');
+    scrollEl.releasePointerCapture(e.pointerId);
+}
+
+function initBillPan() {
+    const scrollEl = document.getElementById('oh-bill-scroll');
+    scrollEl.addEventListener('pointerdown', startBillPan);
+    scrollEl.addEventListener('pointermove', moveBillPan);
+    scrollEl.addEventListener('pointerup', endBillPan);
+    scrollEl.addEventListener('pointercancel', endBillPan);
+}
+
 // ─── Print ─────────────────────────────────────────────────────────────────────
 
 function initPrintButton() {
@@ -482,6 +552,7 @@ export async function initOrderHistory(user) {
         document.getElementById('oh-discount-pct').textContent = '0';
         document.getElementById('oh-print-btn').disabled = true;
         document.getElementById('oh-info').classList.add('is-hidden');
+        resetBillZoom();
 
         // Fetch and render orders
         const orderList = document.getElementById('oh-order-list');
@@ -506,4 +577,6 @@ export async function initOrderHistory(user) {
     document.getElementById('oh-search-add').addEventListener('click', addCurrentFilter);
 
     initPrintButton();
+    initBillZoom();
+    initBillPan();
 }

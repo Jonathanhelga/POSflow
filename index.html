@@ -70,7 +70,7 @@
         <button type="button" class="c-btn c-btn--primary" id="js-landing-signup">
           Sign&nbsp;Up <span class="c-btn__pill">Free</span>
         </button>
-        <label class="c-landing__theme-toggle" id="js-theme-toggle">
+        <label class="c-landing__theme-toggle" id="js-theme-toggle-landing">
           <span class="c-landing__theme-toggle-label">Dark Mode</span>
           <span class="c-theme-toggle__switch">
             <input type="checkbox" />
@@ -497,7 +497,7 @@
             <button type="button" class="c-modal__close" aria-label="Close" data-modal-close="features-modal">&times;</button>
           </header>
           <div class="c-modal__body">
-            <label class="c-theme-toggle" id="js-theme-toggle">
+            <label class="c-theme-toggle" id="js-theme-toggle-app">
               <span class="c-theme-toggle__label">Dark Mode</span>
               <span class="c-theme-toggle__switch">
                 <input type="checkbox">
@@ -598,74 +598,74 @@
             </div>
 
             <!-- Scrollable receipt area -->
-            <div class="oh-bill-scroll">
-            <div id="oh-bill-preview" class="oh-bill">
+            <div class="oh-bill-scroll" id="oh-bill-scroll">
+              <div id="oh-bill-preview" class="oh-bill">
 
-              <!-- Bill Header (populated dynamically from profile) -->
-              <div class="oh-bill__header">
-                <div class="oh-bill__shop-name" id="oh-shop-name">—</div>
-                <div class="oh-bill__tagline" id="oh-shop-tagline"></div>
-                <div class="oh-bill__shop-details" id="oh-shop-details"></div>
+                <!-- Bill Header (populated dynamically from profile) -->
+                <div class="oh-bill__header">
+                  <div class="oh-bill__shop-name" id="oh-shop-name">—</div>
+                  <div class="oh-bill__tagline" id="oh-shop-tagline"></div>
+                  <div class="oh-bill__shop-details" id="oh-shop-details"></div>
+                </div>
+
+                <!-- Bill Meta -->
+                <div class="oh-bill__meta">
+                  <div>
+                    <div class="oh-bill__invoice">Invoice: <span id="oh-invoice-num">—</span></div>
+                    <div>Cashier: <span id="oh-cashier">—</span></div>
+                  </div>
+                  <div class="oh-bill__meta-right">
+                    <div id="oh-bill-date">—</div>
+                    <div id="oh-bill-time">—</div>
+                  </div>
+                </div>
+
+                <!-- Items Table -->
+                <div class="oh-bill__items">
+                  <div class="oh-bill__items-header">
+                    <div>Item</div>
+                    <div>Qty</div>
+                    <div>Price</div>
+                    <div>Total</div>
+                  </div>
+                  <div id="oh-items-list">
+                    <!-- rows injected by JS -->
+                  </div>
+                </div>
+
+                <!-- Summary -->
+                <div class="oh-bill__summary">
+                  <div class="oh-bill__summary-row">
+                    <span>Total Items:</span>
+                    <span id="oh-total-items">—</span>
+                  </div>
+                  <div class="oh-bill__summary-row">
+                    <span>Subtotal:</span>
+                    <span id="oh-subtotal">—</span>
+                  </div>
+                  <div class="oh-bill__summary-row" id="oh-discount-row">
+                    <span>Discount (<span id="oh-discount-pct">0</span>%):</span>
+                    <span id="oh-discount-amount">- 0</span>
+                  </div>
+                  <div class="oh-bill__summary-row">
+                    <span>Tax (<span id="oh-business-tax"></span>%):</span>
+                    <span id="oh-tax">0</span>
+                  </div>
+                  <div class="oh-bill__summary-total">
+                    <span>GRAND TOTAL:</span>
+                    <span id="oh-grand-total">—</span>
+                  </div>
+                </div>
+
+                <!-- Receipt Footer -->
+                <div class="oh-bill__footer">
+                  <div class="oh-bill__thankyou">Thank You for Your Purchase!</div>
+                  <div>Goods sold cannot be returned</div>
+                  <div>Please check your items before leaving</div>
+                </div>
+
               </div>
-
-              <!-- Bill Meta -->
-              <div class="oh-bill__meta">
-                <div>
-                  <div class="oh-bill__invoice">Invoice: <span id="oh-invoice-num">—</span></div>
-                  <div>Cashier: <span id="oh-cashier">—</span></div>
-                </div>
-                <div class="oh-bill__meta-right">
-                  <div id="oh-bill-date">—</div>
-                  <div id="oh-bill-time">—</div>
-                </div>
-              </div>
-
-              <!-- Items Table -->
-              <div class="oh-bill__items">
-                <div class="oh-bill__items-header">
-                  <div>Item</div>
-                  <div>Qty</div>
-                  <div>Price</div>
-                  <div>Total</div>
-                </div>
-                <div id="oh-items-list">
-                  <!-- rows injected by JS -->
-                </div>
-              </div>
-
-              <!-- Summary -->
-              <div class="oh-bill__summary">
-                <div class="oh-bill__summary-row">
-                  <span>Total Items:</span>
-                  <span id="oh-total-items">—</span>
-                </div>
-                <div class="oh-bill__summary-row">
-                  <span>Subtotal:</span>
-                  <span id="oh-subtotal">—</span>
-                </div>
-                <div class="oh-bill__summary-row" id="oh-discount-row">
-                  <span>Discount (<span id="oh-discount-pct">0</span>%):</span>
-                  <span id="oh-discount-amount">- 0</span>
-                </div>
-                <div class="oh-bill__summary-row">
-                  <span>Tax (<span id="oh-business-tax"></span>%):</span>
-                  <span id="oh-tax">0</span>
-                </div>
-                <div class="oh-bill__summary-total">
-                  <span>GRAND TOTAL:</span>
-                  <span id="oh-grand-total">—</span>
-                </div>
-              </div>
-
-              <!-- Receipt Footer -->
-              <div class="oh-bill__footer">
-                <div class="oh-bill__thankyou">Thank You for Your Purchase!</div>
-                <div>Goods sold cannot be returned</div>
-                <div>Please check your items before leaving</div>
-              </div>
-
             </div>
-            </div><!-- /oh-bill-scroll -->
 
             <!-- Order Information (display only — NOT part of the printed bill) -->
             <div class="oh-info is-hidden" id="oh-info">
