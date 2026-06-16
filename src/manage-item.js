@@ -127,7 +127,7 @@ function selectItem(item, cardEl) {
 function populateDetail(item) {
     document.getElementById('mi-placeholder').classList.add('is-hidden');
     document.getElementById('mi-detail-view').classList.remove('is-hidden');
-    document.getElementById('mi-footer').classList.remove('is-hidden');
+    document.getElementById('mi-save-btn').disabled = false;
 
     document.getElementById('mi-detail-dot').style.backgroundColor = swatchFor(item.tagColor);
     document.getElementById('mi-detail-name').textContent = item.itemName ?? '—';
@@ -226,7 +226,7 @@ async function openManageItem(user) {
 
     selection.clear();
     document.getElementById('mi-detail-view').classList.add('is-hidden');
-    document.getElementById('mi-footer').classList.add('is-hidden');
+    document.getElementById('mi-save-btn').disabled = true;
     document.getElementById('mi-placeholder').classList.remove('is-hidden');
     document.getElementById('mi-search').value = '';
 

@@ -325,7 +325,7 @@
     border-top: 1px solid var(--clr-border);
     background: var(--clr-panel);
 }
-.mi-edit__footer.is-hidden { display: none; }
+
 .mi-save-btn {
     background-color: var(--clr-success);
     color: var(--clr-text-primary);
