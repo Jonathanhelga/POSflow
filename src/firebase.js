@@ -1,5 +1,5 @@
 import { initializeApp } from "firebase/app";
-import { getFirestore, doc, setDoc, addDoc, getDoc, updateDoc, collection, query, where, orderBy, getDocs, serverTimestamp, writeBatch, increment } from "firebase/firestore";
+import { getFirestore, doc, setDoc, addDoc, getDoc, updateDoc, collection, query, where, orderBy, getDocs, serverTimestamp, writeBatch, increment, startAfter, limit } from "firebase/firestore";
 import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "firebase/auth";
 
 const firebaseConfig = {
@@ -195,6 +195,22 @@ export async function syncStockToFirestore(itemId, newQuantity) {
     });
     const item = allItems.find(i => i.id === itemId);
     if (item) item.stockLevel = newQuantity;
+}
+
+export async function addStockUpdateHistory(itemId, qtyAdded, previousStock) {
+    const ref = collection(db, 'inventory', itemId, 'stockUpdates');
+    await addDoc(ref, { qtyAdded, previousStock, timestamp: serverTimestamp() });
+}
+
+export async function fetchStockHistory(itemId, pageSize, lastDoc = null) {
+    let q = query(
+        collection(db, 'inventory', itemId, 'stockUpdates'),
+        orderBy('timestamp', 'desc'),
+        limit(pageSize)
+    );
+    if (lastDoc) q = query(q, startAfter(lastDoc));
+    const snap = await getDocs(q);
+    return { docs: snap.docs, records: snap.docs.map(d => ({ id: d.id, ...d.data() })) };
 }
 
 // Update editable metadata on an inventory item (prices, supplier, min stock,

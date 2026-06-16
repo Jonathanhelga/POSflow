@@ -1,4 +1,4 @@
-import { db, getCachedUserProfile } from './firebase';
+import { db, getCachedUserProfile, addStockUpdateHistory, fetchStockHistory } from './firebase';
 import { doc, updateDoc, increment, serverTimestamp } from 'firebase/firestore';
 import { toggleModal } from './modal-handler';
 import { allItems, loadAllItems, updateLocalStock } from './search_item';
@@ -7,6 +7,10 @@ import { formatCurrency, getCurrencySymbol } from './formatCurrency';
 
 let filteredItems = [];
 const selection   = createSelection();
+
+const HISTORY_PAGE = 5;
+let historyLastDoc = null;
+let historyItemId  = null;
 
 function currentCurrency() {
     return getCachedUserProfile()?.currency || 'IDR';
@@ -111,6 +115,10 @@ function populateDetail(item) {
 
     document.getElementById('iu-incoming-qty').value = '';
     clearFeedback();
+
+    historyLastDoc = null;
+    historyItemId  = item.id;
+    loadStockHistory(item.id, false);
 }
 
 // ─── Save stock update
@@ -132,10 +140,18 @@ async function handleSave() {
     btn.textContent = 'Saving...';
 
     try {
+        const previousStock = item.stockLevel ?? 0;
+
         await updateDoc(doc(db, 'inventory', item.id), {
             stockLevel:  increment(qty),
             lastUpdated: serverTimestamp(),
         });
+
+        try {
+            await addStockUpdateHistory(item.id, qty, previousStock);
+        } catch (e) {
+            console.error('History write failed:', e);
+        }
 
         updateLocalStock(item.id, qty);
 
@@ -158,10 +174,7 @@ async function handleSave() {
 
         populateDetail(item);
         input.value = '';
-        showFeedback(
-            `Added ${qty} ${item.unit ?? 'units'}. New stock: ${item.stockLevel}.`,
-            'success'
-        );
+        showFeedback( `Added ${qty} ${item.unit ?? 'units'}. New stock: ${item.stockLevel}.`, 'success');
 
     } catch (err) {
         console.error('Stock update failed:', err);
@@ -184,6 +197,56 @@ function clearFeedback() {
     const el = document.getElementById('iu-feedback');
     el.textContent = '';
     el.className   = 'iu-feedback';
+}
+
+// ─── Stock update history
+
+async function loadStockHistory(itemId, append) {
+    const { docs, records } = await fetchStockHistory(itemId, HISTORY_PAGE, append ? historyLastDoc : null);
+    if (!append) historyLastDoc = null;
+    if (docs.length > 0) historyLastDoc = docs[docs.length - 1];
+
+    const moreBtn = document.getElementById('iu-history-more');
+    moreBtn.classList.toggle('is-hidden', docs.length < HISTORY_PAGE);
+
+    renderStockHistory(records, append);
+}
+
+function renderStockHistory(records, append) {
+    const list = document.getElementById('iu-history-list');
+    if (!append) list.replaceChildren();
+
+    if (records.length === 0 && !append) {
+        const empty = document.createElement('p');
+        empty.className = 'iu-history__empty';
+        empty.textContent = 'No stock updates yet.';
+        list.appendChild(empty);
+        return;
+    }
+
+    const frag = document.createDocumentFragment();
+    records.forEach(r => {
+        const row = document.createElement('div');
+        row.className = 'iu-history__row';
+
+        const ts = document.createElement('span');
+        ts.className = 'iu-history__ts';
+        ts.textContent = r.timestamp
+            ? r.timestamp.toDate().toLocaleString(undefined, { dateStyle: 'medium', timeStyle: 'short' })
+            : '—';
+
+        const delta = document.createElement('span');
+        delta.className = 'iu-history__delta';
+        delta.textContent = `+${r.qtyAdded}`;
+
+        const trail = document.createElement('span');
+        trail.className = 'iu-history__trail';
+        trail.textContent = `${r.previousStock} → ${r.previousStock + r.qtyAdded}`;
+
+        row.append(ts, delta, trail);
+        frag.appendChild(row);
+    });
+    list.appendChild(frag);
 }
 
 // ─── Load inventory on open
@@ -224,6 +287,9 @@ export function initInventoryUpdate(user) {
     });
 
     document.getElementById('iu-save-btn').addEventListener('click', handleSave);
+    document.getElementById('iu-history-more').addEventListener('click', () => {
+        if (historyItemId) loadStockHistory(historyItemId, true);
+    });
 
     document.getElementById('iu-search').addEventListener('input', (e) => {
         const q = e.target.value.trim().toLowerCase();

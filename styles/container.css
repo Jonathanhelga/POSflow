@@ -92,8 +92,7 @@
     justify-content: center;
     align-items: center;
     margin-top: 20px;
-    padding: var(--pos-padding);
-    padding-top: 20px;
+    padding: 20px var(--pos-padding);
     text-align: center;
     background-color: var(--clr-panel);
     border-radius: var(--radius);

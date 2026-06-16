@@ -333,3 +333,70 @@ flex: 0 1 auto	0	1	auto	Don't grow, can shrink, starting from its natural size *
     padding: 2rem 0;
 }
 .iu-empty--error { color: var(--clr-danger); }
+
+/* ─── Stock update history ───────────────────────────────────── */
+
+.iu-history {
+    border-top: 1px solid var(--clr-border);
+    padding-top: 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.iu-history__title {
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--clr-text-secondary);
+    margin: 0;
+}
+
+.iu-history__row {
+    display: grid;
+    grid-template-columns: 1fr auto auto;
+    gap: 0.75rem;
+    align-items: center;
+    padding: 0.45rem 0;
+    border-bottom: 1px solid color-mix(in srgb, var(--clr-border) 50%, transparent);
+    font-size: 0.8rem;
+}
+
+.iu-history__ts {
+    color: var(--clr-text-secondary);
+}
+
+.iu-history__delta {
+    font-weight: 700;
+    color: var(--clr-success);
+    min-width: 3.5rem;
+    text-align: right;
+}
+
+.iu-history__trail {
+    color: var(--clr-text-secondary);
+    font-size: 0.72rem;
+    min-width: 5rem;
+    text-align: right;
+}
+
+.iu-history__empty {
+    font-size: 0.8rem;
+    color: var(--clr-text-secondary);
+    padding: 0.5rem 0;
+}
+
+.iu-history__more-btn {
+    align-self: flex-start;
+    background: none;
+    border: none;
+    padding: 0;
+    font-size: 0.78rem;
+    color: var(--clr-primary);
+    cursor: pointer;
+    text-decoration: underline;
+    text-underline-offset: 2px;
+}
+
+.iu-history__more-btn.is-hidden { display: none; }

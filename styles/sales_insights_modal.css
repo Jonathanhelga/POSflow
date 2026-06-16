@@ -28,12 +28,6 @@
     margin: 0;
     letter-spacing: 0.01em;
 }
-/* #c-modal-sales .c-modal__subtitle {
-    margin: 0.35rem 0 0;
-    color: var(--clr-text-secondary);
-    font-size: 0.875rem;
-    font-weight: 400;
-} */
 
 .c-sales {
     flex: 1;
@@ -88,9 +82,9 @@
     color: var(--clr-text-primary);
 }
 .c-chip.is-active {
-    background-color: var(--clr-text-primary);
+    background-color: var(--clr-button-active);
     color: #ffffff;
-    border-color: var(--clr-text-primary);
+    border-color: var(--clr-button-active);
 }
 .c-chip:focus-visible {
     outline: 2px solid var(--clr-primary);
@@ -129,13 +123,14 @@
 }
 .c-sales__apply {
     padding: 0.5rem 0.9rem;
-    background-color: var(--clr-text-primary);
+    background-color: var(--clr-button-active);
     color: #ffffff;
     border-radius: 8px;
     font-size: 0.875rem;
     font-weight: 600;
     padding: 0.5rem 0.9rem;
-    border: 1px solid var(--clr-border);
+    border: 5px solid var(--clr-border);
+
     cursor: pointer;
 }
 .c-sales__apply:hover { filter: brightness(1.15); }
