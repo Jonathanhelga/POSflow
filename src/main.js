@@ -45,30 +45,7 @@ function initLanding() {
   if (!overlay) return;
 
   initThemeToggle('js-theme-toggle-landing');
-
-  document.getElementById('js-landing-signup').addEventListener('click', () => openWizardOverlay('signUp'));
-  document.getElementById('js-landing-login').addEventListener('click', () => openWizardOverlay('logIn'));
-  document.getElementById('js-hero-signup').addEventListener('click', () => openWizardOverlay('signUp'));
-  document.getElementById('js-hero-login').addEventListener('click', () => openWizardOverlay('logIn'));
-  document.getElementById('js-final-signup').addEventListener('click', () => openWizardOverlay('signUp'));
-  document.getElementById('js-wizard-overlay-close').addEventListener('click', closeWizardOverlay);
-
-  overlay.addEventListener('click', (e) => { if (e.target === overlay) closeWizardOverlay(); });
-}
-
-function openWizardOverlay(view) {
-  const overlay = document.getElementById('js-wizard-overlay');
-  switchView(view);
-  overlay.classList.remove('is-hidden');
-  overlay.setAttribute('aria-hidden', 'false');
-  document.body.style.overflow = 'hidden';
-}
-
-function closeWizardOverlay() {
-  const overlay = document.getElementById('js-wizard-overlay');
-  overlay.classList.add('is-hidden');
-  overlay.setAttribute('aria-hidden', 'true');
-  document.body.style.overflow = '';
+  switchView('signUp');
 }
 
 initLanding();

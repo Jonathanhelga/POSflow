@@ -59,122 +59,34 @@
   <div class="c-boot-splash__spinner"></div>
 </div>
 
-  <!--  Landing Page  -->
-<div id="js-landing" class="c-landing">
+  <!--  Landing — App Showcase + Sign Up  -->
+<div id="js-landing" class="c-showcase">
 
-  <header class="c-landing__nav">
-    <div class="c-landing__nav-inner">
-      <div class="c-landing__brand">POS&nbsp;FLOW</div>
-      <nav class="c-landing__nav-actions">
-        <button type="button" class="c-btn c-btn--ghost" id="js-landing-login">Log&nbsp;In</button>
-        <button type="button" class="c-btn c-btn--primary" id="js-landing-signup">
-          Sign&nbsp;Up <span class="c-btn__pill">Free</span>
-        </button>
-        <label class="c-landing__theme-toggle" id="js-theme-toggle-landing">
-          <span class="c-landing__theme-toggle-label">Dark Mode</span>
-          <span class="c-theme-toggle__switch">
-            <input type="checkbox" />
-            <span class="c-theme-toggle__track">
-              <span class="c-theme-toggle__knob"></span>
-            </span>
-          </span>
-        </label>
-      </nav>
-    </div>
-  </header>
+  <div class="c-showcase__bg" aria-hidden="true">
+    <!-- Left curtain (children 1-4) -->
+    <img class="c-showcase__shot" src="assets/landing/feature-checkout.png" alt="" />
+    <img class="c-showcase__shot" src="assets/landing/feature-order-history-detail.png" alt="" />
+    <img class="c-showcase__shot" src="assets/landing/feature-insights-detail.png" alt="" />
+    <img class="c-showcase__shot" src="assets/landing/feature-menu.png" alt="" />
+    <!-- Right curtain (children 5-8) -->
+    <img class="c-showcase__shot" src="assets/landing/feature-inventory.png" alt="" />
+    <img class="c-showcase__shot" src="assets/landing/feature-manage-items.png" alt="" />
+    <img class="c-showcase__shot" src="assets/landing/feature-barcode-detail.png" alt="" />
+    <img class="c-showcase__shot" src="assets/landing/feature-customer-checkout.png" alt="" />
+  </div>
 
-  <section class="c-landing__hero">
-    <div class="c-landing__hero-inner">
-      <span class="c-landing__eyebrow">Point of Sale &middot; Built for simplicty</span>
-      <h1 class="c-landing__headline">Run your shop<br/>from the browser.</h1>
-      <p class="c-landing__sub">No installs. No servers. No IT.</p>
-      <div class="c-landing__cta-row">
-        <button type="button" class="c-btn c-btn--primary c-btn--lg" id="js-hero-signup">
-        Sign Up
-        </button>
-        <button type="button" class="c-btn c-btn--ghost c-btn--lg" id="js-hero-login">Log In</button>
-      </div>
-
-      <figure class="c-browser-frame" aria-hidden="true">
-        <div class="c-browser-frame__chrome">
-          <span class="c-browser-frame__dot c-browser-frame__dot--red"></span>
-          <span class="c-browser-frame__dot c-browser-frame__dot--yellow"></span>
-          <span class="c-browser-frame__dot c-browser-frame__dot--green"></span>
-          <div class="c-browser-frame__url">posflow.app</div>
-        </div>
-        <div class="c-browser-frame__body">
-          <img src="assets/landing/hero.png" alt="POS FLOW dashboard" class="c-browser-frame__img"/>
-        </div>
-      </figure>
-    </div>
-  </section>
-
-  <section class="c-landing__features">
-    <div class="c-landing__features-inner">
-      <span class="c-landing__section-label">01 — Features</span>
-      <h2 class="c-landing__section-heading">Everything you need to sell.</h2>
-      <div class="c-landing__feature-grid">
-        <article class="c-feature">
-          <div class="c-feature__thumb">
-            <img src="assets/landing/feature-order-history.png" alt="Order History"/>
-          </div>
-          <h3 class="c-feature__title">Order History</h3>
-          <p class="c-feature__desc">Revisit every past sale.</p>
-        </article>
-        <article class="c-feature">
-          <div class="c-feature__thumb">
-            <img src="assets/landing/feature-insights.png" alt="Insights"/>
-          </div>
-          <h3 class="c-feature__title">Insights</h3>
-          <p class="c-feature__desc">See what's working.</p>
-        </article>
-        <article class="c-feature">
-          <div class="c-feature__thumb">
-            <img src="assets/landing/feature-barcode.png" alt="Barcode"/>
-          </div>
-          <h3 class="c-feature__title">Barcode</h3>
-          <p class="c-feature__desc">Print barcodes in seconds.</p>
-        </article>
-      </div>
-      <ul class="c-feature-list">
-        <li class="c-feature-point">
-          <h3 class="c-feature-point__title">Checkout</h3>
-          <p class="c-feature-point__desc">Build a cart, take payment.</p>
-        </li>
-        <li class="c-feature-point">
-          <h3 class="c-feature-point__title">Inventory</h3>
-          <p class="c-feature-point__desc">Update stock as you sell.</p>
-        </li>
-        <li class="c-feature-point">
-          <h3 class="c-feature-point__title">Customers</h3>
-          <p class="c-feature-point__desc">Track who's buying.</p>
-        </li>
-        <li class="c-feature-point">
-          <h3 class="c-feature-point__title">Receipts &amp; Tax</h3>
-          <p class="c-feature-point__desc">Your rates, your receipt.</p>
-        </li>
-      </ul>
-    </div>
-  </section>
-
-  <section class="c-landing__final-cta">
-    <div class="c-landing__final-cta-inner">
-      <span class="c-landing__section-label">02 — Start</span>
-      <h2 class="c-landing__final-headline">Ready when you are.</h2>
-      <button type="button" class="c-btn c-btn--primary c-btn--xl" id="js-final-signup">
-        Get Started <span class="c-btn__pill">Free</span>
-      </button>
-    </div>
-  </section>
-
-  <footer class="c-landing__footer">
-    <span>POS&nbsp;FLOW &middot; &copy; 2026</span>
-  </footer>
-</div>
+  <label class="c-landing__theme-toggle c-showcase__theme-toggle" id="js-theme-toggle-landing">
+    <span class="c-landing__theme-toggle-label">Dark Mode</span>
+    <span class="c-theme-toggle__switch">
+      <input type="checkbox" />
+      <span class="c-theme-toggle__track">
+        <span class="c-theme-toggle__knob"></span>
+      </span>
+    </span>
+  </label>
 
   <!--  Setup Wizard  -->
-    <div id="js-wizard-overlay" class="c-wizard-overlay is-hidden" aria-hidden="true">
-      <button type="button" class="c-wizard-overlay__close" id="js-wizard-overlay-close" aria-label="Close">&times;</button>
+  <div id="js-wizard-overlay" class="c-wizard-overlay" aria-hidden="false">
     <div id="setup-wizard" class="setup-wizard">
         <h1 class="app-title">POS FLOW</h1>
         <div id="setup-wizard-card" class="c-wizard__card">
@@ -183,7 +95,7 @@
                 Step <span id="setup-step-current">1</span> of 4
               </div>
               <h2 class="c-wizard__step-title" id="js-setup-step-title">Sign Up as a new user</h2>
-              
+
               <div class="c-wizard__login-header" id="js-wizard-login-header" style="display: none;">
                 <p>Welcome Back!:)</p>
                 <h2>Sign in to your account</h2>
@@ -202,7 +114,8 @@
             </footer>
         </div>
     </div>
-    </div>
+  </div>
+</div>
 
   <!--  Templates  -->
     <template id="logged-in-wizard-template">
