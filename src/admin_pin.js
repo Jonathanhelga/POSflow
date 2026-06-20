@@ -1,13 +1,10 @@
 import { updateAdminPinHash, getCachedUserProfile, setCachedUserProfile } from './firebase';
 import { toggleModal } from './modal-handler';
-
+import { showToast } from "./toast";
 let currentUser = null;
 let isChangingPin = false;
 let resolvePinConfirm = null;
 
-// Reveal-then-mask PIN inputs: the input element's own value is the bullet
-// display, the actual digits are tracked here so a shoulder-surfer only ever
-// sees the digit just typed, briefly, before it masks like a phone PIN.
 const PIN_INPUT_IDS = ['ap-old-input', 'ap-new-input', 'ap-confirm-input', 'ap-gate-input'];
 const rawPinValues = new Map();
 const maskTimers = new Map();
@@ -18,13 +15,9 @@ async function hashPin(pin) {
     return Array.from(new Uint8Array(buffer)).map(b => b.toString(16).padStart(2, '0')).join('');
 }
 
-function isValidPin(pin) {
-    return /^\d{4}$/.test(pin);
-}
+function isValidPin(pin) { return /^\d{4}$/.test(pin); }
 
-function getRawPin(inputId) {
-    return rawPinValues.get(inputId) || '';
-}
+function getRawPin(inputId) { return rawPinValues.get(inputId) || ''; }
 
 function renderMaskedValue(inputId, revealLast) {
     const raw = getRawPin(inputId);
@@ -38,7 +31,7 @@ function handlePinInputTyped(inputId) {
     const displayedLength = input.value.length;
 
     let nextRaw;
-    if (displayedLength > prevRaw.length) {
+    if (displayedLength > prevRaw.length) { 
         const addedDigits = input.value.slice(-(displayedLength - prevRaw.length)).replace(/\D/g, '');
         nextRaw = (prevRaw + addedDigits).slice(0, 4);
     } 
@@ -48,9 +41,7 @@ function handlePinInputTyped(inputId) {
     renderMaskedValue(inputId, nextRaw.length > 0);
 
     clearTimeout(maskTimers.get(inputId));
-    if (nextRaw.length > 0) {
-        maskTimers.set(inputId, setTimeout(() => renderMaskedValue(inputId, false), REVEAL_MS));
-    }
+    if (nextRaw.length > 0) { maskTimers.set(inputId, setTimeout(() => renderMaskedValue(inputId, false), REVEAL_MS)); }
 }
 
 function resetPinInput(inputId) {
@@ -59,9 +50,7 @@ function resetPinInput(inputId) {
     document.getElementById(inputId).value = '';
 }
 
-function setApFeedback(elId, msg) {
-    document.getElementById(elId).textContent = msg;
-}
+function setApFeedback(elId, msg) { document.getElementById(elId).textContent = msg; }
 
 function showApPanel(panelId) {
     ['ap-intro', 'ap-old-pin', 'ap-new-pin'].forEach(id => {
@@ -123,6 +112,7 @@ async function handleSaveNewPin() {
         setCachedUserProfile({ ...getCachedUserProfile(), adminPinHash: hashHex });
         updateFeaturesButtonLabel();
         toggleModal('admin-pin-modal');
+        showToast('PIN successfully created :)');
     } catch (err) {
         console.error('Failed to save Admin PIN:', err);
         setApFeedback('ap-feedback', 'Failed to save PIN. Please try again.');
@@ -186,8 +176,8 @@ export function initAdminPin(user) {
     });
 
     document.getElementById('ap-intro-continue').addEventListener('click', () => showApPanel('ap-new-pin'));
-    document.getElementById('ap-old-continue').addEventListener('click', handleVerifyOldPin);
     document.getElementById('ap-save-btn').addEventListener('click', handleSaveNewPin);
+    document.getElementById('ap-old-continue').addEventListener('click', handleVerifyOldPin);
 
     document.getElementById('ap-gate-confirm-btn').addEventListener('click', handlePinGateSubmit);
     document.getElementById('ap-gate-cancel-btn').addEventListener('click', handlePinGateCancel);

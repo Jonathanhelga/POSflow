@@ -3,6 +3,9 @@ import { formatCurrency, getCurrencySymbol } from './formatCurrency';
 import { toggleModal } from './modal-handler';
 import { showConfirm } from './confirm_modal';
 import { requireAdminPin } from './admin_pin';
+import { showToast } from "./toast";
+import { updateLocalStock, refreshGrid } from './search_item';
+import { refreshSelectedItemDetail } from './manage-item';
 
 let isProcessing = false;
 let currentOrder = null;
@@ -571,6 +574,14 @@ async function handleDeleteOrder() {
         await deleteOrder(order.id);
         allOrders = allOrders.filter(o => o.id !== order.id);
         currentOrder = null;
+
+        for (const item of order.items ?? []) {
+            updateLocalStock(item.id, item.quantity);
+        }
+        refreshGrid();
+        refreshSelectedItemDetail();
+
+        showToast(`Successfully delete order ${order.id}`);
         resetBillPanel();
         applyFilters();
     } catch (err) {

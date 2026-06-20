@@ -228,7 +228,25 @@ export async function deleteInventoryItem(itemId) {
 }
 
 export async function deleteOrder(orderId) {
-    await deleteDoc(doc(db, 'orders', orderId));
+    const orderRef = doc(db, 'orders', orderId);
+    const orderSnap = await getDoc(orderRef);
+    const items = orderSnap.exists() ? orderSnap.data().items ?? [] : [];
+
+    const batch = writeBatch(db);
+    batch.delete(orderRef);
+
+    for (const item of items) {
+        const inventoryRef = doc(db, "inventory", item.id);
+        const inventorySnap = await getDoc(inventoryRef);
+        if (!inventorySnap.exists()) continue;
+
+        batch.update(inventoryRef, {
+            stockLevel: increment(item.quantity),
+            lastUpdated: serverTimestamp(),
+        });
+    }
+
+    await batch.commit();
 }
 
 export async function updateAdminPinHash(uid, hashHex) {

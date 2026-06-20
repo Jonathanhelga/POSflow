@@ -5,7 +5,7 @@ import { allItems, loadAllItems, updateLocalItem, removeLocalItem, refreshGrid }
 import { createSelection } from './selection';
 import { showConfirm } from './confirm_modal';
 import { requireAdminPin } from './admin_pin';
-
+import { showToast } from "./toast";
 let filteredItems  = [];
 const selection    = createSelection();
 let selectedTheme  = 'primary';
@@ -121,6 +121,14 @@ function selectItem(item, cardEl) {
     populateDetail(item);
 }
 
+// Re-render the detail panel for the currently selected item, e.g. after its
+// stock is mutated elsewhere (order deletion restock) while the modal is open.
+export function refreshSelectedItemDetail() {
+    const item = selection.get();
+    if (!item) return;
+    populateDetail(item);
+}
+
 function populateDetail(item) {
     // document.getElementById('mi-placeholder').classList.add('is-hidden');
     // document.getElementById('mi-detail-view').classList.remove('is-hidden');
@@ -232,7 +240,8 @@ async function handleDelete() {
         document.getElementById('mi-placeholder').classList.remove('is-hidden');
         document.getElementById('mi-save-btn').disabled = true;
         renderItemList_Manage(filteredItems = filteredItems.filter(i => i.id !== item.id));
-        showFeedback('Item deleted.', 'success');
+        // showFeedback('Item deleted.', 'success');
+        showToast(`Successfully delete item ${item.id}`);
         btn.textContent = 'Delete Item';
     } catch (err) {
         console.error('Item delete failed:', err);
