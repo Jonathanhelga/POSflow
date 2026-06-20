@@ -1,5 +1,5 @@
 import { initializeApp } from "firebase/app";
-import { getFirestore, doc, setDoc, addDoc, getDoc, updateDoc, collection, query, where, orderBy, getDocs, serverTimestamp, writeBatch, increment, startAfter, limit } from "firebase/firestore";
+import { getFirestore, doc, setDoc, addDoc, getDoc, updateDoc, deleteDoc, collection, query, where, orderBy, getDocs, serverTimestamp, writeBatch, increment, startAfter, limit } from "firebase/firestore";
 import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "firebase/auth";
 
 const firebaseConfig = {
@@ -221,4 +221,16 @@ export async function updateItemData(itemId, fields) {
         ...fields,
         lastUpdated: serverTimestamp(),
     });
+}
+
+export async function deleteInventoryItem(itemId) {
+    await deleteDoc(doc(db, 'inventory', itemId));
+}
+
+export async function deleteOrder(orderId) {
+    await deleteDoc(doc(db, 'orders', orderId));
+}
+
+export async function updateAdminPinHash(uid, hashHex) {
+    await setDoc(doc(db, 'users', uid), { adminPinHash: hashHex }, { merge: true });
 }

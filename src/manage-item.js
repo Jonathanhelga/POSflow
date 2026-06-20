@@ -1,15 +1,15 @@
-import { updateItemData, getCachedUserProfile } from './firebase';
+import { updateItemData, deleteInventoryItem, getCachedUserProfile } from './firebase';
 import { getCurrencySymbol } from './formatCurrency';
 import { toggleModal } from './modal-handler';
-import { allItems, loadAllItems, updateLocalItem, refreshGrid } from './search_item';
+import { allItems, loadAllItems, updateLocalItem, removeLocalItem, refreshGrid } from './search_item';
 import { createSelection } from './selection';
+import { showConfirm } from './confirm_modal';
+import { requireAdminPin } from './admin_pin';
 
 let filteredItems  = [];
 const selection    = createSelection();
 let selectedTheme  = 'primary';
 
-// Maps the stored tagColor token to the swatch shown on cards / header.
-// Mirrors the .btn--* theme colors defined in add_item_modal.css.
 const TAG_SWATCH = {
     primary:    '#4E7397',
     success:    '#86A38C',
@@ -19,9 +19,6 @@ const TAG_SWATCH = {
     pink:       '#ea8cd1',
     yellow:     '#ebdfa4',
 };
-
-// Theme order + display names for the swatch picker (replaces the native
-// <select>, which Safari refuses to style consistently).
 const THEMES = [
     { token: 'primary',    name: 'Muted Cobalt' },
     { token: 'success',    name: 'Sage Green' },
@@ -71,7 +68,7 @@ function formatTimestamp(ts) {
     }).format(date);
 }
 
-// ─── Render item list ────────────────────────────────────────────
+//  Render item list 
 
 function renderItemList_Manage(items) {
     const container = document.getElementById('mi-item-list');
@@ -115,7 +112,7 @@ function renderItemList_Manage(items) {
     container.appendChild(frag);
 }
 
-// ─── Select + populate ───────────────────────────────────────────
+//  Select + populate 
 
 function selectItem(item, cardEl) {
     document.querySelectorAll('.mi-card').forEach(c => c.classList.remove('mi-card--active'));
@@ -125,9 +122,10 @@ function selectItem(item, cardEl) {
 }
 
 function populateDetail(item) {
-    document.getElementById('mi-placeholder').classList.add('is-hidden');
-    document.getElementById('mi-detail-view').classList.remove('is-hidden');
+    // document.getElementById('mi-placeholder').classList.add('is-hidden');
+    // document.getElementById('mi-detail-view').classList.remove('is-hidden');
     document.getElementById('mi-save-btn').disabled = false;
+    document.getElementById('mi-delete-btn').disabled = false;
 
     document.getElementById('mi-detail-dot').style.backgroundColor = swatchFor(item.tagColor);
     document.getElementById('mi-detail-name').textContent = item.itemName ?? '—';
@@ -150,7 +148,7 @@ function populateDetail(item) {
     clearFeedback();
 }
 
-// ─── Save edits ──────────────────────────────────────────────────
+//  Save edits 
 
 async function handleSave() {
     const item = selection.get();
@@ -205,7 +203,46 @@ async function handleSave() {
     }
 }
 
-// ─── Feedback helpers ────────────────────────────────────────────
+//  Delete item
+
+async function handleDelete() {
+    const item = selection.get();
+    if (!item) return;
+
+    const confirmed = await showConfirm({
+        title: 'Delete item?',
+        message: `This will permanently delete "${item.itemName ?? 'this item'}". This cannot be undone.`,
+        confirmText: 'Delete',
+        danger: true,
+    });
+    if (!confirmed) return;
+
+    const pinOk = await requireAdminPin();
+    if (!pinOk) return;
+
+    const btn = document.getElementById('mi-delete-btn');
+    btn.disabled    = true;
+    btn.textContent = 'Deleting...';
+
+    try {
+        await deleteInventoryItem(item.id);
+        removeLocalItem(item.id);
+        selection.clear();
+        document.getElementById('mi-detail-view').classList.add('is-hidden');
+        document.getElementById('mi-placeholder').classList.remove('is-hidden');
+        document.getElementById('mi-save-btn').disabled = true;
+        renderItemList_Manage(filteredItems = filteredItems.filter(i => i.id !== item.id));
+        showFeedback('Item deleted.', 'success');
+        btn.textContent = 'Delete Item';
+    } catch (err) {
+        console.error('Item delete failed:', err);
+        showFeedback('Failed to delete item. Please try again.', 'error');
+        btn.disabled    = false;
+        btn.textContent = 'Delete Item';
+    }
+}
+
+//  Feedback helpers
 
 function showFeedback(msg, type) {
     const el = document.getElementById('mi-feedback');
@@ -219,16 +256,19 @@ function clearFeedback() {
     el.className   = 'mi-feedback';
 }
 
-// ─── Open / load ─────────────────────────────────────────────────
+//  Open / load 
 
 async function openManageItem(user) {
     if (!user) return;
 
     selection.clear();
-    document.getElementById('mi-detail-view').classList.add('is-hidden');
+    // document.getElementById('mi-detail-view').classList.add('is-hidden');
     document.getElementById('mi-save-btn').disabled = true;
-    document.getElementById('mi-placeholder').classList.remove('is-hidden');
+    document.getElementById('mi-delete-btn').disabled = true;
+    // document.getElementById('mi-placeholder').classList.remove('is-hidden');
     document.getElementById('mi-search').value = '';
+    console.log("open Manage Item");
+    
 
     // Set currency symbol from user profile
     const currency = getCachedUserProfile()?.currency || 'IDR';
@@ -268,6 +308,7 @@ export function initManageItem(user) {
     });
 
     document.getElementById('mi-save-btn').addEventListener('click', handleSave);
+    document.getElementById('mi-delete-btn').addEventListener('click', handleDelete);
 
     document.getElementById('mi-search').addEventListener('input', (e) => {
         const q = e.target.value.trim().toLowerCase();

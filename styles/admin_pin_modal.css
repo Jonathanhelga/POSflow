@@ -1,0 +1,41 @@
+/* Admin PIN setup/change modal + per-action PIN gate modal */
+
+
+#admin-pin-modal, #admin-pin-gate-modal {
+    align-items: center;
+    justify-content: center;
+}
+#c-modal-admin-pin, #c-modal-admin-pin-gate{
+    width: 400px;
+    max-width: 92vw;
+    border-radius: var(--radius);
+    background-color: var(--clr-panel);
+    box-shadow: var(--shadow);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+}
+
+.ap-panel.is-hidden { display: none; }
+
+.ap-panel p {
+    margin-bottom: var(--margin-bottom);
+    color: var(--clr-text-secondary);
+}
+
+#ap-old-input,
+#ap-new-input,
+#ap-confirm-input,
+#ap-gate-input {
+    text-align: center;
+    font-size: 1.5rem;
+    letter-spacing: 0.4em;
+    margin-bottom: var(--margin-bottom);
+}
+
+.ap-feedback {
+    min-height: 1.2em;
+    margin-bottom: var(--gap);
+    font-size: 0.9rem;
+    color: var(--clr-danger);
+}

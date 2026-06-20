@@ -560,7 +560,9 @@
     border-top: 1px solid var(--clr-border);
     background: var(--clr-bg-surface);
     display: flex;
-    justify-content: center;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
 }
 
 .oh-print-btn {
@@ -575,6 +577,29 @@
     opacity: 0.4;
     cursor: not-allowed;
     filter: none;
+}
+
+/* Delete sits below Print as a visually quieter, separate action — keeps a
+   destructive control off the everyday button's edge on touch (iPad). */
+.oh-delete-btn {
+    background-color: transparent;
+    border: 1px solid var(--clr-danger);
+    color: var(--clr-danger);
+    width: 100%;
+    max-width: 260px;
+    min-height: 38px;
+    padding: 8px 20px;
+    font-size: 0.875rem;
+}
+@media (hover: hover) {
+    .oh-delete-btn:hover { background-color: var(--clr-danger); color: white; filter: none; }
+}
+.oh-delete-btn:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+    filter: none;
+    background-color: transparent;
+    color: var(--clr-danger);
 }
 
 /* ── print: only the bill ────────────────────────────────────────────────── */

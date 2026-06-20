@@ -1,8 +1,11 @@
-import { auth, fetchOrders, fetchUserProfile } from './firebase';
+import { auth, fetchOrders, fetchUserProfile, deleteOrder } from './firebase';
 import { formatCurrency, getCurrencySymbol } from './formatCurrency';
 import { toggleModal } from './modal-handler';
+import { showConfirm } from './confirm_modal';
+import { requireAdminPin } from './admin_pin';
 
 let isProcessing = false;
+let currentOrder = null;
 
 // Search state. `allOrders` is the master array loaded once per modal open;
 // `activeFilters` are the chips currently applied (AND semantics); `searchAttributes`
@@ -117,6 +120,7 @@ function renderOrderList(orders) {
 }
 
 function viewOrderDetails(order, cardEl) {
+    currentOrder = order;
     const itemsList = document.getElementById('oh-items-list');
     itemsList.replaceChildren();
 
@@ -162,6 +166,7 @@ function viewOrderDetails(order, cardEl) {
     document.getElementById('oh-grand-total').textContent = `${symbol} ${formatCurrency(order.totalPrice, currency)}`;
 
     document.getElementById('oh-print-btn').disabled = false;
+    document.getElementById('oh-delete-btn').disabled = false;
 
     renderOrderInfo(order);
 
@@ -524,6 +529,58 @@ function initPrintButton() {
     });
 }
 
+// ─── Delete order ────────────────────────────────────────────────────────────────
+
+function resetBillPanel() {
+    document.getElementById('oh-items-list').replaceChildren();
+    document.getElementById('oh-invoice-num').textContent = '—';
+    document.getElementById('oh-bill-date').textContent = '—';
+    document.getElementById('oh-bill-time').textContent = '—';
+    document.getElementById('oh-total-items').textContent = '—';
+    document.getElementById('oh-subtotal').textContent = '—';
+    document.getElementById('oh-grand-total').textContent = '—';
+    document.getElementById('oh-tax').textContent = '—';
+    document.getElementById('oh-discount-amount').textContent = '- 0';
+    document.getElementById('oh-discount-pct').textContent = '0';
+    document.getElementById('oh-print-btn').disabled = true;
+    document.getElementById('oh-delete-btn').disabled = true;
+    document.getElementById('oh-info').classList.add('is-hidden');
+    resetBillZoom();
+}
+
+async function handleDeleteOrder() {
+    if (!currentOrder) return;
+    const order = currentOrder;
+
+    const confirmed = await showConfirm({
+        title: 'Delete order?',
+        message: `This will permanently delete order #${shortId(order.id)}. This cannot be undone.`,
+        confirmText: 'Delete',
+        danger: true,
+    });
+    if (!confirmed) return;
+
+    const pinOk = await requireAdminPin();
+    if (!pinOk) return;
+
+    const btn = document.getElementById('oh-delete-btn');
+    btn.disabled = true;
+    btn.textContent = 'Deleting...';
+
+    try {
+        await deleteOrder(order.id);
+        allOrders = allOrders.filter(o => o.id !== order.id);
+        currentOrder = null;
+        resetBillPanel();
+        applyFilters();
+    } catch (err) {
+        console.error('Order delete failed:', err);
+        btn.disabled = false;
+    } finally {
+        btn.textContent = 'Delete Order';
+    }
+}
+
 // ─── Init ──────────────────────────────────────────────────────────────────────
 
 export async function initOrderHistory(user) {
@@ -539,20 +596,8 @@ export async function initOrderHistory(user) {
         populateBillHeader(profile);
         resetSearch(profile?.orderFieldLibrary);
 
-        // Reset bill panel
-        document.getElementById('oh-items-list').replaceChildren();
-        document.getElementById('oh-invoice-num').textContent = '—';
-        document.getElementById('oh-bill-date').textContent = '—';
-        document.getElementById('oh-bill-time').textContent = '—';
-        document.getElementById('oh-total-items').textContent = '—';
-        document.getElementById('oh-subtotal').textContent = '—';
-        document.getElementById('oh-grand-total').textContent = '—';
-        document.getElementById('oh-tax').textContent = '—';
-        document.getElementById('oh-discount-amount').textContent = '- 0';
-        document.getElementById('oh-discount-pct').textContent = '0';
-        document.getElementById('oh-print-btn').disabled = true;
-        document.getElementById('oh-info').classList.add('is-hidden');
-        resetBillZoom();
+        currentOrder = null;
+        resetBillPanel();
 
         // Fetch and render orders
         const orderList = document.getElementById('oh-order-list');
@@ -575,6 +620,7 @@ export async function initOrderHistory(user) {
 
     document.getElementById('oh-search-attr').addEventListener('change', renderValueControl);
     document.getElementById('oh-search-add').addEventListener('click', addCurrentFilter);
+    document.getElementById('oh-delete-btn').addEventListener('click', handleDeleteOrder);
 
     initPrintButton();
     initBillZoom();

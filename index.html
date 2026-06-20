@@ -424,6 +424,7 @@
               <button id="manage-item-open" class="btn" type="button">Manage Items</button>
               <button id="barcode-generator-open" class="btn" type="button">Generate Barcode</button>
               <button id="sales-insights-open" class="btn" type="button">Sales Insights</button>
+              <button id="admin-pin-open" class="btn" type="button">Set up Admin PIN</button>
               <!-- <button id="item-info-open" class="btn" type="button" disabled>Item Information</button> -->
             </div>
           </div>
@@ -601,10 +602,13 @@
               <div class="oh-info__empty is-hidden" id="oh-info-empty">No additional details.</div>
             </div>
 
-            <!-- Print Button -->
+            <!-- Print / Delete Buttons -->
             <div class="oh-print-bar">
               <button id="oh-print-btn" class="btn oh-print-btn" disabled>
                Print Bill
+              </button>
+              <button id="oh-delete-btn" class="btn btn--danger oh-delete-btn" type="button" disabled>
+               Delete Order
               </button>
             </div>
           </div>
@@ -909,12 +913,12 @@
           <div class="mi-detail-panel">
 
             <!-- Placeholder (shown until an item is selected) -->
-            <div id="mi-placeholder" class="mi-placeholder">
+            <!-- <div id="mi-placeholder" class="mi-placeholder">
               <p>← Select an item to view and edit its details</p>
-            </div>
+            </div> -->
 
             <!-- Detail view (hidden until item selected) -->
-            <div id="mi-detail-view" class="mi-detail-view is-hidden">
+            <div id="mi-detail-view" class="mi-detail-view">
 
               <!-- Item header -->
               <div class="mi-detail-header">
@@ -987,6 +991,7 @@
             <!-- Footer: always pinned at the bottom of the panel -->
             <div id="mi-footer" class="mi-edit__footer">
               <p id="mi-feedback" class="mi-feedback"></p>
+              <button type="button" id="mi-delete-btn" class="btn btn--danger mi-delete-btn" disabled>Delete Item</button>
               <button type="button" id="mi-save-btn" class="btn mi-save-btn" disabled>Save Changes</button>
             </div>
           </div>
@@ -1261,19 +1266,75 @@
       </div>
     </div>
 
-    <div id="confirm-modal" class="c-modal c-modal--center is-hidden">                  
+    <div id="confirm-modal" class="c-modal c-modal--center is-hidden">
       <div class="c-modal__panel" id="c-modal-confirm">
-        <header class="c-modal__header">                                                
-          <h2 class="c-modal__title" id="confirm-modal-title">Are you sure?</h2>        
+        <header class="c-modal__header">
+          <h2 class="c-modal__title" id="confirm-modal-title">Are you sure?</h2>
         </header>
-        <div class="c-modal__body">                                                     
-          <p id="confirm-modal-message">This action cannot be undone.</p>             
-          <div class="c-confirm__actions">                                              
-            <button type="button" class="btn btn--ghost" id="confirm-modal-cancel">Cancel</button>                                           
-            <button type="button" class="btn btn--primary" id="confirm-modal-ok">Confirm</button>                                              
-          </div>                                                                     
-        </div>                                                                          
-      </div>                                                                          
+        <div class="c-modal__body">
+          <p id="confirm-modal-message">This action cannot be undone.</p>
+          <div class="c-confirm__actions">
+            <button type="button" class="btn btn--ghost" id="confirm-modal-cancel">Cancel</button>
+            <button type="button" class="btn btn--primary" id="confirm-modal-ok">Confirm</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div id="admin-pin-modal" class="c-modal c-modal--center is-hidden">
+      <div class="c-modal__panel" id="c-modal-admin-pin">
+        <header class="c-modal__header">
+          <h2 class="c-modal__title" id="ap-title">Set up Admin PIN</h2>
+          <button type="button" class="c-modal__close" aria-label="Close" data-modal-close="admin-pin-modal">&times;</button>
+        </header>
+        <div class="c-modal__body">
+
+          <div id="ap-intro" class="ap-panel">
+            <p>This Admin PIN will be required before deleting an inventory item or cancelling an order.</p>
+              <div class="c-actions">
+              <button type="button" class="btn btn--primary" id="ap-intro-continue">Continue</button>
+            </div>
+          </div>
+
+          <div id="ap-old-pin" class="ap-panel is-hidden">
+            <label class="c-field__label" for="ap-old-input">Enter current Admin PIN</label>
+            <input type="text" inputmode="numeric" pattern="\d{4}" maxlength="4" id="ap-old-input" class="c-field__input" placeholder="••••" autocomplete="off" />
+            <p id="ap-old-feedback" class="ap-feedback"></p>
+            <div class="c-actions">
+              <button type="button" class="btn btn--primary" id="ap-old-continue">Continue</button>
+            </div>
+          </div>
+
+          <div id="ap-new-pin" class="ap-panel is-hidden">
+            <label class="c-field__label" for="ap-new-input">Enter new 4-digit Admin PIN</label>
+            <input type="text" inputmode="numeric" pattern="\d{4}" maxlength="4" id="ap-new-input" class="c-field__input" placeholder="••••" autocomplete="off" />
+            <label class="c-field__label" for="ap-confirm-input">Confirm Admin PIN</label>
+            <input type="text" inputmode="numeric" pattern="\d{4}" maxlength="4" id="ap-confirm-input" class="c-field__input" placeholder="••••" autocomplete="off" />
+            <p id="ap-feedback" class="ap-feedback"></p>
+            <div class="c-actions">
+              <button type="button" class="btn btn--primary" id="ap-save-btn">Save PIN</button>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+    <div id="admin-pin-gate-modal" class="c-modal c-modal--center is-hidden">
+      <div class="c-modal__panel" id="c-modal-admin-pin-gate">
+        <header class="c-modal__header">
+          <h2 class="c-modal__title">Enter Admin PIN to confirm deletion</h2>
+        </header>
+        <div class="c-modal__body">
+          <label class="c-field__label" for="ap-gate-input">Admin PIN</label>
+          <input type="text" inputmode="numeric" pattern="\d{4}" maxlength="4" id="ap-gate-input" class="c-field__input" placeholder="••••" autocomplete="off" />
+          <p id="ap-gate-feedback" class="ap-feedback"></p>
+          <div class="c-confirm__actions">
+            <button type="button" class="btn btn--ghost" id="ap-gate-cancel-btn">Cancel</button>
+            <button type="button" class="btn btn--primary" id="ap-gate-confirm-btn">Confirm</button>
+          </div>
+        </div>
+      </div>
     </div>
 
     <main id="pos-app" class="l-app">

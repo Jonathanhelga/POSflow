@@ -236,7 +236,7 @@ Two backends in play:
 
 Walkthrough of every command run to wire up GitHub Actions → Workload Identity Federation → Cloud Run + Firebase Hosting. Two workflow files end up in `.github/workflows/` that fire on push based on which paths changed.
 
-### Step 1 — Pre-flight checks
+### Step 1 — Pre-flight checks 
 
 ```bash
 gcloud config get-value project
@@ -248,7 +248,12 @@ gcloud auth list
 ```
 Confirms which Google account `gcloud` is authenticated as. Needs to be the project owner (or have IAM Admin + Service Account Admin) for the next steps to work.
 
-### Step 2a — Enable required APIs
+### Step 2a —  Enabling the APIs
+
+Google Cloud has hundreds of features, but they are turned off by default to save resources and secure your environment. This command acts like flipping the power switches "on" for three specific Google Cloud backend services in your project:
+- `iam.googleapis.com`: Lets you create users and service accounts.
+- `cloudresourcemanager.googleapis.com`: Lets you assign permissions across your entire project.
+- `iamcredentials.googleapis.com`: Lets external systems (like GitHub) securely request temporary access to your project.
 
 ```bash
 gcloud services enable \
@@ -262,7 +267,9 @@ Turns on the three APIs WIF depends on:
 - `cloudresourcemanager` — required to add project-level IAM bindings.
 - `iam` — required to create the service account, pool, and provider.
 
-### Step 2b — Create the deploy service account and grant roles
+### Step 2b — Create the deploy service account and grant roles  (Creating the "Robot User")
+
+This creates a Service Account named github-deployer. A service account is essentially a "robot user" account designed specifically for applications, scripts, or CI/CD pipelines (like GitHub Actions) to use, rather than a human being. This creates the identity, but at this stage, the robot user has zero permissions to actually do anything.
 
 ```bash
 gcloud iam service-accounts create github-deployer \
@@ -270,7 +277,14 @@ gcloud iam service-accounts create github-deployer \
   --project=minipos-d9d92
 ```
 Creates the identity GitHub will impersonate. Email becomes `github-deployer@minipos-d9d92.iam.gserviceaccount.com`. No JSON key generated — that's the point of WIF.
-
+## Handing out the Keys (Permissions)
+bash loop that takes the robot user we just created and grants it five specific jobs (roles).
+Instead of typing out the gcloud projects add-iam-policy-binding command five separate times, the loop runs it once for each role in the list. It gives your GitHub deployer the exact "keys" it needs to:
+- Manage Cloud Run (run.admin)
+- Act on behalf of other service accounts (iam.serviceAccountUser)
+- Trigger container builds (cloudbuild.builds.editor)
+- Save those built containers (artifactregistry.writer)
+- Update your frontend website (firebasehosting.admin)
 ```bash
 for role in \
   roles/run.admin \

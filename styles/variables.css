@@ -125,6 +125,8 @@ body {
 }
 .btn:active { transform: scale(0.97); filter: brightness(0.85); }
 
+.btn--danger { background-color: var(--clr-danger); color: white; }
+
 /* — Form Field — */
 .c-field { margin-bottom: var(--margin-bottom); }
 

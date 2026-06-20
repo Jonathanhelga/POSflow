@@ -155,3 +155,9 @@ export function updateLocalItem(itemId, fields) {
     if (!item) return;
     Object.assign(item, fields);
 }
+
+// Remove a deleted item from the canonical in-memory list and refresh the grid.
+export function removeLocalItem(itemId) {
+    allItems = allItems.filter(i => i.id !== itemId);
+    refreshGrid();
+}
