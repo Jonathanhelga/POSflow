@@ -186,7 +186,7 @@ function renderDiscountRow(order) {
     document.getElementById('oh-discount-amount').textContent = `- ${getCurrencySymbol(currency)} ${formatCurrency(discountAmount, currency)}`;
 }
 
-// ─── Order Information (display-only; not part of the printed bill) ──────────────
+//  Order Information (display-only; not part of the printed bill) 
 
 // Populate the info block for the selected order. Each core row is shown only when
 // it has a value; custom fields are injected per order; the whole block falls back
@@ -259,8 +259,6 @@ function prettifyTime(value) {
     return d.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
 }
 
-// ─── Attribute-aware search (Phase 4b) ──────────────────────────────────────────
-
 // Build the searchable attribute list: fixed attributes + one per library field.
 // Choice fields carry their options so the value control can render a dropdown.
 function buildSearchAttributes(library) {
@@ -292,7 +290,6 @@ function populateAttributeSelect() {
     renderValueControl();
 }
 
-// Swap the value control to match the selected attribute's type.
 function renderValueControl() {
     const container = document.getElementById('oh-search-value');
     container.replaceChildren();
@@ -301,21 +298,19 @@ function renderValueControl() {
 }
 
 function buildValueControl(attr) {
-    if (attr.type === 'choice') {
-        const select = document.createElement('select');
-        select.id = 'oh-search-input';
-        for (const opt of attr.options) {
-            const o = document.createElement('option');
-            o.value = opt;
-            o.textContent = opt;
-            select.appendChild(o);
-        }
-        return select;
+if (attr.type === 'choice') {
+    const select = document.createElement('select');
+    select.id = 'oh-search-input';
+    for (const opt of attr.options) {
+        const o = document.createElement('option');
+        o.value = opt;
+        o.textContent = opt;
+        select.appendChild(o);
     }
+    return select;
+}
     const input = document.createElement('input');
     input.id = 'oh-search-input';
-    // Pre-fill date/time with today/now so the shown value is the real value and
-    // the user can Add immediately without having to "tweak" the field first.
     if (attr.type === 'date') {
         input.type = 'date';
         input.value = nowDateValue();
@@ -337,6 +332,11 @@ function nowDateValue() {
 function nowTimeValue() {
     const d = new Date();
     return `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
+}
+
+function timeToMinutes(value) {
+    const [h, m] = value.split(':').map(Number);
+    return h * 60 + m;
 }
 
 function handleSearchEnter(e) {
@@ -363,8 +363,6 @@ function addCurrentFilter() {
     renderChips();
     applyFilters();
 
-    // Reset the value control to its default so the stale value doesn't look
-    // re-addable, and the field is clearly ready for the next criterion.
     renderValueControl();
 }
 
@@ -376,7 +374,7 @@ function removeFilter(key) {
 
 function displayFilterValue(attr, value) {
     if (attr.type === 'date') return prettifyDate(value);
-    if (attr.type === 'time') return prettifyTime(value);
+    if (attr.type === 'time') return `${prettifyTime(value)} or later`;
     return value;
 }
 
@@ -427,6 +425,7 @@ function orderMatchesFilter(order, filter) {
     }
     const field = order.customFields ? order.customFields[attr.id] : null;
     if (!field || field.value == null) return false;
+    if (attr.type === 'time') return timeToMinutes(String(field.value)) >= timeToMinutes(String(filter.value));
     return String(field.value) === String(filter.value);
 }
 
@@ -454,7 +453,7 @@ function resetSearch(library) {
     renderChips();
 }
 
-// ─── Bill zoom ─────────────────────────────────────────────────────────────────
+//  Bill zoom 
 
 const ZOOM_MIN = 0.5;
 const ZOOM_MAX = 2;
@@ -485,7 +484,7 @@ function initBillZoom() {
     document.getElementById('oh-zoom-level').addEventListener('click', resetBillZoom);
 }
 
-// ─── Bill pan (drag like a PDF/map viewer) ──────────────────────────────────────
+// Bill pan (drag like a PDF/map viewer)
 
 let panState = null;
 
@@ -524,15 +523,13 @@ function initBillPan() {
     scrollEl.addEventListener('pointercancel', endBillPan);
 }
 
-// ─── Print ─────────────────────────────────────────────────────────────────────
+//  Print 
 
 function initPrintButton() {
-    document.getElementById('oh-print-btn').addEventListener('click', () => {
-        window.print();
-    });
+    document.getElementById('oh-print-btn').addEventListener('click', () => { window.print(); });
 }
 
-// ─── Delete order ────────────────────────────────────────────────────────────────
+// Delete order
 
 function resetBillPanel() {
     document.getElementById('oh-items-list').replaceChildren();
@@ -592,7 +589,7 @@ async function handleDeleteOrder() {
     }
 }
 
-// ─── Init ──────────────────────────────────────────────────────────────────────
+// Init
 
 export async function initOrderHistory(user) {
     const openBtn = document.getElementById('js-order-history-open');
