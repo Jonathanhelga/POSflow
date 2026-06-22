@@ -30,10 +30,6 @@ export function renderItemGrid(items){
     if(!container) return;
     container.innerHTML = '';
 
-    if (items.length === 0) { container.innerHTML = '<p>No items in inventory.</p>'; } 
+    if (items.length === 0) { container.innerHTML = '<p>No items in inventory.</p>'; }
     else { items.forEach(item => createItemButton(container, item)); }
 }
-
-// function handleSearchInput(event){}
-// function updateSearchStats(count, query){}
-// function openOrderPanel(item){}
