@@ -51,6 +51,14 @@
         animation: bootSpin 0.7s linear infinite;
       }
       @keyframes bootSpin { to { transform: rotate(360deg); } }
+
+      /* Dark theme — literal values kept inline so the splash paints before variables.css loads */
+      [data-theme="dark"] .c-boot-splash { background: #0F172A; }
+      [data-theme="dark"] .c-boot-splash__brand { color: #F1F5F9; }
+      [data-theme="dark"] .c-boot-splash__spinner {
+        border-color: #334155;
+        border-top-color: #F1F5F9;
+      }
     </style>
 </head>
 <body class="is-booting">
