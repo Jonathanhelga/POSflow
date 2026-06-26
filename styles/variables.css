@@ -46,6 +46,14 @@
     --clr-input-bg:    #ffffff;
     --clr-focus-ring:  #3498db;
     --clr-surface-alt: #f1f5f9;
+
+    /* — Semantic status surfaces (pale badges + feedback text) — */
+    --clr-status-pos-bg: #dcfce7;   /* good-stock badge fill   */
+    --clr-status-pos-fg: #166534;   /* good / success text     */
+    --clr-status-neg-bg: #fee2e2;   /* alert badge fill        */
+    --clr-status-neg-fg: #991b1b;   /* alert / error text      */
+    --clr-trend-up:      #2f855a;   /* KPI delta rising        */
+    --clr-trend-down:    #c05621;   /* KPI delta falling       */
 }
 
 /*  DARK THEME */
@@ -85,6 +93,14 @@
     --clr-focus-ring:  #3b82f6;
     --clr-surface-alt: #1e293b;
     --clr-button-active: #76a6f4;
+
+    /* — Semantic status surfaces (dark-tuned: deep fills, light text) — */
+    --clr-status-pos-bg: #14532d;
+    --clr-status-pos-fg: #86efac;
+    --clr-status-neg-bg: #7f1d1d;
+    --clr-status-neg-fg: #fca5a5;
+    --clr-trend-up:      #4ade80;
+    --clr-trend-down:    #fb923c;
 }
 
 

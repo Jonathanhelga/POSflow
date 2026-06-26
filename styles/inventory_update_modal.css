@@ -146,8 +146,8 @@ flex: 0 1 auto	0	1	auto	Don't grow, can shrink, starting from its natural size *
     letter-spacing: 0.5px;
     flex-shrink: 0;
 }
-.iu-badge--good  { background: #dcfce7; color: #166534; }
-.iu-badge--alert { background: #fee2e2; color: #991b1b; }
+.iu-badge--good  { background: var(--clr-status-pos-bg); color: var(--clr-status-pos-fg); }
+.iu-badge--alert { background: var(--clr-status-neg-bg); color: var(--clr-status-neg-fg); }
 
 /* ─── Right panel: detail + update ──────────────────────────── */
 
@@ -321,8 +321,8 @@ flex: 0 1 auto	0	1	auto	Don't grow, can shrink, starting from its natural size *
     min-height: 1.1em;
     font-weight: 500;
 }
-.iu-feedback--success { color: #166534; }
-.iu-feedback--error   { color: #991b1b; }
+.iu-feedback--success { color: var(--clr-status-pos-fg); }
+.iu-feedback--error   { color: var(--clr-status-neg-fg); }
 
 /* ─── Empty / loading states ─────────────────────────────────── */
 

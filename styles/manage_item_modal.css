@@ -359,5 +359,5 @@
     min-height: 1.1em;
     font-weight: 500;
 }
-.mi-feedback--success { color: #166534; }
-.mi-feedback--error   { color: #991b1b; }
+.mi-feedback--success { color: var(--clr-status-pos-fg); }
+.mi-feedback--error   { color: var(--clr-status-neg-fg); }

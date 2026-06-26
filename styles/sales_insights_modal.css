@@ -179,8 +179,8 @@
     color: var(--clr-text-secondary);
     min-height: 1em;            /* reserve space so layout doesn't jump */
 }
-.c-kpi__delta.is-up   { color: #2f855a; }
-.c-kpi__delta.is-down { color: #c05621; }
+.c-kpi__delta.is-up   { color: var(--clr-trend-up); }
+.c-kpi__delta.is-down { color: var(--clr-trend-down); }
 
 /* ── Card primitive (chart + top items share this) ────────────── */
 .c-card {

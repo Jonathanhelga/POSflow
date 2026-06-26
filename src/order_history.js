@@ -124,19 +124,22 @@ function renderOrderList(orders) {
         btn.className = 'btn oh-card__btn';
         btn.textContent = 'View Details';
 
-        btn.addEventListener('click', () => {
+        btn.addEventListener('click', async () => {
             if (isProcessing) return;
             isProcessing = true;
             btn.disabled = true;
             btn.textContent = 'Loading...';
 
-            viewOrderDetails(order, card);
-
-            setTimeout(() => {
-                isProcessing = false;
-                btn.disabled = false;
-                btn.textContent = 'View Details';
-            }, 800);
+            await viewOrderDetails(order, card);
+            
+            isProcessing = false;
+            btn.disabled = false;
+            btn.textContent = 'View Details';
+            // setTimeout(() => {
+            //     isProcessing = false;
+            //     btn.disabled = false;
+            //     btn.textContent = 'View Details';
+            // }, 100);
         });
 
         card.querySelector('.oh-card__bottom-row').appendChild(btn);
@@ -144,7 +147,7 @@ function renderOrderList(orders) {
     });
 }
 
-function viewOrderDetails(order, cardEl) {
+async function viewOrderDetails(order, cardEl) {
     currentOrder = order;
     const itemsList = document.getElementById('oh-items-list');
     itemsList.replaceChildren();
