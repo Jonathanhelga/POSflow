@@ -49,7 +49,11 @@ function getStartDate(range) {
 }                                                            
 
 function setupToolBar(){
-    document.getElementById('sales-insights-open').addEventListener('click', () => { toggleModal('sales-insights-modal'); });
+    document.getElementById('sales-insights-open').addEventListener('click', () => {
+        document.getElementById('js-sales-from').value = todayInputValue();
+        document.getElementById('js-sales-to').value = todayInputValue();
+        toggleModal('sales-insights-modal');
+    });
     const chips = document.querySelectorAll('.c-chip');
     chips.forEach(chip => {
         chip.addEventListener('click', () => {
@@ -64,6 +68,8 @@ function setupToolBar(){
 
     document.getElementById('js-sales-apply').addEventListener('click', applyCustomRange);
     setupTopItemsSort();
+
+    // document.getElementById('js-sales-to').value = todayInputValue();
 
     let startDate = getStartDate("today");
     filterOrders(startDate, new Date());
@@ -93,6 +99,15 @@ function parseDateInput(value){
     if (!value) return null;
     const [y, m, d] = value.split('-').map(Number);
     return new Date(y, m - 1, d);
+}
+
+// Local YYYY-MM-DD for today, matching what <input type="date"> expects.
+function todayInputValue(){
+    const d = new Date();
+    const y = d.getFullYear();
+    const m = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    return `${y}-${m}-${day}`;
 }
 
 function applyCustomRange(){

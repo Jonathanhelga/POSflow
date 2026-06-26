@@ -100,7 +100,7 @@ export async function fetchOrders(uid) {
     const q = query(
         collection(db, "orders"),
         where("ownerId", "==", uid),
-        orderBy("createdAt", "asc")
+        orderBy("createdAt", "desc")
     );
     const snapshot = await getDocs(q);
     return snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
