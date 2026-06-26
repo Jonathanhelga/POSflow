@@ -4,6 +4,7 @@ import { toggleModal } from './modal-handler';
 import { allItems, loadAllItems, updateLocalStock } from './search_item';
 import { createSelection } from './selection';
 import { formatCurrency, getCurrencySymbol } from './formatCurrency';
+import { skeletonBar } from './skeleton';
 
 let filteredItems = [];
 const selection   = createSelection();
@@ -76,6 +77,28 @@ function renderItemList_Inventory(items) {
     container.appendChild(frag);
 }
 
+// Placeholder cards mirroring .iu-card, shown while inventory loads.
+function buildItemSkeleton_Inventory(count = 5) {
+    const frag = document.createDocumentFragment();
+    for (let i = 0; i < count; i++) {
+        const card = document.createElement('div');
+        card.className = 'iu-card is-skeleton';
+
+        const topRow = document.createElement('div');
+        topRow.className = 'iu-card__top';
+        topRow.append(skeletonBar('40%', '1rem'), skeletonBar('10%', '1rem'));
+
+        const bottomRow = document.createElement('div');
+        bottomRow.className = 'iu-card__bottom';
+        bottomRow.append(skeletonBar('30%', '0.8rem'), skeletonBar('10%', '0.5rem'));
+
+        card.append(topRow, bottomRow);
+        frag.appendChild(card);
+    }
+    return frag;
+}
+
+
 // ─── Select item 
 
 function selectItem(item, cardEl) {
@@ -90,7 +113,7 @@ function selectItem(item, cardEl) {
 
 function populateDetail(item) {
     // document.getElementById('iu-empty-state').classList.add('is-hidden');
-    document.getElementById('iu-detail-view').classList.remove('is-hidden');
+    // document.getElementById('iu-detail-view').classList.remove('is-hidden');
 
     const status = getStockStatus(item.stockLevel, item?.minStockLevel || 0);
     const badgeEl = document.getElementById('iu-status-badge');
@@ -256,12 +279,9 @@ async function openInventoryUpdate(user) {
 
     // Reset panel state
     selection.clear();
-    const loadingMsg = document.createElement('p');
-    loadingMsg.className = 'iu-empty';
-    loadingMsg.textContent = 'Loading...';
-    document.getElementById('iu-item-list').replaceChildren(loadingMsg);
     document.getElementById('iu-search').value          = '';
 
+    document.getElementById('iu-item-list').replaceChildren(buildItemSkeleton_Inventory());
     try {
         await loadAllItems();
         filteredItems = [...allItems];
@@ -283,6 +303,7 @@ export function initInventoryUpdate(user) {
         toggleModal('features-modal');
         toggleModal('inventory-update-modal');
         if (!user) return;
+
         openInventoryUpdate(user);
     });
 

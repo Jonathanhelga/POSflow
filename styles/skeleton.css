@@ -1,0 +1,33 @@
+/* styles/skeleton.css — shared loading-skeleton primitives.
+   Compose .skeleton-bar with width/height (inline or per-view classes)
+   to stand in for text lines, totals, dots, etc. while data loads. */
+
+.skeleton-bar {
+    border-radius: 6px;
+    background-color: var(--clr-border);
+    background-image: linear-gradient(
+        90deg,
+        transparent 0%,
+        color-mix(in srgb, #ffffff 45%, transparent) 50%,
+        transparent 100%
+    );
+    background-size: 200% 100%;
+    background-repeat: no-repeat;
+    animation: skeleton-shimmer 1.2s ease-in-out infinite;
+}
+
+.skeleton-bar--dot { border-radius: 50%; }
+
+/* Skeleton cards reuse the real card classes for shape, but shouldn't
+   react to hover/clicks while loading. */
+.is-skeleton { pointer-events: none; }
+
+@keyframes skeleton-shimmer {
+    from { background-position: -150% 0; }
+    to   { background-position:  150% 0; }
+}
+
+/* Accessibility: hold a static grey for users who avoid motion */
+@media (prefers-reduced-motion: reduce) {
+    .skeleton-bar { animation: none; }
+}

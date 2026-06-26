@@ -5,6 +5,7 @@ import { toggleModal } from './modal-handler';
 import { formatCurrency, getCurrencySymbol } from './formatCurrency';
 import { showToast } from './toast';
 import { createSelection } from './selection';
+import { skeletonBar } from './skeleton';
 let allItems      = [];
 let filteredItems = [];
 const selection   = createSelection();
@@ -26,6 +27,27 @@ function cleanupObjectUrl() {
 }
 
 // item list
+
+// Placeholder cards mirroring .bg-card, shown while inventory loads.
+function buildItemSkeleton_Barcode(count = 6) {
+    const frag = document.createDocumentFragment();
+    for (let i = 0; i < count; i++) {
+        const card = document.createElement('div');
+        card.className = 'bg-card is-skeleton';
+
+        const topRow = document.createElement('div');
+        topRow.className = 'bg-card__top-row';
+        topRow.append(skeletonBar('55%', '1rem'), skeletonBar('25%', '0.8rem'));
+
+        const secondRow = document.createElement('div');
+        secondRow.className = 'bg-card__second-row';
+        secondRow.append(skeletonBar('35%', '0.85rem'), skeletonBar('20%', '0.85rem'));
+
+        card.append(topRow, secondRow);
+        frag.appendChild(card);
+    }
+    return frag;
+}
 
 function renderItemList_Barcode(items) {
     const container = document.getElementById('bg-item-list');
@@ -196,10 +218,7 @@ async function openBarcodeGenerator(user) {
     cleanupObjectUrl();
     uploadedImageUrl = null;
 
-    const loadingMsg = document.createElement('p');
-    loadingMsg.className = 'bg-empty';
-    loadingMsg.textContent = 'Loading...';
-    document.getElementById('bg-item-list').replaceChildren(loadingMsg);
+    document.getElementById('bg-item-list').replaceChildren(buildItemSkeleton_Barcode());
     document.getElementById('bg-search').value        = '';
     document.getElementById('bg-save-btn').disabled   = true;
     document.getElementById('bg-img-upload').value    = '';

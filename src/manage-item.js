@@ -6,6 +6,7 @@ import { createSelection } from './selection';
 import { showConfirm } from './confirm_modal';
 import { requireAdminPin } from './admin_pin';
 import { showToast } from "./toast";
+import { skeletonBar } from './skeleton';
 let filteredItems  = [];
 const selection    = createSelection();
 let selectedTheme  = 'primary';
@@ -70,6 +71,25 @@ function formatTimestamp(ts) {
 
 //  Render item list 
 
+
+function buildItemSkeleton(count = 6) {
+    const frag = document.createDocumentFragment();
+    for (let i = 0; i < count; i++) {
+        const card = document.createElement('div');
+        card.className = 'mi-card is-skeleton';
+
+        const top = document.createElement('div');
+        top.className = 'mi-card__top';
+        const dot = skeletonBar('9px', '9px');
+        dot.classList.add('skeleton-bar--dot');
+        top.append(dot, skeletonBar('60%', '1rem'));
+
+        card.append(top, skeletonBar('40%', '1rem'));
+        frag.appendChild(card);
+    }
+    return frag;
+}
+
 function renderItemList_Manage(items) {
     const container = document.getElementById('mi-item-list');
     container.replaceChildren();
@@ -122,7 +142,7 @@ function selectItem(item, cardEl) {
 }
 
 // Re-render the detail panel for the currently selected item, e.g. after its
-// stock is mutated elsewhere (order deletion restock) while the modal is open.
+// stock is mutated elsewhere (order deletion restock) while the modal is open
 export function refreshSelectedItemDetail() {
     const item = selection.get();
     if (!item) return;
@@ -285,10 +305,7 @@ async function openManageItem(user) {
     document.getElementById('mi-cost-currency').textContent = symbol;
     document.getElementById('mi-sell-currency').textContent = symbol;
 
-    const loadingMsg = document.createElement('p');
-    loadingMsg.className = 'mi-empty';
-    loadingMsg.textContent = 'Loading...';
-    document.getElementById('mi-item-list').replaceChildren(loadingMsg);
+    document.getElementById('mi-item-list').replaceChildren(buildItemSkeleton());
 
     try {
         await loadAllItems();

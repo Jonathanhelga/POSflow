@@ -6,6 +6,7 @@ import { requireAdminPin } from './admin_pin';
 import { showToast } from "./toast";
 import { updateLocalStock, refreshGrid } from './search_item';
 import { refreshSelectedItemDetail } from './manage-item';
+import { skeletonBar } from './skeleton';
 
 let isProcessing = false;
 let currentOrder = null;
@@ -58,6 +59,27 @@ function populateBillHeader(profile) {
     });
     document.getElementById('oh-cashier').textContent =
         profile?.username || auth.currentUser?.email || '—';
+}
+
+// Placeholder cards mirroring .oh-card, shown while orders load.
+function buildOrderSkeleton(count = 5) {
+    const frag = document.createDocumentFragment();
+    for (let i = 0; i < count; i++) {
+        const card = document.createElement('div');
+        card.className = 'oh-card is-skeleton';
+
+        const topRow = document.createElement('div');
+        topRow.className = 'oh-card__top-row';
+        topRow.append(skeletonBar('40%', '0.95rem'), skeletonBar('20%', '0.75rem'));
+
+        const bottomRow = document.createElement('div');
+        bottomRow.className = 'oh-card__bottom-row';
+        bottomRow.append(skeletonBar('30%', '0.8rem'), skeletonBar('92px', '1.9rem'));
+
+        card.append(topRow, skeletonBar('40%', '1.15rem'), bottomRow);
+        frag.appendChild(card);
+    }
+    return frag;
 }
 
 function renderOrderList(orders) {
@@ -609,10 +631,7 @@ export async function initOrderHistory(user) {
 
         // Fetch and render orders
         const orderList = document.getElementById('oh-order-list');
-        const loadingMsg = document.createElement('p');
-        loadingMsg.className = 'oh-empty';
-        loadingMsg.textContent = 'Loading orders...';
-        orderList.replaceChildren(loadingMsg);
+        orderList.replaceChildren(buildOrderSkeleton());
         try {
             const orders = await fetchOrders(user.uid);
             allOrders = orders;

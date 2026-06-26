@@ -1,4 +1,5 @@
 import '../styles/variables.css';
+import '../styles/skeleton.css';
 import '../styles/setupWizard.css';
 import '../styles/container.css';
 import '../styles/add_item_modal.css';
