@@ -6,6 +6,7 @@ import { formatCurrency, getCurrencySymbol } from './formatCurrency';
 import { showToast } from './toast';
 import { createSelection } from './selection';
 import { skeletonBar } from './skeleton';
+import { attachListKeyNav } from './listKeyNav';
 let allItems      = [];
 let filteredItems = [];
 const selection   = createSelection();
@@ -253,6 +254,15 @@ export async function initBarcodeGenerator(user) {
         toggleModal('barcode-generator-modal');
         if (!user) return;
         openBarcodeGenerator(user);
+    });
+
+    attachListKeyNav({
+        scope:       document.getElementById('barcode-generator-modal'),
+        container:   document.getElementById('bg-item-list'),
+        cardSelector: '.bg-card',
+        searchInput: document.getElementById('bg-search'),
+        getItems:    () => filteredItems,
+        onOpen:      (item) => selectItem(item),
     });
 
     document.getElementById('bg-search').addEventListener('input', (e) => {

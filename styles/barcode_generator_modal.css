@@ -81,6 +81,11 @@
     border-color: var(--clr-primary);
     background-color: color-mix(in srgb, var(--clr-primary) 8%, transparent);
 }
+/* Keyboard cursor — highlight only, panel not yet opened. */
+.bg-card.list-cursor {
+    border-color: var(--clr-primary);
+    box-shadow: 0 0 0 2px color-mix(in srgb, var(--clr-primary) 8%, transparent);
+}
 
 .bg-card__top-row {
     display: flex;

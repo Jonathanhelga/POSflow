@@ -7,6 +7,7 @@ import { showConfirm } from './confirm_modal';
 import { requireAdminPin } from './admin_pin';
 import { showToast } from "./toast";
 import { skeletonBar } from './skeleton';
+import { attachListKeyNav } from './listKeyNav';
 let filteredItems  = [];
 const selection    = createSelection();
 let selectedTheme  = 'primary';
@@ -335,6 +336,15 @@ export function initManageItem(user) {
 
     document.getElementById('mi-save-btn').addEventListener('click', handleSave);
     document.getElementById('mi-delete-btn').addEventListener('click', handleDelete);
+
+    attachListKeyNav({
+        scope:       document.getElementById('manage-item-modal'),
+        container:   document.getElementById('mi-item-list'),
+        cardSelector: '.mi-card',
+        searchInput: document.getElementById('mi-search'),
+        getItems:    () => filteredItems,
+        onOpen:      (item, card) => selectItem(item, card),
+    });
 
     document.getElementById('mi-search').addEventListener('input', (e) => {
         const q = e.target.value.trim().toLowerCase();

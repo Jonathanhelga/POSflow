@@ -5,6 +5,7 @@ import { allItems, loadAllItems, updateLocalStock } from './search_item';
 import { createSelection } from './selection';
 import { formatCurrency, getCurrencySymbol } from './formatCurrency';
 import { skeletonBar } from './skeleton';
+import { attachListKeyNav } from './listKeyNav';
 
 let filteredItems = [];
 const selection   = createSelection();
@@ -308,6 +309,16 @@ export function initInventoryUpdate(user) {
     });
 
     document.getElementById('iu-save-btn').addEventListener('click', handleSave);
+
+    attachListKeyNav({
+        scope:       document.getElementById('inventory-update-modal'),
+        container:   document.getElementById('iu-item-list'),
+        cardSelector: '.iu-card',
+        searchInput: document.getElementById('iu-search'),
+        getItems:    () => filteredItems,
+        onOpen:      (item, card) => selectItem(item, card),
+    });
+
     document.getElementById('iu-history-more').addEventListener('click', () => {
         if (historyItemId) loadStockHistory(historyItemId, true);
     });

@@ -1,6 +1,4 @@
-/* 
-   INVENTORY UPDATE MODAL
-    */
+/* INVENTORY UPDATE MODAL */
 
 #inventory-update-modal {
     align-items: center;
@@ -20,7 +18,7 @@
     flex-direction: column;
 }
 
-/* ─── Two-panel body ─────────────────────────────────────────── */
+/* Two-panel body */
 
 .iu-body {
     display: grid;
@@ -32,7 +30,7 @@
     min-height: 0;
 }
 
-/* ─── Left panel: item list ──────────────────────────────────── */
+/*  Left panel: item list  */
 
 .iu-list-panel {
     border-right: 1px solid var(--clr-border);
@@ -60,10 +58,12 @@
     color: var(--clr-text-primary);
 }
 .iu-search-input:focus { border-color: var(--clr-primary); }
-/* Value	grow	shrink	basis	Meaning
-flex: 1	1	1	0	Grow AND shrink freely, starting from 0 size
-flex: 0 1	0	1	0	Don't grow, can shrink, starting from 0
-flex: 0 1 auto	0	1	auto	Don't grow, can shrink, starting from its natural size */
+/* 
+Value	grow	shrink	basis	Meaning
+flex: 1	 1	1	0	Grow AND shrink freely, starting from 0 size
+flex: 0  1	0	1	0	Don't grow, can shrink, starting from 0
+flex: 0  1 auto	0	1	auto	Don't grow, can shrink, starting from its natural size 
+*/
 #iu-item-list {
     flex: 1;
     overflow-y: auto;
@@ -73,7 +73,7 @@ flex: 0 1 auto	0	1	auto	Don't grow, can shrink, starting from its natural size *
     gap: 1rem;
 }
 
-/* ─── Item card ──────────────────────────────────────────────── */
+/*  Item card  */
 
 .iu-card {
     border: 1px solid var(--clr-border);
@@ -89,6 +89,11 @@ flex: 0 1 auto	0	1	auto	Don't grow, can shrink, starting from its natural size *
 .iu-card--active {
     border-color: var(--clr-primary);
     background-color: var(--clr-surface-alt);
+}
+/* Keyboard cursor — highlight only, panel not yet opened. */
+.iu-card.list-cursor {
+    border-color: var(--clr-primary);
+    box-shadow: 0 0 0 2px color-mix(in srgb, var(--clr-primary) 8%, transparent);
 }
 
 .iu-card__top {
@@ -123,7 +128,7 @@ flex: 0 1 auto	0	1	auto	Don't grow, can shrink, starting from its natural size *
 }
 .iu-card__unit { color: var(--clr-gray-mid); }
 
-/* ─── Tag color dots ─────────────────────────────────────────── */
+/*  Tag color dots */
 
 .iu-card__tag-dot,
 .iu-detail-tag {
@@ -136,7 +141,7 @@ flex: 0 1 auto	0	1	auto	Don't grow, can shrink, starting from its natural size *
 .iu-tag--good       { background-color: #98e698; }
 .iu-tag--alert    { background-color: #d59797; }
 
-/* ─── Status badges ──────────────────────────────────────────── */
+/*  Status badges  */
 
 .iu-badge {
     font-size: 0.62rem;
@@ -149,7 +154,7 @@ flex: 0 1 auto	0	1	auto	Don't grow, can shrink, starting from its natural size *
 .iu-badge--good  { background: var(--clr-status-pos-bg); color: var(--clr-status-pos-fg); }
 .iu-badge--alert { background: var(--clr-status-neg-bg); color: var(--clr-status-neg-fg); }
 
-/* ─── Right panel: detail + update ──────────────────────────── */
+/*  Right panel: detail + update  */
 
 .iu-detail-panel {
     display: flex;
@@ -186,7 +191,7 @@ flex: 0 1 auto	0	1	auto	Don't grow, can shrink, starting from its natural size *
     display: none;
 }
 
-/* ─── Item header ────────────────────────────────────────────── */
+/* Item header */
 
 .iu-detail-header {
     display: flex;
@@ -217,7 +222,7 @@ flex: 0 1 auto	0	1	auto	Don't grow, can shrink, starting from its natural size *
     flex-shrink: 0;
 }
 
-/* ─── Stock metrics grid ─────────────────────────────────────── */
+/* Stock metrics grid */
 
 .iu-stock-grid {
     display: grid;
@@ -245,7 +250,7 @@ flex: 0 1 auto	0	1	auto	Don't grow, can shrink, starting from its natural size *
     color: var(--clr-text-primary);
 }
 
-/* ─── Price row ──────────────────────────────────────────────── */
+/* Price row */
 
 .iu-price-row {
     display: flex;
@@ -313,7 +318,7 @@ flex: 0 1 auto	0	1	auto	Don't grow, can shrink, starting from its natural size *
     filter: none;
 }
 
-/* ─── Feedback ───────────────────────────────────────────────── */
+/* Feedback */
 
 .iu-feedback {
     margin-top: 7px;
@@ -324,7 +329,7 @@ flex: 0 1 auto	0	1	auto	Don't grow, can shrink, starting from its natural size *
 .iu-feedback--success { color: var(--clr-status-pos-fg); }
 .iu-feedback--error   { color: var(--clr-status-neg-fg); }
 
-/* ─── Empty / loading states ─────────────────────────────────── */
+/* Empty / loading states  */
 
 .iu-empty {
     color: var(--clr-text-secondary);
@@ -334,7 +339,7 @@ flex: 0 1 auto	0	1	auto	Don't grow, can shrink, starting from its natural size *
 }
 .iu-empty--error { color: var(--clr-danger); }
 
-/* ─── Stock update history ───────────────────────────────────── */
+/*  Stock update history */
 
 .iu-history {
     border-top: 1px solid var(--clr-border);

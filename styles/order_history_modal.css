@@ -19,7 +19,7 @@
     flex-direction: column;
 }
 
-/* ─── Two-panel body ─────────────────────────────────────────── */
+/* Two-panel body */
 
 .oh-body {
     display: grid;
@@ -31,7 +31,7 @@
     min-height: 0;
 }
 
-/* ─── Left panel: order list ─────────────────────────────────── */
+/* Left panel: order list */
 
 .oh-list-panel {
     border-right: 1px solid var(--clr-border);
@@ -52,7 +52,7 @@
     min-height: 0;
 }
 
-/* ─── Attribute-aware search ──────────────────────────────────── */
+/*  Attribute-aware search  */
 
 .oh-search {
     flex: 0 0 auto;
@@ -238,6 +238,11 @@
 .oh-card--active {
     border-color: var(--clr-primary);
     background-color: var(--clr-surface-alt);
+}
+/* Keyboard cursor — highlight only, bill not yet opened. */
+.oh-card.list-cursor {
+    border-color: var(--clr-primary);
+    box-shadow: 0 0 0 2px color-mix(in srgb, var(--clr-primary) 8%, transparent);
 }
 
 /* Top row: date on left, order ID on right */

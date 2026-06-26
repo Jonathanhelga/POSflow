@@ -7,6 +7,7 @@ import { showToast } from "./toast";
 import { updateLocalStock, refreshGrid } from './search_item';
 import { refreshSelectedItemDetail } from './manage-item';
 import { skeletonBar } from './skeleton';
+import { attachListKeyNav } from './listKeyNav';
 
 let isProcessing = false;
 let currentOrder = null;
@@ -17,6 +18,9 @@ let currentOrder = null;
 let allOrders = [];
 let activeFilters = [];
 let searchAttributes = [];
+// The orders currently rendered in the list (post-filter), in display order —
+// the source of truth for keyboard navigation's index lookups.
+let visibleOrders = [];
 
 // Fixed attributes always available, regardless of the custom-field library.
 const FIXED_ATTRIBUTES = [
@@ -135,11 +139,6 @@ function renderOrderList(orders) {
             isProcessing = false;
             btn.disabled = false;
             btn.textContent = 'View Details';
-            // setTimeout(() => {
-            //     isProcessing = false;
-            //     btn.disabled = false;
-            //     btn.textContent = 'View Details';
-            // }, 100);
         });
 
         card.querySelector('.oh-card__bottom-row').appendChild(btn);
@@ -428,6 +427,7 @@ function applyFilters() {
     const filtered = activeFilters.length
         ? allOrders.filter(order => activeFilters.every(f => orderMatchesFilter(order, f)))
         : allOrders;
+    visibleOrders = filtered;
     renderSearchCount(filtered.length);
     renderOrderList(filtered);
 }
@@ -651,6 +651,16 @@ export async function initOrderHistory(user) {
     document.getElementById('oh-search-attr').addEventListener('change', renderValueControl);
     document.getElementById('oh-search-add').addEventListener('click', addCurrentFilter);
     document.getElementById('oh-delete-btn').addEventListener('click', handleDeleteOrder);
+
+    // searchInput omitted: Enter inside the filter controls already adds a chip,
+    // so nav stays out of all form fields and only acts when focus is elsewhere.
+    attachListKeyNav({
+        scope:       document.getElementById('order-history-modal'),
+        container:   document.getElementById('oh-order-list'),
+        cardSelector: '.oh-card',
+        getItems:    () => visibleOrders,
+        onOpen:      (order, card) => viewOrderDetails(order, card),
+    });
 
     initPrintButton();
     initBillZoom();

@@ -86,6 +86,11 @@
     border-color: var(--clr-primary);
     background-color: var(--clr-surface-alt);
 }
+/* Keyboard cursor — highlight only, panel not yet opened. */
+.mi-card.list-cursor {
+    border-color: var(--clr-primary);
+    box-shadow: 0 0 0 2px color-mix(in srgb, var(--clr-primary) 8%, transparent);
+}
 .mi-card__top {
     display: flex;
     align-items: center;
