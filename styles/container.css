@@ -248,6 +248,19 @@
     background-color: var(--clr-focus-ring);
     color: #fff;
 }
+/* Visual separator between the sort badges and the category-filter badges. */
+.c-sort-bar__divider {
+    align-self: stretch;
+    width: 1px;
+    min-height: 1.5rem;
+    margin: 0 0.2rem;
+    background-color: var(--clr-border);
+}
+/* Dissolve the wrapper so its badges become flex children of the sort bar,
+   inheriting the same gap and wrapping behaviour. */
+.c-sort-bar__categories {
+    display: contents;
+}
 
 /* — Feature Buttons (Add New Item, Other Features) — */
 .c-actions__features {

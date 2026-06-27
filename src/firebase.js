@@ -155,6 +155,19 @@ export async function saveOrderFieldDefinitions(definitions, uid) {
     if (cachedUserProfile) cachedUserProfile.orderFieldLibrary = merged;
 }
 
+// Categories are a simple ownerId-scoped list stored on the user profile.
+// fetch returns the array (empty if unset); save overwrites it and keeps the
+// cached profile in sync so the dropdowns refresh without a re-fetch.
+export async function fetchCategories(uid) {
+    const profile = await fetchUserProfile(uid);
+    return Array.isArray(profile?.categories) ? profile.categories : [];
+}
+
+export async function saveCategories(categories, uid) {
+    await updateDoc(doc(db, "users", uid), { categories });
+    if (cachedUserProfile) cachedUserProfile.categories = categories;
+}
+
 export async function fetchCustomers(uid) {
     const q = query(
         collection(db, "customers"),

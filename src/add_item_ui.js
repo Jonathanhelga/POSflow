@@ -51,6 +51,7 @@ export function initInventoryForm() {
             stockLevel: parseFloat(document.getElementById('item-qty').value) || 0,
             minStockLevel: parseFloat(document.getElementById('min-stock-level').value) || 0,
             unit: document.getElementById('item-unit').value,
+            category: document.getElementById('item-category').value,
             supplier: document.getElementById('supplier-info').value.trim(),
             description: document.getElementById('js-description').value.trim(),
         };

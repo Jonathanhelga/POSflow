@@ -1,0 +1,137 @@
+/* Manage Categories modal.
+   Inherits the centered Add-Item modal frame (pale-green panel, slate borders)
+   and the Manage-Item card/eyebrow system, so it reads as part of the family. */
+
+#manage-categories-modal {
+    align-items: center;
+    justify-content: center;
+    padding: 2.5rem;
+}
+
+#c-modal-manage-categories {
+    width: 100%;
+    max-width: 520px;
+    max-height: 85vh;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    border-radius: var(--radius);
+    background-color: var(--clr-modal-panel);
+    box-shadow: var(--shadow);
+}
+
+#c-modal-manage-categories .c-modal__header {
+    padding: 1rem 2.25rem;
+    border-bottom: 1px solid var(--clr-border);
+}
+#c-modal-manage-categories .c-modal__title {
+    font-size: 1.4rem;
+    font-weight: 700;
+    margin: 0;
+    letter-spacing: 0.01em;
+}
+
+#c-modal-manage-categories .c-modal__body {
+    padding: 1.75rem 2.25rem 2rem;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+}
+
+/*  Add row: name input + Add button (matches the Add-Item inputs/actions)  */
+
+.mc-add-form {
+    display: flex;
+    gap: 0.7rem;
+}
+#c-modal-manage-categories .mc-add-form .c-field__input {
+    flex: 1;
+    min-width: 0;
+    padding: 12px 14px;
+    font-size: 1rem;
+    background-color: var(--clr-input-bg);
+}
+#c-modal-manage-categories .mc-add-form .btn {
+    padding: 11px 22px;
+    background-color: var(--clr-success);
+    color: white;
+    white-space: nowrap;
+}
+
+.mc-feedback {
+    min-height: 1.1em;
+    margin: 0.6rem 0 0;
+    font-size: 0.78rem;
+    font-weight: 500;
+    color: var(--clr-status-neg-fg);
+}
+
+/*  List of categories (cards mirror .mi-card)  */
+
+.mc-eyebrow {
+    margin: 1.5rem 0 0.8rem;
+    font-size: 0.72rem;
+    font-weight: 700;
+    color: var(--clr-text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.mc-list {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 0.7rem;
+    overflow-y: auto;
+}
+
+.mc-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.7rem;
+    padding: 14px 16px;
+    border: 1px solid var(--clr-border);
+    border-radius: var(--radius);
+    background: var(--clr-panel);
+    transition: border-color 0.15s;
+}
+.mc-item:hover { border-color: var(--clr-primary); }
+
+.mc-item__name {
+    flex: 1;
+    min-width: 0;
+    font-weight: 600;
+    font-size: 1rem;
+    color: var(--clr-text-primary);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.mc-item__delete {
+    flex-shrink: 0;
+    width: 32px;
+    height: 32px;
+    border: none;
+    border-radius: 50%;
+    background: transparent;
+    color: var(--clr-text-secondary);
+    font-size: 22px;
+    line-height: 1;
+    cursor: pointer;
+    transition: background-color 0.2s ease, color 0.2s ease;
+}
+@media (hover: hover) {
+    .mc-item__delete:hover {
+        background: var(--clr-status-neg-bg);
+        color: var(--clr-status-neg-fg);
+    }
+}
+
+.mc-empty {
+    color: var(--clr-text-secondary);
+    font-size: 0.9rem;
+    text-align: center;
+    padding: 1.5rem 0;
+}

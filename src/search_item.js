@@ -1,11 +1,15 @@
 import { auth, fetchInventory, db } from './firebase';
 // import { doc, updateDoc, serverTimestamp } from 'firebase/firestore';
 import { renderItemGrid } from './item_ui';
+import { getCategories } from './categories';
 
 export let allItems = [];
 let searchTimeout = 0;
 let currentQuery = '';
 let currentSortMode = 'color';
+// Active category filter, or null when showing every category. Independent of
+// the sort mode above — sort controls order, this controls which items show.
+let currentCategoryFilter = null;
 function normalizeText(text){ return String(text || '').toLowerCase().trim(); }
 
 // Sort a copy of the items by the chosen mode. 'color' groups items by their
@@ -30,10 +34,14 @@ function sortItems(items, mode){
     return sorted;
 }
 
-// Single render path: apply the active search filter, then the active sort.
+// Single render path: apply the active search filter, then the category filter,
+// then the active sort.
 export function refreshGrid(){
     const search_stats_element = document.getElementById('js-search-stats');
-    const filtered = searchedItems(currentQuery);
+    let filtered = searchedItems(currentQuery);
+    if (currentCategoryFilter) {
+        filtered = filtered.filter(item => item.category === currentCategoryFilter);
+    }
     search_stats_element.textContent = filtered.length;
     renderItemGrid(sortItems(filtered, currentSortMode));
 }
@@ -91,14 +99,60 @@ export function initializeSearch(){
 function handleSortClick(event){
     const button = event.currentTarget;
     currentSortMode = button.dataset.sort;
-    document.querySelectorAll('.c-sort-bar__btn')
+    document.querySelectorAll('.c-sort-bar__btn[data-sort]')
         .forEach(btn => btn.classList.toggle('is-active', btn === button));
     refreshGrid();
 }
 
 export function initSort(){
-    document.querySelectorAll('.c-sort-bar__btn')
+    document.querySelectorAll('.c-sort-bar__btn[data-sort]')
         .forEach(btn => btn.addEventListener('click', handleSortClick));
+}
+
+// Toggle a category filter on/off. Tapping the active one clears it (show all);
+// tapping another switches to it. Mutually exclusive among the category badges.
+function handleCategoryFilterClick(cat, button){
+    if (currentCategoryFilter === cat) {
+        currentCategoryFilter = null;
+        button.classList.remove('is-active');
+    } else {
+        currentCategoryFilter = cat;
+        document.querySelectorAll('.c-sort-bar__btn--category')
+            .forEach(btn => btn.classList.toggle('is-active', btn === button));
+    }
+    refreshGrid();
+}
+
+// Render one filter badge per owner category into the sort bar. Called whenever
+// the canonical category list changes (initial load, add, delete). Mirrors how
+// populateCategorySelects keeps the dropdowns in sync.
+export function renderCategoryFilters(){
+    const container = document.getElementById('js-category-filters');
+    if (!container) return;
+    const categories = getCategories();
+
+    // If the active filter's category was deleted, drop the filter and re-render
+    // the grid so stale-filtered items don't linger.
+    if (currentCategoryFilter && !categories.includes(currentCategoryFilter)) {
+        currentCategoryFilter = null;
+        refreshGrid();
+    }
+
+    const divider = document.getElementById('js-sort-bar-divider');
+    if (divider) divider.hidden = categories.length === 0;
+
+    const frag = document.createDocumentFragment();
+    categories.forEach(cat => {
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'c-sort-bar__btn c-sort-bar__btn--category';
+        btn.dataset.category = cat;
+        btn.textContent = cat;
+        btn.classList.toggle('is-active', cat === currentCategoryFilter);
+        btn.addEventListener('click', () => handleCategoryFilterClick(cat, btn));
+        frag.appendChild(btn);
+    });
+    container.replaceChildren(frag);
 }
 
 //   1. Listen on document so no manual focus is required

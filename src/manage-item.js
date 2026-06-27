@@ -8,6 +8,7 @@ import { requireAdminPin } from './admin_pin';
 import { showToast } from "./toast";
 import { skeletonBar } from './skeleton';
 import { attachListKeyNav } from './listKeyNav';
+import { selectCategoryValue } from './categories';
 let filteredItems  = [];
 const selection    = createSelection();
 let selectedTheme  = 'primary';
@@ -172,6 +173,7 @@ function populateDetail(item) {
     document.getElementById('mi-edit-sell').value     = item.sellPrice ?? '';
     document.getElementById('mi-edit-min').value      = item.minStockLevel ?? '';
     document.getElementById('mi-edit-supplier').value = item.supplier ?? '';
+    selectCategoryValue(document.getElementById('mi-edit-category'), item.category);
     setActiveTheme(item.tagColor || 'primary');
 
     clearFeedback();
@@ -187,6 +189,7 @@ async function handleSave() {
     const sellPrice     = Number(document.getElementById('mi-edit-sell').value);
     const minStockLevel = parseFloat(document.getElementById('mi-edit-min').value);
     const supplier      = document.getElementById('mi-edit-supplier').value.trim();
+    const category      = document.getElementById('mi-edit-category').value;
     const tagColor      = selectedTheme;
 
     if (!Number.isFinite(costPrice) || costPrice < 0) {
@@ -202,7 +205,7 @@ async function handleSave() {
         return;
     }
 
-    const fields = { costPrice, sellPrice, minStockLevel, supplier, tagColor };
+    const fields = { costPrice, sellPrice, minStockLevel, supplier, category, tagColor };
 
     const btn = document.getElementById('mi-save-btn');
     btn.disabled    = true;

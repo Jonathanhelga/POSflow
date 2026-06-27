@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Plan: Item Categories</title>
+<style>
+  :root {
+    --clr-bg-app: antiquewhite;
+    --clr-panel: #ffffff;
+    --clr-surface: #f8fafc;
+    --clr-primary: #98d2e6;
+    --clr-success: #a9d597;
+    --clr-danger: #f18a7a;
+    --clr-text-primary: #1f2937;
+    --clr-text-secondary: #6b7280;
+    --clr-border: #d1d5db;
+    --clr-pos-bg: #dcfce7;
+    --clr-pos-fg: #166534;
+    --clr-neg-bg: #fee2e2;
+    --clr-neg-fg: #991b1b;
+    --radius: 12px;
+    --font-sans: 'Geist', -apple-system, BlinkMacSystemFont, sans-serif;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: var(--font-sans);
+    background: var(--clr-bg-app);
+    color: var(--clr-text-primary);
+    line-height: 1.5;
+    padding: 32px 20px 80px;
+  }
+  .wrap { max-width: 860px; margin: 0 auto; }
+  header.hero { margin-bottom: 28px; }
+  .kicker {
+    text-transform: uppercase; letter-spacing: 0.08em; font-size: 0.72rem;
+    font-weight: 700; color: var(--clr-text-secondary); margin-bottom: 6px;
+  }
+  h1 { font-size: 1.85rem; line-height: 1.2; margin-bottom: 10px; }
+  .sub { color: var(--clr-text-secondary); font-size: 1rem; max-width: 60ch; }
+  section { margin-top: 26px; }
+  h2 {
+    font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.07em;
+    color: var(--clr-text-secondary); font-weight: 700; margin-bottom: 12px;
+  }
+  .card {
+    background: var(--clr-panel); border: 1px solid var(--clr-border);
+    border-radius: var(--radius); padding: 18px 20px;
+    box-shadow: 0 1px 3px rgba(18,24,40,0.06);
+  }
+  .card + .card { margin-top: 12px; }
+  .goal { border-left: 4px solid var(--clr-success); }
+  .verified-tag {
+    display: inline-flex; align-items: center; gap: 5px;
+    background: var(--clr-pos-bg); color: var(--clr-pos-fg);
+    font-size: 0.7rem; font-weight: 700; padding: 2px 8px; border-radius: 999px;
+    text-transform: uppercase; letter-spacing: 0.04em;
+  }
+  ol.steps { list-style: none; counter-reset: step; }
+  ol.steps > li {
+    counter-increment: step; position: relative; padding: 14px 16px 14px 52px;
+    background: var(--clr-panel); border: 1px solid var(--clr-border);
+    border-radius: var(--radius); margin-bottom: 10px;
+  }
+  ol.steps > li::before {
+    content: counter(step); position: absolute; left: 14px; top: 14px;
+    width: 26px; height: 26px; border-radius: 50%;
+    background: var(--clr-primary); color: #0b3a47; font-weight: 700;
+    display: flex; align-items: center; justify-content: center; font-size: 0.85rem;
+  }
+  ol.steps b { display: block; margin-bottom: 2px; }
+  code {
+    background: var(--clr-surface); border: 1px solid var(--clr-border);
+    border-radius: 6px; padding: 1px 6px; font-size: 0.85em;
+    font-family: ui-monospace, 'SF Mono', Menlo, monospace;
+  }
+  .files { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
+  .files th, .files td { text-align: left; padding: 9px 10px; border-bottom: 1px solid var(--clr-border); vertical-align: top; }
+  .files th { color: var(--clr-text-secondary); font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; }
+  .files td:first-child { white-space: nowrap; }
+  ul.risks { list-style: none; }
+  ul.risks li { padding: 8px 0 8px 24px; position: relative; border-bottom: 1px dashed var(--clr-border); }
+  ul.risks li:last-child { border-bottom: none; }
+  ul.risks li::before { content: "▹"; position: absolute; left: 4px; color: var(--clr-primary); font-weight: 700; }
+  .decision { border-top: 4px solid var(--clr-primary); }
+  .opt-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 14px 0; }
+  @media (max-width: 620px) { .opt-grid { grid-template-columns: 1fr; } }
+  .opt {
+    border: 1px solid var(--clr-border); border-radius: var(--radius);
+    padding: 14px; min-width: 0; background: var(--clr-surface);
+  }
+  .opt h3 { font-size: 0.98rem; margin-bottom: 6px; }
+  .opt .rec { display: inline-block; background: var(--clr-pos-bg); color: var(--clr-pos-fg); font-size: 0.65rem; font-weight: 700; padding: 1px 7px; border-radius: 999px; margin-left: 6px; text-transform: uppercase; }
+  .opt p { font-size: 0.85rem; color: var(--clr-text-secondary); margin-bottom: 6px; }
+  .opt .cost { font-size: 0.8rem; color: var(--clr-neg-fg); }
+  form.qa { margin-top: 8px; }
+  form.qa label {
+    display: flex; align-items: center; gap: 9px; padding: 10px 12px;
+    border: 1px solid var(--clr-border); border-radius: var(--radius);
+    margin-bottom: 8px; cursor: pointer; background: var(--clr-panel);
+  }
+  form.qa label:hover { border-color: var(--clr-primary); }
+  form.qa input[type="radio"] { width: 17px; height: 17px; accent-color: #2f855a; }
+  .queue-btn {
+    background: var(--clr-success); color: #14401a; border: none;
+    border-radius: var(--radius); padding: 10px 18px; font-weight: 700;
+    font-size: 0.9rem; cursor: pointer; font-family: inherit;
+  }
+  .queue-btn:active { filter: brightness(0.9); }
+  .hint { font-size: 0.82rem; color: var(--clr-text-secondary); margin-top: 8px; font-style: italic; }
+  .annotate-note {
+    background: var(--clr-surface); border: 1px dashed var(--clr-border);
+    border-radius: var(--radius); padding: 12px 14px; font-size: 0.85rem;
+    color: var(--clr-text-secondary); margin-top: 26px;
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="hero">
+    <div class="kicker">Feature Plan · feature-builder agent</div>
+    <h1>Item Categories</h1>
+    <p class="sub">Let users tag inventory items with a category, edit it later, and group the POS grid by category so items are faster to find. Everything below was verified against your current code.</p>
+  </header>
+
+  <section>
+    <h2>Goal &amp; current state</h2>
+    <div class="card goal">
+      <p><b>Goal:</b> Add a <b>category</b> to each item, editable after creation, and add a <b>"Category" grouping</b> to the existing Sort bar.</p>
+    </div>
+    <div class="card">
+      <p style="margin-bottom:10px;"><span class="verified-tag">✓ verified in code</span></p>
+      <ul class="risks">
+        <li>Items are created in the Add-Item modal; <code>add_item_ui.js</code> builds <code>formData</code> and <code>submitItemData()</code> spreads it straight into <code>/inventory</code>. No <code>category</code> field exists today.</li>
+        <li>Items are edited in Manage Item; <code>manage-item.js → handleSave()</code> currently saves only <code>costPrice, sellPrice, minStockLevel, supplier, tagColor</code>.</li>
+        <li><b>The "Sort by" bar lives on the main POS screen</b> (<code>.c-sort-bar</code> in index.html), driven by <code>sortItems()</code> in <code>search_item.js</code> with modes <code>color / name / price / stock</code>. The Manage Item modal itself only has a <em>search</em> box, no sort control. (See Decision 2.)</li>
+      </ul>
+    </div>
+  </section>
+
+  <section>
+    <h2>Proposed approach</h2>
+    <ol class="steps">
+      <li><b>Add a Category field to the Add-Item form</b>A text input backed by a <code>&lt;datalist&gt;</code> of existing categories, added to the modal markup and to <code>formData</code> in <code>add_item_ui.js</code>.</li>
+      <li><b>Make Category editable in Manage Item</b>Show it in the detail panel and include <code>category</code> in the <code>handleSave()</code> fields, plus a read-only line in the overview.</li>
+      <li><b>Add a "Category" button to the main Sort bar</b>New <code>&lt;button data-sort="category"&gt;</code> and a matching branch in <code>sortItems()</code> that groups by category, then by name within each group.</li>
+      <li><b>Treat blanks as "Uncategorized"</b>Old items with no category sort to a single trailing group, so nothing breaks.</li>
+    </ol>
+  </section>
+
+  <section>
+    <h2>Files touched</h2>
+    <div class="card" style="padding:6px 14px;">
+      <table class="files">
+        <thead><tr><th>File</th><th>Change</th></tr></thead>
+        <tbody>
+          <tr><td><code>index.html</code></td><td>Category field in Add-Item modal + Manage-Item panel; new "Category" sort button; a shared <code>&lt;datalist&gt;</code>.</td></tr>
+          <tr><td><code>add_item_ui.js</code></td><td>Add <code>category</code> to <code>formData</code>.</td></tr>
+          <tr><td><code>manage-item.js</code></td><td>Populate + save <code>category</code>; show in overview.</td></tr>
+          <tr><td><code>search_item.js</code></td><td>New <code>category</code> branch in <code>sortItems()</code>; build datalist from <code>allItems</code>.</td></tr>
+          <tr><td><code>manage_item_modal.css</code> / <code>add_item_modal.css</code></td><td>Minor: reuse existing <code>.c-field</code> styles, little or no new CSS.</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="card" style="margin-top:12px;">
+      <ul class="risks">
+        <li><b>No <code>firestore.rules</code> change.</b> Category is just another field on the existing <code>/inventory</code> docs; <code>ownerId</code> isolation is untouched.</li>
+        <li><b>No new Firestore index.</b> Sorting/grouping happens in-memory on the client, like the other sort modes.</li>
+      </ul>
+    </div>
+  </section>
+
+  <section>
+    <h2>Decision 1 — How are categories defined?</h2>
+    <div class="card decision">
+      <div style="background:var(--clr-surface);border:1px solid var(--clr-border);border-radius:var(--radius);padding:14px 16px;margin-bottom:16px;">
+        <p style="font-size:0.92rem;"><b>What a "category" actually is:</b> just a label that groups similar items, like the aisles in a shop &mdash; "Drinks", "Snacks", "Stationery". Your question is really: <b>who decides that list of labels?</b></p>
+        <p style="font-size:0.92rem;margin-top:9px;"><b>The unlock &mdash; it isn't either/or.</b> The recommended option is a <b>hybrid</b>: <i>you</i> type your own category (so you never have to plan them in advance), and the app <b>remembers each one and suggests it next time</b>. So it's as flexible as free text, but stays as tidy as a fixed list &mdash; you won't end up with "Drinks", "drink", and "DRINKS" as three separate things.</p>
+      </div>
+      <div class="opt-grid">
+        <div class="opt">
+          <h3>A · You type them, app remembers <span class="rec">recommended</span></h3>
+          <p>A text box that autocompletes from categories you've already used (via <code>&lt;datalist&gt;</code>). Type a brand-new one anytime; reuse old ones with one tap.</p>
+          <p class="cost">Cost: tiny. No new collection, no setup screen. Flexible <em>and</em> stays consistent.</p>
+        </div>
+        <div class="opt">
+          <h3>B · Managed fixed list</h3>
+          <p>A separate place to define the allowed categories, then pick from a dropdown only.</p>
+          <p class="cost">Cost: higher. Needs a categories collection + a management UI. Cleaner data, less flexible for a fast-moving bazaar.</p>
+        </div>
+      </div>
+      <form class="qa" data-lavish-question="category-model"
+            onsubmit="event.preventDefault(); const c = new FormData(event.currentTarget).get('cat'); if (c) window.lavish.queuePrompt('For item categories, use approach: ' + c, { tag: 'decision', text: 'Category model: ' + c, element: event.currentTarget, data: { question: 'category-model', answer: c } });">
+        <label><input type="radio" name="cat" value="A — Free text + datalist suggestions" checked /> A — Free text + datalist suggestions (recommended)</label>
+        <label><input type="radio" name="cat" value="B — Managed fixed list" /> B — Managed fixed list</label>
+        <button type="submit" class="queue-btn">Queue this answer</button>
+      </form>
+    </div>
+  </section>
+
+  <section>
+    <h2>Decision 2 — Where does "Sort by Category" go?</h2>
+    <div class="card decision">
+      <p style="font-size:0.9rem; margin-bottom:4px;">You pictured this <em>inside Manage Item</em>, but in the real code the Sort bar is on the <b>main POS screen</b>. Two ways to honour your intent:</p>
+      <div class="opt-grid">
+        <div class="opt">
+          <h3>A · Add to the main Sort bar <span class="rec">recommended</span></h3>
+          <p>Adds "Category" next to Color / Name / Price / Stock, grouping the POS grid you actually sell from.</p>
+          <p class="cost">Cost: tiny. Matches how sorting already works.</p>
+        </div>
+        <div class="opt">
+          <h3>B · Also add a filter inside Manage Item</h3>
+          <p>A category filter in the Manage Item modal too, for back-office editing.</p>
+          <p class="cost">Cost: a bit more. Can be a fast follow-up after A.</p>
+        </div>
+      </div>
+      <form class="qa" data-lavish-question="sort-placement"
+            onsubmit="event.preventDefault(); const c = new FormData(event.currentTarget).get('place'); if (c) window.lavish.queuePrompt('For sort-by-category placement: ' + c, { tag: 'decision', text: 'Sort placement: ' + c, element: event.currentTarget, data: { question: 'sort-placement', answer: c } });">
+        <label><input type="radio" name="place" value="A — main POS Sort bar only" checked /> A — Main POS Sort bar only (recommended)</label>
+        <label><input type="radio" name="place" value="B — main Sort bar now + Manage Item filter as follow-up" /> B — Sort bar now, Manage Item filter as a follow-up</label>
+        <button type="submit" class="queue-btn">Queue this answer</button>
+      </form>
+    </div>
+  </section>
+
+  <div class="annotate-note">
+    <b>How to use this page:</b> pick your answers above and hit "Queue this answer" for each. You can also click or highlight any text to leave a freehand note. When you're done, press <b>Send to Agent</b> and I'll build exactly what you approved, then verify it in the browser.
+    <br /><br />
+    <span style="font-size:0.78rem;">Design source: your POS app's own tokens from <code>styles/variables.css</code> (so this preview matches the product).</span>
+  </div>
+</div>
+</body>
+</html>
