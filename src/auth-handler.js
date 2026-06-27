@@ -236,11 +236,12 @@ async function submitSettingForm(){
     }
 }
 export function initUserLogin() {
+    const loginForm = document.getElementById('login-form');
     const loginButton = document.getElementById('js-login-submit');
     const emailInput = document.getElementById('js-login-identifier');
     const passwordInput = document.getElementById('js-login-password');
-    
-    if (!loginButton || !emailInput || !passwordInput) return;
+
+    if (!loginForm || !loginButton || !emailInput || !passwordInput) return;
 
     const validate = () => {
         const hasValues = emailInput.value.trim() && passwordInput.value.trim();
@@ -251,7 +252,7 @@ export function initUserLogin() {
     passwordInput.addEventListener('input', validate);
     validate(); 
 
-    loginButton.addEventListener('click', async (e) => {
+    loginForm.addEventListener('submit', async (e) => {
         e.preventDefault();
         
         const email = emailInput.value.trim();
