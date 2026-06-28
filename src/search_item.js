@@ -2,6 +2,7 @@ import { auth, fetchInventory, db } from './firebase';
 // import { doc, updateDoc, serverTimestamp } from 'firebase/firestore';
 import { renderItemGrid } from './item_ui';
 import { getCategories } from './categories';
+import { getItemCategories } from './item_categories';
 
 export let allItems = [];
 let searchTimeout = 0;
@@ -40,7 +41,7 @@ export function refreshGrid(){
     const search_stats_element = document.getElementById('js-search-stats');
     let filtered = searchedItems(currentQuery);
     if (currentCategoryFilter) {
-        filtered = filtered.filter(item => item.category === currentCategoryFilter);
+        filtered = filtered.filter(item => getItemCategories(item).includes(currentCategoryFilter));
     }
     search_stats_element.textContent = filtered.length;
     renderItemGrid(sortItems(filtered, currentSortMode));
@@ -124,8 +125,7 @@ function handleCategoryFilterClick(cat, button){
 }
 
 // Render one filter badge per owner category into the sort bar. Called whenever
-// the canonical category list changes (initial load, add, delete). Mirrors how
-// populateCategorySelects keeps the dropdowns in sync.
+// the canonical category list changes (initial load, add, delete).
 export function renderCategoryFilters(){
     const container = document.getElementById('js-category-filters');
     if (!container) return;

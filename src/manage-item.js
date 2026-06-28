@@ -8,10 +8,12 @@ import { requireAdminPin } from './admin_pin';
 import { showToast } from "./toast";
 import { skeletonBar } from './skeleton';
 import { attachListKeyNav } from './listKeyNav';
-import { selectCategoryValue } from './categories';
+import { getCategories } from './categories';
+import { getItemCategories } from './item_categories';
 let filteredItems  = [];
 const selection    = createSelection();
 let selectedTheme  = 'primary';
+let selectedCategories = new Set();
 
 const TAG_SWATCH = {
     primary:    '#4E7397',
@@ -61,6 +63,41 @@ function setActiveTheme(token) {
     });
 }
 
+
+function buildCategoryChips() {
+    const container = document.getElementById('mi-edit-categories');
+    const library = getCategories();
+    const names = [...new Set([...library, ...selectedCategories])];
+
+    const frag = document.createDocumentFragment();
+    names.forEach(name => {
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'mi-chip';
+        btn.dataset.category = name;
+        btn.textContent = name;
+        btn.classList.toggle('mi-chip--active', selectedCategories.has(name));
+        if (!library.includes(name)) btn.classList.add('mi-chip--orphan');
+        btn.addEventListener('click', () => toggleCategory(name));
+        frag.appendChild(btn);
+    });
+    container.replaceChildren(frag);
+
+    if (names.length === 0) {
+        const hint = document.createElement('span');
+        hint.className = 'mi-chip-empty';
+        hint.textContent = 'No categories yet — add some in Manage Categories.';
+        container.appendChild(hint);
+    }
+}
+
+function toggleCategory(name) {
+    if (selectedCategories.has(name)) selectedCategories.delete(name);
+    else selectedCategories.add(name);
+    document.querySelector(`#mi-edit-categories .mi-chip[data-category="${name}"]`)
+        ?.classList.toggle('mi-chip--active');
+}
+
 function formatTimestamp(ts) {
     if (!ts) return '—';
     // Firestore Timestamp has toDate(); fall back to raw Date/string.
@@ -70,8 +107,6 @@ function formatTimestamp(ts) {
         day: '2-digit', month: 'short', year: 'numeric',
     }).format(date);
 }
-
-//  Render item list 
 
 
 function buildItemSkeleton(count = 6) {
@@ -152,8 +187,8 @@ export function refreshSelectedItemDetail() {
 }
 
 function populateDetail(item) {
-    // document.getElementById('mi-placeholder').classList.add('is-hidden');
-    // document.getElementById('mi-detail-view').classList.remove('is-hidden');
+    document.getElementById('mi-placeholder').classList.add('is-hidden');
+    document.getElementById('mi-detail-view').classList.remove('is-hidden');
     document.getElementById('mi-save-btn').disabled = false;
     document.getElementById('mi-delete-btn').disabled = false;
 
@@ -173,7 +208,8 @@ function populateDetail(item) {
     document.getElementById('mi-edit-sell').value     = item.sellPrice ?? '';
     document.getElementById('mi-edit-min').value      = item.minStockLevel ?? '';
     document.getElementById('mi-edit-supplier').value = item.supplier ?? '';
-    selectCategoryValue(document.getElementById('mi-edit-category'), item.category);
+    selectedCategories = new Set(getItemCategories(item));
+    buildCategoryChips();
     setActiveTheme(item.tagColor || 'primary');
 
     clearFeedback();
@@ -189,7 +225,7 @@ async function handleSave() {
     const sellPrice     = Number(document.getElementById('mi-edit-sell').value);
     const minStockLevel = parseFloat(document.getElementById('mi-edit-min').value);
     const supplier      = document.getElementById('mi-edit-supplier').value.trim();
-    const category      = document.getElementById('mi-edit-category').value;
+    const categories    = [...selectedCategories];
     const tagColor      = selectedTheme;
 
     if (!Number.isFinite(costPrice) || costPrice < 0) {
@@ -205,7 +241,7 @@ async function handleSave() {
         return;
     }
 
-    const fields = { costPrice, sellPrice, minStockLevel, supplier, category, tagColor };
+    const fields = { costPrice, sellPrice, minStockLevel, supplier, categories, tagColor };
 
     const btn = document.getElementById('mi-save-btn');
     btn.disabled    = true;
@@ -264,7 +300,6 @@ async function handleDelete() {
         document.getElementById('mi-placeholder').classList.remove('is-hidden');
         document.getElementById('mi-save-btn').disabled = true;
         renderItemList_Manage(filteredItems = filteredItems.filter(i => i.id !== item.id));
-        // showFeedback('Item deleted.', 'success');
         showToast(`Successfully delete item ${item.id}`);
         btn.textContent = 'Delete Item';
     } catch (err) {
@@ -295,10 +330,10 @@ async function openManageItem(user) {
     if (!user) return;
 
     selection.clear();
-    // document.getElementById('mi-detail-view').classList.add('is-hidden');
+    document.getElementById('mi-detail-view').classList.add('is-hidden');
     document.getElementById('mi-save-btn').disabled = true;
     document.getElementById('mi-delete-btn').disabled = true;
-    // document.getElementById('mi-placeholder').classList.remove('is-hidden');
+    document.getElementById('mi-placeholder').classList.remove('is-hidden');
     document.getElementById('mi-search').value = '';
     console.log("open Manage Item");
     

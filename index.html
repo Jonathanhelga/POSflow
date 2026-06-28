@@ -352,11 +352,7 @@
                   <label class="c-field__label" for="sku">SKU</label>
                   <input class="c-field__input" type="text" id="sku" placeholder="SKU" />
                 </div>
-                <div class="c-field">
-                  <label class="c-field__label" for="item-category">Category</label>
-                  <select class="c-field__select js-category-select" id="item-category"></select>
-                </div>
-                <div class="c-field c-field--full">
+                <div class="c-field c-field">
                   <label class="c-field__label" for="item-name">Item Name</label>
                   <input class="c-field__input" type="text" id="item-name" placeholder="Item Name" />
                 </div>
@@ -860,8 +856,10 @@
           <!-- Right: Detail + Update Form -->
           <div class="iu-detail-panel">
             <!-- Detail view (hidden until item selected) -->
+            <div id="iu-placeholder" class="iu-placeholder">
+              <p>← Select an item to view and update its stock</p>
+            </div>
             <div id="iu-detail-view" class="iu-detail-view">
-
               <!-- Item header -->
               <div class="iu-detail-header">
                 <div id="iu-detail-tag" class="iu-detail-tag iu-tag--neutral"></div>
@@ -928,7 +926,6 @@
         </div>
       </div>
     </div>
-
     <div id="manage-item-modal" class="c-modal c-modal--center is-hidden">
       <div class="c-modal__panel" id="c-modal-manage-item">
         <header class="c-modal__header">
@@ -949,13 +946,12 @@
           <!-- Right: Overview + Edit -->
           <div class="mi-detail-panel">
 
-            <!-- Placeholder (shown until an item is selected) -->
-            <!-- <div id="mi-placeholder" class="mi-placeholder">
+            <div id="mi-placeholder" class="mi-placeholder">
               <p>← Select an item to view and edit its details</p>
-            </div> -->
+            </div>
 
             <!-- Detail view (hidden until item selected) -->
-            <div id="mi-detail-view" class="mi-detail-view">
+            <div id="mi-detail-view" class="mi-detail-view is-hidden">
 
               <!-- Item header -->
               <div class="mi-detail-header">
@@ -1017,8 +1013,8 @@
                     <input type="text" id="mi-edit-supplier" class="mi-field__input" maxlength="255" placeholder="e.g., PT. FreshGoods Supplier" />
                   </div>
                   <div class="mi-field mi-field--full">
-                    <label class="mi-field__label" for="mi-edit-category">Category</label>
-                    <select id="mi-edit-category" class="mi-field__input js-category-select"></select>
+                    <span class="mi-field__label">Categories</span>
+                    <div id="mi-edit-categories" class="mi-chip-row"></div>
                   </div>
                   <div class="mi-field">
                     <span class="mi-field__label">Button Theme</span>
@@ -1026,12 +1022,11 @@
                   </div>
                 </div>
               </div>
-
+                <p id="mi-feedback" class="mi-feedback"></p>
             </div>
 
             <!-- Footer: always pinned at the bottom of the panel -->
             <div id="mi-footer" class="mi-edit__footer">
-              <p id="mi-feedback" class="mi-feedback"></p>
               <button type="button" id="mi-delete-btn" class="btn btn--danger mi-delete-btn" disabled>Delete Item</button>
               <button type="button" id="mi-save-btn" class="btn mi-save-btn" disabled>Save Changes</button>
             </div>

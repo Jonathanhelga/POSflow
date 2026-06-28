@@ -164,7 +164,7 @@ flex: 0  1 auto	0	1	auto	Don't grow, can shrink, starting from its natural size
 }
 
 /* Empty state */
-.iu-empty-state {
+/* .iu-empty-state {
     flex: 1;
     display: flex;
     align-items: center;
@@ -174,7 +174,19 @@ flex: 0  1 auto	0	1	auto	Don't grow, can shrink, starting from its natural size
     text-align: center;
     padding: 2rem;
 }
-.iu-empty-state.is-hidden { display: none; }
+.iu-empty-state.is-hidden { display: none; } */
+
+.iu-placeholder {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--clr-text-secondary);
+    font-size: 0.875rem;
+    text-align: center;
+    padding: 2rem;
+}
+.iu-placeholder.is-hidden { display: none; }
 
 /* Detail view */
 .iu-detail-view {

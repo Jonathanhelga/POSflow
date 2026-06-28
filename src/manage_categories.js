@@ -74,7 +74,7 @@ async function handleAdd(e) {
 async function handleDelete(cat) {
     const confirmed = await showConfirm({
         title: 'Delete category?',
-        message: `Remove "${cat}"? Items already using it keep the label; you just won't be able to pick it for new items.`,
+        message: `Remove "${cat}"? Items already using it keep the label. You just won't be able to pick it for new items.`,
         confirmText: 'Delete',
         danger: true,
     });

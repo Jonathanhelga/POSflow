@@ -318,6 +318,40 @@
     box-shadow: 0 0 0 2px var(--clr-panel), 0 0 0 4px var(--clr-primary);
 }
 
+/* ─── Category chips (multi-select) ──────────────────────────── */
+
+.mi-chip-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    padding: 2px 0;
+}
+.mi-chip {
+    padding: 5px 12px;
+    border-radius: 999px;                 /* pill */
+    border: 1px solid var(--clr-border);
+    background: var(--clr-input-bg);
+    color: var(--clr-text-secondary);
+    font-size: 0.85rem;
+    line-height: 1.2;
+    cursor: pointer;
+    transition: background 0.12s, color 0.12s, box-shadow 0.12s, border-color 0.12s;
+}
+.mi-chip:hover { border-color: var(--clr-primary); }
+.mi-chip--active {
+    background: var(--clr-primary);
+    border-color: var(--clr-primary);
+    /* Fixed dark text: --clr-primary is light blue in BOTH themes, so the
+       theme-aware --clr-text-primary would wash out in dark mode. */
+    color: #1f2937;
+    box-shadow: 0 0 0 2px var(--clr-panel), 0 0 0 4px var(--clr-primary);
+}
+.mi-chip--orphan { border-style: dashed; font-style: italic; }
+.mi-chip-empty {
+    font-size: 0.85rem;
+    color: var(--clr-text-secondary);
+}
+
 /*  Footer: save + feedback  */
 
 .mi-edit__footer {

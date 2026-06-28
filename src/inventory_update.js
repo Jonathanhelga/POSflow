@@ -113,8 +113,8 @@ function selectItem(item, cardEl) {
 // ─── Populate right panel 
 
 function populateDetail(item) {
-    // document.getElementById('iu-empty-state').classList.add('is-hidden');
-    // document.getElementById('iu-detail-view').classList.remove('is-hidden');
+    document.getElementById('iu-placeholder').classList.add('is-hidden');
+    document.getElementById('iu-detail-view').classList.remove('is-hidden');
 
     const status = getStockStatus(item.stockLevel, item?.minStockLevel || 0);
     const badgeEl = document.getElementById('iu-status-badge');
@@ -280,7 +280,9 @@ async function openInventoryUpdate(user) {
 
     // Reset panel state
     selection.clear();
-    document.getElementById('iu-search').value          = '';
+    document.getElementById('iu-detail-view').classList.add('is-hidden');
+    document.getElementById('iu-placeholder').classList.remove('is-hidden');
+    document.getElementById('iu-search').value = '';
 
     document.getElementById('iu-item-list').replaceChildren(buildItemSkeleton_Inventory());
     try {
