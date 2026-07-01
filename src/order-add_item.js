@@ -46,9 +46,7 @@ export function openOrderItemModal(itemID) {
 
     toggleModal('order-item-modal');
 
-    // Move focus into the quantity field so the user can type a quantity and
-    // press Enter to submit immediately (HTML implicit form submission), instead
-    // of having to click OK. select() highlights the value for quick overwrite.
+    // Move focus into the quantity field so the user can type a quantity and  press Enter to submit immediately (HTML implicit form submission)
     const qtyInput = document.getElementById('js-order-qty');
     requestAnimationFrame(() => { qtyInput.focus(); qtyInput.select(); });
 }
@@ -90,6 +88,7 @@ export function addItemToOrder(itemID, itemName, itemPrice, costPrice, itemQuant
         if(orderedItems.length === 1){ fullRender(); }
     }
     updateTotals();
+    persistOrder();
 }
 
 export function scanAddItem(itemID){
@@ -113,6 +112,7 @@ export function scanAddItem(itemID){
         updateRow(existingIndex);
     }
     updateTotals();
+    persistOrder();
     showToast(`${item.itemName} added`);
 }
 
@@ -199,6 +199,7 @@ function removeSelectedItem(){
 
     fullRender();
     updateTotals();
+    persistOrder();
 
     const removeBtn = document.getElementById('js-order-remove');
     if (removeBtn) removeBtn.disabled = true;
@@ -210,27 +211,101 @@ async function resetOrderTable() {     // ← add `async`
         confirmText: 'Reset',                                      
         danger: true,                                                                                                                                            
     });                                                                                                                                                        
-    if (!ok) return;                                                                                                                                             
+    if (!ok) return;
     orderedItems = [];
     selectedRowIndex = -1;
     fullRender();
     updateTotals();
-  }    
+    persistOrder();
+  }
 
-// function resetOrderTable(){
-//     if (orderedItems.length === 0) return;
-//     // if (!confirm('Reset the entire order?')) return;
 
-//     orderedItems = [];
-//     selectedRowIndex = -1;
-//     fullRender();
-//     updateTotals();
-// }
 export function clearOrderTable(){
     orderedItems = [];
     selectedRowIndex = -1;
     fullRender();
     updateTotals();
+    persistOrder();
+}
+
+// The cart is autosaved to localStorage so an accidental reload or tab close
+// does not wipe an in-progress order. We store the orderedItems array (the data),
+
+function storageKey(){
+    const uid = auth.currentUser?.uid;
+    return uid ? `pos-order-draft-${uid}` : null;
+}
+
+function persistOrder(){
+    const key = storageKey();
+    if(!key) return;
+    try{
+        if(orderedItems.length === 0){
+            localStorage.removeItem(key);
+        } else {
+            localStorage.setItem(key, JSON.stringify(orderedItems));
+        }
+    } catch(err){
+        console.error('Failed to persist order draft:', err);
+    }
+}
+
+export function restoreOrderFromStorage(){
+    const key = storageKey();
+    if(!key) return;
+
+    let saved;
+    try{
+        const raw = localStorage.getItem(key);
+        if(!raw) return;
+        saved = JSON.parse(raw);
+    } catch(err){
+        console.error('Failed to read order draft:', err);
+        return;
+    }
+
+    if(!Array.isArray(saved)){
+        try{ localStorage.removeItem(key); } catch(_){}
+        return;
+    }
+
+    let adjusted = false;
+    const reconciled = [];
+    saved.forEach(line => {
+        const live = allItems.find(i => i.id === line.id);
+        // Drop items that were deleted from inventory or are now out of stock.
+        if(!live || live.stockLevel <= 0){
+            adjusted = true;
+            return;
+        }
+        const quantity = Math.min(line.quantity, live.stockLevel);
+        if(quantity !== line.quantity) adjusted = true;
+        // Refresh name/price/cost from the live item so the cart reflects current
+        // inventory (and scanned lines saved without costPrice get repaired).
+        reconciled.push({
+            id: live.id,
+            name: live.itemName,
+            price: live.sellPrice,
+            costPrice: live.costPrice,
+            quantity,
+        });
+    });
+
+    orderedItems = reconciled;
+    selectedRowIndex = -1;
+    fullRender();
+    updateTotals();
+    persistOrder();
+
+    if(reconciled.length === 0){
+        if(adjusted) showToast('Your saved order items are no longer available.', 'info');
+        return;
+    }
+    if(adjusted){
+        showToast('Restored your order; some items were adjusted to current stock.', 'info');
+    } else {
+        showToast('Restored your previous order.');
+    }
 }
 function updateTotals(){
     let subtotal = 0;

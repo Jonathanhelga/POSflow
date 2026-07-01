@@ -1,7 +1,7 @@
 import { db, fetchUserProfile } from "./firebase";
 import { initInventoryForm } from './add_item_ui';
 import { allItems, loadAllItems, initializeSearch, initSort, initGlobalBarcodeListener } from './search_item';
-import { initializeOrderForm, initSubmitOrder, setTaxRate, scanAddItem } from "./order-add_item";
+import { initializeOrderForm, initSubmitOrder, setTaxRate, scanAddItem, restoreOrderFromStorage } from "./order-add_item";
 import { initProfile } from "./profile";
 import { switchView } from "./control_wizard";
 import { showToast } from "./toast";
@@ -12,7 +12,10 @@ export async function renderLoggedInState(user) {
         document.getElementById('setup-wizard').classList.add('is-hidden');
         document.getElementById('pos-app').classList.add('is-active');
         initInventoryForm();
-        loadAllItems();
+        // Restore the saved cart only after inventory has loaded, so each line can
+        // be reconciled against live stock. loadAllItems() stays un-awaited to keep
+        // the rest of init non-blocking.
+        loadAllItems().then(restoreOrderFromStorage);
         initializeSearch();
         initSort();
         initializeOrderForm();
