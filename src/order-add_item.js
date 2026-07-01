@@ -176,6 +176,19 @@ function orderModifier(){
     const removeButton = document.getElementById('js-order-remove');
     resetButton.addEventListener('click', () => { resetOrderTable(); })
     removeButton.addEventListener('click', () => { removeSelectedItem(); })
+    document.addEventListener('keydown', handleDeleteKey);
+}
+
+function handleDeleteKey(e){
+    if (e.key !== 'Delete' && e.key !== 'Backspace') return;
+    if (selectedRowIndex === -1) return;
+    if (isTypingTarget(document.activeElement)) return;
+    e.preventDefault();
+    removeSelectedItem();
+}
+
+function isTypingTarget(el){
+    return ['INPUT', 'TEXTAREA', 'SELECT'].includes(el?.tagName) || el?.isContentEditable;
 }
 
 function removeSelectedItem(){
