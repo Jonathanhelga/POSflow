@@ -316,7 +316,7 @@ export async function updateItemData(itemId, fields) {
 
 // Deletes run server-side (see server/server.js) because firestore.rules cannot
 // see that the Admin PIN was verified. The PIN travels with the request, and the
-// order restock/promo rollback now lives in that endpoint's transaction.
+// order restock now lives in that endpoint's transaction.
 async function postAdminDelete(path, body) {
     const idToken = await auth.currentUser.getIdToken();
     const response = await fetch(`${SERVER_URL}${path}`, {

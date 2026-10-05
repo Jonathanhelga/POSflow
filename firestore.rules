@@ -34,7 +34,9 @@ service cloud.firestore {
     }
     
     // Same as /inventory: deletes go through /api/orders/delete, which also
-    // restocks and rolls back promo usage inside one transaction.
+    // restocks the items inside one transaction. It deliberately leaves
+    // promo.usedQty alone; see the comment in that endpoint for why.
+    
     match /orders/{docId} {
       allow read, update: if request.auth != null && request.auth.uid == resource.data.ownerId;
       allow create: if request.auth != null && request.auth.uid == request.resource.data.ownerId;
