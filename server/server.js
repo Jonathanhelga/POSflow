@@ -37,7 +37,8 @@ const verifyOtpLimiter = rateLimit({
 
 const adminPinLimiter = rateLimit({
     windowMs: 15 * 60 * 1000, // 15 minutes
-    max: 10,                   // 10 set/verify attempts per IP per window
+    max: 10,                   // only failed set/verify attempts count toward this
+    skipSuccessfulRequests: true,
     message: { error: "Too many PIN attempts. Please try again in 15 minutes." },
     standardHeaders: true,
     legacyHeaders: false,
@@ -47,6 +48,13 @@ const adminDeleteLimiter = rateLimit({
     windowMs: 15 * 60 * 1000,
     max: 10,                       // only wrong-PIN attempts count toward this
     skipSuccessfulRequests: true,
+    standardHeaders: true,
+    legacyHeaders: false,
+});
+
+const adminPinStatusLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000, // 15 minutes
+    max: 60,                   // 60 status checks per IP per window
     standardHeaders: true,
     legacyHeaders: false,
 });
@@ -160,7 +168,7 @@ app.post('/api/verify-otp', verifyOtpLimiter, async (req, res) => {
 // Admin PIN is verified/stored entirely server-side (in the adminPins collection,
 // which firestore.rules denies to all client access, same as /otps) so the client
 // never holds a hash it could brute-force offline in a devtools console.
-app.post('/api/admin-pin/status', requireAuth, async (req, res) => {
+app.post('/api/admin-pin/status', adminPinStatusLimiter, requireAuth, async (req, res) => {
     try {
         res.status(200).json({ hasPin: await hasAdminPin(req.uid) });
     } catch (error) {
