@@ -17,11 +17,7 @@ async function hasAdminPin(uid) {
 async function setAdminPin(uid, pin) {
     const salt = crypto.randomBytes(16).toString('hex');
     const hash = hashPin(pin, salt);
-    await getPinsCollection().doc(uid).set({
-        hash,
-        salt,
-        updatedAt: admin.firestore.FieldValue.serverTimestamp(),
-    });
+    await getPinsCollection().doc(uid).set({ hash, salt, updatedAt: admin.firestore.FieldValue.serverTimestamp(), });
 }
 
 async function verifyAdminPin(uid, pin) {

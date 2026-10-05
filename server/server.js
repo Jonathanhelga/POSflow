@@ -71,6 +71,8 @@ const allowedOrigins = process.env.CORS_ORIGINS
 
 app.use(cors({ origin: allowedOrigins, methods: ['POST', 'GET'] }));
 app.use(express.json());
+// below, it adds the real caller's IP not the google frontend server IP 
+app.set('trust proxy', 1);
 
 
 const OTP_TTL_MS = 5 * 60 * 1000; // 5 minutes
