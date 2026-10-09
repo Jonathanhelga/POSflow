@@ -21,12 +21,12 @@ function isValidPin(pin) { return /^\d{4}$/.test(pin); }
 // Verification/storage of the PIN happens entirely server-side (see
 // server/adminPinService.js) so the client never holds a hash it could
 // brute-force offline — it only ever gets a yes/no answer back.
-async function callPinApi(path, pin) {
+async function callPinApi(path, pin, extra = {}) {
     const idToken = await currentUser.getIdToken();
     const response = await fetch(`${SERVER_URL}${path}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${idToken}` },
-        body: JSON.stringify({ pin }),
+        body: JSON.stringify({ pin, ...extra }),
     });
     return { ok: response.ok };
 }
@@ -136,7 +136,10 @@ async function handleSaveNewPin() {
     btn.textContent = 'Saving...';
 
     try {
-        const { ok } = await callPinApi('/api/admin-pin/set', newPin);
+        // When changing an existing PIN, send the old PIN the server now requires.
+        // It is still in ap-old-input from the verify step earlier in this flow.
+        const extra = isChangingPin ? { currentPin: getRawPin('ap-old-input') } : {};
+        const { ok } = await callPinApi('/api/admin-pin/set', newPin, extra);
         if (!ok) {
             setApFeedback('ap-feedback', 'Failed to save PIN. Please try again.');
             return;
@@ -144,7 +147,7 @@ async function handleSaveNewPin() {
         hasPinConfigured = true;
         updateFeaturesButtonLabel();
         toggleModal('admin-pin-modal');
-        showToast('PIN successfully created :)');
+        showToast(isChangingPin ? 'PIN successfully changed :)' : 'PIN successfully created :)');
     } catch (err) {
         console.error('Failed to save Admin PIN:', err);
         setApFeedback('ap-feedback', 'Failed to save PIN. Please try again.');

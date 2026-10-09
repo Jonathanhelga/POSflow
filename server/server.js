@@ -178,11 +178,19 @@ app.post('/api/admin-pin/status', adminPinStatusLimiter, requireAuth, async (req
 });
 
 app.post('/api/admin-pin/set', adminPinLimiter, requireAuth, async (req, res) => {
-    const { pin } = req.body;
+    const { pin, currentPin } = req.body;
     if (!pin || !PIN_RE.test(String(pin))) {
         return res.status(400).json({ error: "PIN must be exactly 4 digits" });
     }
     try {
+        if (await hasAdminPin(req.uid)) {
+            if (!currentPin || !PIN_RE.test(String(currentPin))) {
+                return res.status(401).json({ error: "Incorrect Admin PIN" });
+            }
+            if (!await verifyAdminPin(req.uid, String(currentPin))) {
+                return res.status(401).json({ error: "Incorrect Admin PIN" });
+            }
+        }
         await setAdminPin(req.uid, String(pin));
         res.status(200).json({ message: "PIN saved" });
     } catch (error) {
