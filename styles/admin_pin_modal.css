@@ -1,12 +1,11 @@
 /* Admin PIN setup/change modal + per-action PIN gate modal */
 
-
 #admin-pin-modal, #admin-pin-gate-modal {
     align-items: center;
     justify-content: center;
 }
-#c-modal-admin-pin, #c-modal-admin-pin-gate{
-    width: 400px;
+#c-modal-admin-pin, #c-modal-admin-pin-gate {
+    width: 480px;
     max-width: 92vw;
     border-radius: var(--radius);
     background-color: var(--clr-panel);
@@ -15,27 +14,73 @@
     display: flex;
     flex-direction: column;
 }
+#c-modal-admin-pin .c-modal__body,
+#c-modal-admin-pin-gate .c-modal__body { padding: 22px 24px 24px; }
 
-.ap-panel.is-hidden { display: none; }
-
-.ap-panel p {
-    margin-bottom: var(--margin-bottom);
-    color: var(--clr-text-secondary);
+/* Header: lock icon, title, step dots (change flow only) */
+.ap-header { justify-content: flex-start; gap: 14px; padding: 18px 20px; }
+.ap-icon {
+    flex: none;
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    display: grid;
+    place-items: center;
+    background-color: var(--clr-secure-soft);
+    color: var(--clr-secure-ink);
 }
+.ap-icon svg { width: 22px; height: 22px; }
+.ap-titles { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 4px; }
+.ap-titles .c-modal__title { font-size: 1.2rem; }
+.ap-step { display: flex; align-items: center; gap: 6px; font-size: 0.8rem; font-weight: 500; color: var(--clr-text-secondary); }
+.ap-step.is-hidden { display: none; }
+.ap-dot { width: 8px; height: 8px; border-radius: 50%; background-color: var(--clr-border); }
+.ap-dot.is-on { background-color: var(--clr-secure); }
 
-#ap-old-input,
-#ap-new-input,
-#ap-confirm-input,
-#ap-gate-input {
+/* Body */
+.ap-panel { display: flex; flex-direction: column; gap: 8px; }
+.ap-panel.is-hidden { display: none; }
+.ap-panel .c-field__label { margin-bottom: 0; }
+.ap-panel input + label { margin-top: 8px; }
+.ap-desc { margin-bottom: 12px; line-height: 1.55; color: var(--clr-text-secondary); }
+
+#ap-old-input, #ap-new-input, #ap-confirm-input, #ap-gate-input {
+    height: 56px;
     text-align: center;
     font-size: 1.5rem;
     letter-spacing: 0.4em;
-    margin-bottom: var(--margin-bottom);
+}
+.ap-panel .c-field__input:focus {
+    border-color: var(--clr-secure);
+    box-shadow: 0 0 0 3px var(--clr-secure-soft);
 }
 
-.ap-feedback {
-    min-height: 1.2em;
-    margin-bottom: var(--gap);
-    font-size: 0.9rem;
-    color: var(--clr-danger);
+.ap-feedback { font-size: 0.9rem; color: var(--clr-status-neg-fg); }
+.ap-feedback:empty { display: none; }
+
+/* Footer: Enter hint on the left, buttons on the right */
+.ap-foot { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin-top: 12px; }
+.ap-foot > .btn, .ap-foot__buttons { margin-left: auto; }
+.ap-foot__buttons { display: flex; gap: var(--gap); }
+.ap-hint { font-size: 0.82rem; color: var(--clr-text-secondary); }
+.ap-hint kbd {
+    font: inherit;
+    font-weight: 600;
+    font-size: 0.78rem;
+    padding: 2px 7px;
+    border-radius: 6px;
+    border: 1px solid var(--clr-border);
+    background-color: var(--clr-input-bg);
+    color: var(--clr-text-primary);
+}
+@media (hover: none) and (pointer: coarse) {
+    .ap-hint { display: none; }
+}
+
+.ap-btn { padding: 10px 24px; background-color: var(--clr-secure); color: var(--clr-on-secure); }
+.ap-btn:disabled { opacity: 0.6; cursor: default; }
+#ap-gate-cancel-btn {
+    background-color: transparent;
+    color: var(--clr-text-secondary);
+    border: 1px solid var(--clr-border);
 }

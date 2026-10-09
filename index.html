@@ -1364,38 +1364,44 @@
 
     <div id="admin-pin-modal" class="c-modal c-modal--center is-hidden">
       <div class="c-modal__panel" id="c-modal-admin-pin">
-        <header class="c-modal__header">
-          <h2 class="c-modal__title" id="ap-title">Set up Admin PIN</h2>
+        <header class="c-modal__header ap-header">
+          <div class="ap-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4.5" y="10.5" width="15" height="10" rx="2.5"/><path d="M8 10.5V7.5a4 4 0 0 1 8 0v3"/><circle cx="12" cy="15.5" r="1.2" fill="currentColor"/></svg>
+          </div>
+          <div class="ap-titles">
+            <h2 class="c-modal__title" id="ap-title">Set up Admin PIN</h2>
+            <p id="ap-step" class="ap-step is-hidden">
+              <span class="ap-dot is-on"></span><span class="ap-dot" id="ap-dot-2"></span>
+              <span id="ap-step-text">Step 1 of 2</span>
+            </p>
+          </div>
           <button type="button" class="c-modal__close" aria-label="Close" data-modal-close="admin-pin-modal">&times;</button>
         </header>
         <div class="c-modal__body">
 
-          <div id="ap-intro" class="ap-panel">
-            <p>This Admin PIN will be required before deleting an inventory item or cancelling an order.</p>
-              <div class="c-actions">
-              <button type="button" class="btn btn--primary" id="ap-intro-continue">Continue</button>
-            </div>
-          </div>
-
-          <div id="ap-old-pin" class="ap-panel is-hidden">
-            <label class="c-field__label" for="ap-old-input">Enter current Admin PIN</label>
+          <form id="ap-old-pin" class="ap-panel is-hidden" novalidate>
+            <p class="ap-desc">Enter your current Admin PIN to confirm it's you.</p>
+            <label class="c-field__label" for="ap-old-input">Current Admin PIN</label>
             <input type="text" inputmode="numeric" pattern="\d{4}" maxlength="4" id="ap-old-input" class="c-field__input" placeholder="••••" autocomplete="off" />
             <p id="ap-old-feedback" class="ap-feedback"></p>
-            <div class="c-actions">
-              <button type="button" class="btn btn--primary" id="ap-old-continue">Continue</button>
+            <div class="ap-foot">
+              <span class="ap-hint">Press <kbd>Enter</kbd> to continue</span>
+              <button type="submit" class="btn ap-btn" id="ap-old-continue">Continue</button>
             </div>
-          </div>
+          </form>
 
-          <div id="ap-new-pin" class="ap-panel is-hidden">
-            <label class="c-field__label" for="ap-new-input">Enter new 4-digit Admin PIN</label>
+          <form id="ap-new-pin" class="ap-panel is-hidden" novalidate>
+            <p class="ap-desc" id="ap-new-desc"></p>
+            <label class="c-field__label" for="ap-new-input">New 4-digit Admin PIN</label>
             <input type="text" inputmode="numeric" pattern="\d{4}" maxlength="4" id="ap-new-input" class="c-field__input" placeholder="••••" autocomplete="off" />
-            <label class="c-field__label" for="ap-confirm-input">Confirm Admin PIN</label>
+            <label class="c-field__label" for="ap-confirm-input">Confirm new PIN</label>
             <input type="text" inputmode="numeric" pattern="\d{4}" maxlength="4" id="ap-confirm-input" class="c-field__input" placeholder="••••" autocomplete="off" />
             <p id="ap-feedback" class="ap-feedback"></p>
-            <div class="c-actions">
-              <button type="button" class="btn btn--primary" id="ap-save-btn">Save PIN</button>
+            <div class="ap-foot">
+              <span class="ap-hint">Press <kbd>Enter</kbd> to save</span>
+              <button type="submit" class="btn ap-btn" id="ap-save-btn">Save PIN</button>
             </div>
-          </div>
+          </form>
 
         </div>
       </div>
@@ -1403,18 +1409,29 @@
 
     <div id="admin-pin-gate-modal" class="c-modal c-modal--center is-hidden">
       <div class="c-modal__panel" id="c-modal-admin-pin-gate">
-        <header class="c-modal__header">
-          <h2 class="c-modal__title">Enter Admin PIN to confirm deletion</h2>
+        <header class="c-modal__header ap-header">
+          <div class="ap-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4.5" y="10.5" width="15" height="10" rx="2.5"/><path d="M8 10.5V7.5a4 4 0 0 1 8 0v3"/><circle cx="12" cy="15.5" r="1.2" fill="currentColor"/></svg>
+          </div>
+          <div class="ap-titles">
+            <h2 class="c-modal__title">Confirm deletion</h2>
+          </div>
           <button type="button" class="c-modal__close" aria-label="Close" data-modal-close="admin-pin-gate-modal">&times;</button>
         </header>
         <div class="c-modal__body">
-          <label class="c-field__label" for="ap-gate-input">Admin PIN</label>
-          <input type="text" inputmode="numeric" pattern="\d{4}" maxlength="4" id="ap-gate-input" class="c-field__input" placeholder="••••" autocomplete="off" />
-          <p id="ap-gate-feedback" class="ap-feedback"></p>
-          <div class="c-confirm__actions">
-            <button type="button" class="btn btn--ghost" id="ap-gate-cancel-btn">Cancel</button>
-            <button type="button" class="btn btn--primary" id="ap-gate-confirm-btn">Confirm</button>
-          </div>
+          <form id="ap-gate-form" class="ap-panel" novalidate>
+            <p class="ap-desc">Deleting can't be undone. Enter your Admin PIN to continue.</p>
+            <label class="c-field__label" for="ap-gate-input">Admin PIN</label>
+            <input type="text" inputmode="numeric" pattern="\d{4}" maxlength="4" id="ap-gate-input" class="c-field__input" placeholder="••••" autocomplete="off" />
+            <p id="ap-gate-feedback" class="ap-feedback"></p>
+            <div class="ap-foot">
+              <span class="ap-hint">Press <kbd>Enter</kbd> to confirm</span>
+              <div class="ap-foot__buttons">
+                <button type="button" class="btn btn--ghost" id="ap-gate-cancel-btn">Cancel</button>
+                <button type="submit" class="btn ap-btn" id="ap-gate-confirm-btn">Confirm</button>
+              </div>
+            </div>
+          </form>
         </div>
       </div>
     </div>

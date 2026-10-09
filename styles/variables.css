@@ -11,6 +11,10 @@
     --clr-danger:  #f18a7a;
     --clr-logout: rgb(160, 143, 158);
     --clr-feature-buttons: rgb(221, 220, 199);
+    --clr-secure:      #f2c27b;   /* Admin PIN screens: button, active dot, focus */
+    --clr-secure-soft: #fdf0dc;   /* icon circle, focus glow                      */
+    --clr-secure-ink:  #8a5410;   /* lock icon lines                              */
+    --clr-on-secure:   #3b2506;   /* text on the amber button                     */
     /* — Text Colors — */
     --clr-text-primary:   #1f2937;
     --clr-text-secondary: #6b7280;
@@ -70,6 +74,10 @@
     --clr-danger:  #e07a6a;
     --clr-logout: rgb(140, 123, 138);
     --clr-feature-buttons: rgb(70, 70, 70);
+    --clr-secure:      #e6b066;
+    --clr-secure-soft: rgba(230, 176, 102, 0.2);
+    --clr-secure-ink:  #f5d4a3;
+    --clr-on-secure:   #0f172a;
 
     /* — Text Colors — */
     --clr-text-primary:   #f1f5f9;

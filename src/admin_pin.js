@@ -78,9 +78,19 @@ function resetPinInput(inputId) {
 function setApFeedback(elId, msg) { document.getElementById(elId).textContent = msg; }
 
 function showApPanel(panelId) {
-    ['ap-intro', 'ap-old-pin', 'ap-new-pin'].forEach(id => {
+    ['ap-old-pin', 'ap-new-pin'].forEach(id => {
         document.getElementById(id).classList.toggle('is-hidden', id !== panelId);
     });
+    updateStepIndicator(panelId);
+    document.querySelector(`#${panelId} input`).focus();
+}
+
+// The two-dot "Step X of 2" label only exists in the change flow.
+function updateStepIndicator(panelId) {
+    const isStepTwo = panelId === 'ap-new-pin';
+    document.getElementById('ap-step').classList.toggle('is-hidden', !isChangingPin);
+    document.getElementById('ap-dot-2').classList.toggle('is-on', isStepTwo);
+    document.getElementById('ap-step-text').textContent = `Step ${isStepTwo ? 2 : 1} of 2`;
 }
 
 function updateFeaturesButtonLabel() {
@@ -95,30 +105,43 @@ function openSetupFlow() {
     setApFeedback('ap-old-feedback', '');
     setApFeedback('ap-feedback', '');
     document.getElementById('ap-title').textContent = isChangingPin ? 'Change Admin PIN' : 'Set up Admin PIN';
-    showApPanel(isChangingPin ? 'ap-old-pin' : 'ap-intro');
+    document.getElementById('ap-new-desc').textContent = isChangingPin
+        ? 'Choose a new 4-digit PIN. From now on, deleting items and orders will need this one.'
+        : "Your Admin PIN protects actions that can't be undone. You'll need to enter it before you delete an inventory item or delete an order. Choose 4 digits that your staff don't know.";
+    // Open the modal first: an input inside a display:none modal cannot take focus.
     toggleModal('admin-pin-modal');
+    showApPanel(isChangingPin ? 'ap-old-pin' : 'ap-new-pin');
 }
 
-async function handleVerifyOldPin() {
+async function handleVerifyOldPin(event) {
+    event.preventDefault();
     const input = getRawPin('ap-old-input');
     if (!isValidPin(input)) {
         setApFeedback('ap-old-feedback', 'Enter a 4-digit PIN.');
         return;
     }
+
+    const btn = document.getElementById('ap-old-continue');
+    btn.disabled = true;
+
     try {
         const { ok } = await callPinApi('/api/admin-pin/verify', input);
         if (!ok) {
             setApFeedback('ap-old-feedback', 'Incorrect Admin PIN.');
             return;
         }
+        setApFeedback('ap-old-feedback', '');
         showApPanel('ap-new-pin');
     } catch (err) {
         console.error('Failed to verify Admin PIN:', err);
         setApFeedback('ap-old-feedback', 'Could not verify PIN. Check your connection.');
+    } finally {
+        btn.disabled = false;
     }
 }
 
-async function handleSaveNewPin() {
+async function handleSaveNewPin(event) {
+    event.preventDefault();
     const newPin = getRawPin('ap-new-input');
     const confirmPin = getRawPin('ap-confirm-input');
 
@@ -161,14 +184,20 @@ function openPinGate() {
     resetPinInput('ap-gate-input');
     setApFeedback('ap-gate-feedback', '');
     toggleModal('admin-pin-gate-modal');
+    document.getElementById('ap-gate-input').focus();
 }
 
-async function handlePinGateSubmit() {
+async function handlePinGateSubmit(event) {
+    event.preventDefault();
     const input = getRawPin('ap-gate-input');
     if (!isValidPin(input)) {
         setApFeedback('ap-gate-feedback', 'Enter a 4-digit PIN.');
         return;
     }
+
+    const btn = document.getElementById('ap-gate-confirm-btn');
+    btn.disabled = true;
+
     try {
         const { ok } = await callPinApi('/api/admin-pin/verify', input);
         if (!ok) {
@@ -181,6 +210,8 @@ async function handlePinGateSubmit() {
     } catch (err) {
         console.error('Failed to verify Admin PIN:', err);
         setApFeedback('ap-gate-feedback', 'Could not verify PIN. Check your connection.');
+    } finally {
+        btn.disabled = false;
     }
 }
 
@@ -235,10 +266,9 @@ export function initAdminPin(user) {
         openSetupFlow();
     });
 
-    document.getElementById('ap-intro-continue').addEventListener('click', () => showApPanel('ap-new-pin'));
-    document.getElementById('ap-save-btn').addEventListener('click', handleSaveNewPin);
-    document.getElementById('ap-old-continue').addEventListener('click', handleVerifyOldPin);
+    document.getElementById('ap-new-pin').addEventListener('submit', handleSaveNewPin);
+    document.getElementById('ap-old-pin').addEventListener('submit', handleVerifyOldPin);
 
-    document.getElementById('ap-gate-confirm-btn').addEventListener('click', handlePinGateSubmit);
+    document.getElementById('ap-gate-form').addEventListener('submit', handlePinGateSubmit);
     document.getElementById('ap-gate-cancel-btn').addEventListener('click', handlePinGateCancel);
 }
