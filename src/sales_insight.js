@@ -63,7 +63,7 @@ function setupToolBar(){
         });
     });
 
-    document.getElementById('js-sales-apply').addEventListener('click', applyCustomRange);
+    document.getElementById('js-sales-range-form').addEventListener('submit', applyCustomRange);
     setupTopItemsSort();
 
     // document.getElementById('js-sales-to').value = todayInputValue();
@@ -107,7 +107,8 @@ function todayInputValue(){
     return `${y}-${m}-${day}`;
 }
 
-function applyCustomRange(){
+function applyCustomRange(event){
+    event.preventDefault();
     const fromInput = document.getElementById('js-sales-from');
     const toInput = document.getElementById('js-sales-to');
     const startDate = parseDateInput(fromInput.value);

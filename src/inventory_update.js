@@ -143,7 +143,8 @@ function populateDetail(item) {
 
 // ─── Save stock update
 
-async function handleSave() {
+async function handleSave(event) {
+    event.preventDefault();
     const item = selection.get();
     if (!item) return;
 
@@ -306,7 +307,7 @@ export function initInventoryUpdate(user) {
         openInventoryUpdate(user);
     });
 
-    document.getElementById('iu-save-btn').addEventListener('click', handleSave);
+    document.getElementById('iu-update-form').addEventListener('submit', handleSave);
 
     attachListKeyNav({
         scope:       document.getElementById('inventory-update-modal'),

@@ -48,11 +48,12 @@ export function initExport(user) {
         });
     }
 
-    const runBtn = document.getElementById('js-export-run');
-    if (runBtn) runBtn.addEventListener('click', runExport);
+    const exportForm = document.getElementById('js-export-form');
+    if (exportForm) exportForm.addEventListener('submit', runExport);
 }
 
-async function runExport(){
+async function runExport(event){
+    event.preventDefault();
     if (isExporting) return;
     if (!currentUser) { showToast('Please sign in to export.', 'error'); return; }
 

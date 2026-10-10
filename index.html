@@ -138,7 +138,7 @@
     </template>
     <template id="guest-wizard-template">
           <section class="c-wizard__step is-active" id="setup-step-1">
-              <form id="signUp-form">
+              <form id="signUp-form" novalidate>
                 <div class="c-field">
                     <label class="c-field__label" for="username">.ᐣUsername</label>
                     <input class="c-field__input" type="text" id="js-username" placeholder="e.g. Lion King" required />
@@ -153,15 +153,18 @@
                     <label class="c-field__label" for="password">🫣Password</label>
                     <input class="c-field__input" type="password" id="js-password" name="password" minlength="8" placeholder="••••••••" required />
                 </div>
+              </form>
 
+              <!-- Separate form so Enter in the code field signs up, while Enter above sends the code. -->
+              <form id="js-otp-form" novalidate>
                 <div class="c-field">
                     <label class="c-field__label" for="verification-code">📲Verification Code</label>
                     <input class="c-field__input" type="number" id="js-verification-code" placeholder="Check your email box" />
                 </div>
 
                 <div class="c-actions">
-                    <button class="btn is-active" id="js-email-verify" type="button" disabled> E-Mail Verification </button>
-                    <button class="btn" id="js-signup-submit" type="button" disabled> Sign Up </button>
+                    <button class="btn is-active" id="js-email-verify" type="submit" form="signUp-form" disabled> E-Mail Verification </button>
+                    <button class="btn" id="js-signup-submit" type="submit" disabled> Sign Up </button>
                 </div>
 
                 <div class="c-separator" role="separator" aria-label="or">
@@ -914,15 +917,15 @@
               </div>
 
               <!-- Update form -->
-              <div class="iu-update-form">
+              <form class="iu-update-form" id="iu-update-form" novalidate>
                 <label class="iu-update-form__label" for="iu-incoming-qty">Add Incoming Stock</label>
                 <div class="iu-update-form__row">
                   <input type="number" id="iu-incoming-qty" class="iu-update-form__input"
                          min="1" step="1" placeholder="Enter quantity to add..." />
-                  <button type="button" id="iu-save-btn" class="btn iu-save-btn">Save</button>
+                  <button type="submit" id="iu-save-btn" class="btn iu-save-btn">Save</button>
                 </div>
                 <p id="iu-feedback" class="iu-feedback"></p>
-              </div>
+              </form>
 
               <!-- Stock update history -->
               <div class="iu-history">
@@ -963,7 +966,7 @@
             </div>
 
             <!-- Detail view (hidden until item selected) -->
-            <div id="mi-detail-view" class="mi-detail-view is-hidden">
+            <form id="mi-detail-view" class="mi-detail-view is-hidden" novalidate>
 
               <!-- Item header -->
               <div class="mi-detail-header">
@@ -1083,12 +1086,12 @@
                 <div id="mi-history-list"></div>
                 <button type="button" id="mi-history-more" class="mi-history__more-btn is-hidden">Show more</button>
               </div>
-            </div>
+            </form>
 
             <!-- Footer: always pinned at the bottom of the panel -->
             <div id="mi-footer" class="mi-edit__footer">
               <button type="button" id="mi-delete-btn" class="btn btn--danger mi-delete-btn" disabled>Delete Item</button>
-              <button type="button" id="mi-save-btn" class="btn mi-save-btn" disabled>Save Changes</button>
+              <button type="submit" id="mi-save-btn" class="btn mi-save-btn" form="mi-detail-view" disabled>Save Changes</button>
             </div>
           </div>
 
@@ -1254,7 +1257,7 @@
 
           <!-- Date range toolbar -->
           <section class="c-sales__toolbar" aria-label="Date range">
-            <div class="c-sales__range">
+            <form class="c-sales__range" id="js-sales-range-form" novalidate>
               <label class="c-sales__range-label">
                 <span>From</span>
                 <input type="date" id="js-sales-from" class="c-field__input" />
@@ -1263,8 +1266,8 @@
                 <span>To</span>
                 <input type="date" id="js-sales-to" class="c-field__input" />
               </label>
-              <button type="button" class="c-sales__apply" id="js-sales-apply">Apply</button>
-            </div>
+              <button type="submit" class="c-sales__apply" id="js-sales-apply">Apply</button>
+            </form>
             <div class="c-sales__presets" role="group" aria-label="Quick ranges">
               <button type="button" class="c-chip is-active" data-range="today">Today</button>
               <button type="button" class="c-chip" data-range="7d">Last 7 days</button>
@@ -1458,7 +1461,7 @@
 
           <div class="c-export__section">
             <h3 class="c-export__label">Order date range</h3>
-            <div class="c-export__range">
+            <form class="c-export__range" id="js-export-form" novalidate>
               <label class="c-export__range-field">
                 <span>From</span>
                 <input type="date" id="js-export-from" class="c-field__input" />
@@ -1467,13 +1470,13 @@
                 <span>To</span>
                 <input type="date" id="js-export-to" class="c-field__input" />
               </label>
-            </div>
+            </form>
             <!-- <p class="c-export__hint">Filters the Orders and Order Items sheets only. Inventory always exports in full.</p> -->
              <p class="c-export__hint"> Currently, the sheet will only consist of the sales summary. The improvement still on progress. Thank You.</p>
           </div>
 
           <div class="c-export__result">
-            <button id="js-export-run" class="btn c-export__generate" type="button">Generate export</button>
+            <button id="js-export-run" class="btn c-export__generate" type="submit" form="js-export-form">Generate export</button>
             <!-- After generation, runExport swaps in a download card here. -->
             <div id="generated-file-box" class="c-export__file" hidden></div>
           </div>

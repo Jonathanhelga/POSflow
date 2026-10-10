@@ -88,7 +88,8 @@ function ifButtonIsClicked(){
         }, 1000);
     }
 
-    buttonVerification.addEventListener('click', async function(){
+    document.getElementById('signUp-form').addEventListener('submit', async function(e){
+        e.preventDefault();
         emailFinal = document.getElementById('js-email').value.trim();
         passFinal = document.getElementById('js-password').value.trim();
 
@@ -132,7 +133,7 @@ function ifButtonIsClicked(){
         }
     });
 
-    buttonSignUp.addEventListener('click', async function(e){
+    document.getElementById('js-otp-form').addEventListener('submit', async function(e){
         e.preventDefault();
 
         if (otpAttempts >= MAX_OTP_ATTEMPTS) {

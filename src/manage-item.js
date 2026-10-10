@@ -389,7 +389,8 @@ function computeChanges(oldItem, newFields, currencyCode) {
 
 //  Save edits
 
-async function handleSave() {
+async function handleSave(event) {
+    event.preventDefault();
     const item = selection.get();
     if (!item) return;
 
@@ -655,7 +656,7 @@ export function initManageItem(user) {
         openManageItem(user);
     });
 
-    document.getElementById('mi-save-btn').addEventListener('click', handleSave);
+    document.getElementById('mi-detail-view').addEventListener('submit', handleSave);
     document.getElementById('mi-delete-btn').addEventListener('click', handleDelete);
     document.getElementById('mi-promo-remove').addEventListener('click', handlePromoRemove);
 
