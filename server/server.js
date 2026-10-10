@@ -232,7 +232,7 @@ app.post('/api/admin-pin/verify', adminPinLimiter, requireAuth, async (req, res)
 
 // Lets the client validate promo expiry against a clock it can't tamper with,
 // instead of trusting its own (possibly wrong) device time.
-app.get('/api/server-time', serverTimeLimiter, (req, res) => {
+app.get('/api/server-time', serverTimeLimiter, (_req, res) => {
     res.status(200).json({ now: Date.now() });
 });
 

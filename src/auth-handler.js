@@ -167,9 +167,7 @@ function ifButtonIsClicked(){
                 const remaining = MAX_OTP_ATTEMPTS - otpAttempts;
                 showMessage(
                     buttonSignUp,
-                    remaining > 0
-                        ? `Incorrect code. ${remaining} attempt${remaining === 1 ? '' : 's'} remaining.`
-                        : 'Too many incorrect attempts. Please request a new code.'
+                    remaining > 0 ? `Incorrect code. ${remaining} attempt${remaining === 1 ? '' : 's'} remaining.` : 'Too many incorrect attempts. Please request a new code.'
                 );
                 buttonSignUp.textContent = buttonSignUpText;
                 buttonSignUp.disabled = remaining <= 0;
@@ -182,7 +180,6 @@ function ifButtonIsClicked(){
             await signInWithToken(verifyData.token);
             buttonSignUp.textContent = 'Account Successfully Created';
             document.getElementById('js-setup-next').click();
-            // LogOutUser();
         } catch (error) {
             showMessage(buttonSignUp, error.message || 'Failed to create account. Please try again.');
             buttonSignUp.textContent = buttonSignUpText;
