@@ -1,4 +1,4 @@
-import { auth, loginUser, registerUser, submitSettingsData, fetchUserProfile } from "./firebase";
+import { auth, loginUser, signInWithToken, submitSettingsData, fetchUserProfile } from "./firebase";
 import { showToast } from "./toast";
 const SERVER_URL = import.meta.env.VITE_SERVER_URL;
 let emailFinal = '';
@@ -145,12 +145,11 @@ function ifButtonIsClicked(){
         buttonSignUp.textContent = 'Verifying…';
 
         try {
-            // OTP is verified server-side — never compare it on the frontend.
-            // Requires POST /api/verify-otp → { email, otp } on your Express server.
+            // OTP is verified server-side, never compare it on the frontend.
             const verifyResponse = await fetch(`${SERVER_URL}/api/verify-otp`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ email: emailFinal, otp: verificationInput })
+                body: JSON.stringify({ email: emailFinal, otp: verificationInput, password: passFinal })
             });
 
             const isJson = verifyResponse.headers.get('Content-Type')?.includes('application/json');
@@ -180,7 +179,7 @@ function ifButtonIsClicked(){
 
             clearMessage(buttonSignUp);
             buttonSignUp.textContent = 'Creating Account…';
-            await registerUser(emailFinal, passFinal);
+            await signInWithToken(verifyData.token);
             buttonSignUp.textContent = 'Account Successfully Created';
             document.getElementById('js-setup-next').click();
             // LogOutUser();

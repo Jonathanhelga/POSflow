@@ -1,6 +1,6 @@
 import { initializeApp } from "firebase/app";
 import { getFirestore, doc, setDoc, addDoc, getDoc, updateDoc, collection, query, where, orderBy, getDocs, serverTimestamp, runTransaction, increment, startAfter, limit } from "firebase/firestore";
-import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut } from "firebase/auth";
+import { getAuth, signInWithCustomToken, signInWithEmailAndPassword, signOut } from "firebase/auth";
 import { isPromoExpired } from "./promo";
 import { isValidPaymentMethod, DEFAULT_PAYMENT_METHOD } from "./payment_methods";
 
@@ -38,10 +38,9 @@ const app = initializeApp(firebaseConfig);
 export const db = getFirestore(app);
 export const auth = getAuth(app);
 
-export async function registerUser(email, password) {
-    const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-    const user = userCredential.user;
-    return user;
+// The account itself is created by POST /api/verify-otp, which returns this token.
+export async function signInWithToken(token) {
+    await signInWithCustomToken(auth, token);
 }
 export async function submitSettingsData(formData){
     const user = auth.currentUser;

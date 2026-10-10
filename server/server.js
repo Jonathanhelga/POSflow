@@ -88,6 +88,7 @@ const OTP_TTL_MS = 5 * 60 * 1000; // 5 minutes
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const OTP_RE = /^\d{6}$/; // matches the otp-generator config in emailServices.js (6 digits only)
 const PIN_RE = /^\d{4}$/;
+const MIN_PASSWORD_LENGTH = 8; // same rule as the sign-up form in src/auth-handler.js
 
 // Verifies the caller's Firebase ID token and attaches the resulting uid to req.
 // Used for endpoints that act on a specific account (admin PIN) so a client can
@@ -128,12 +129,15 @@ app.post('/api/send-otp', sendOtpLimiter, async (req, res) => {
 });
 
 app.post('/api/verify-otp', verifyOtpLimiter, async (req, res) => {
-    const { email, otp } = req.body;
+    const { email, otp, password } = req.body;
     if (!email || !EMAIL_RE.test(String(email).trim())) {
         return res.status(400).json({ error: "A valid email address is required" });
     }
     if (!otp || !OTP_RE.test(String(otp).trim())) {
         return res.status(400).json({ error: "A valid 6-digit code is required" });
+    }
+    if (typeof password !== 'string' || password.length < MIN_PASSWORD_LENGTH) {
+        return res.status(400).json({ error: `Password must be at least ${MIN_PASSWORD_LENGTH} characters.` });
     }
 
     const normalizedEmail = String(email).trim().toLowerCase();
@@ -143,12 +147,10 @@ app.post('/api/verify-otp', verifyOtpLimiter, async (req, res) => {
     try {
         const snap = await docRef.get();
 
-        if (!snap.exists) {
-            return res.status(400).json({ error: "No code was requested for this email" });
-        }
+        if (!snap.exists) { return res.status(400).json({ error: "No code was requested for this email" }); }
 
         const record = snap.data();
-
+// like accounts:signUp, which step 4 turns off
         if (record.expiresAt.toMillis() < Date.now()) {
             await docRef.delete();
             return res.status(400).json({ error: "Code has expired. Please request a new one." });
@@ -157,9 +159,23 @@ app.post('/api/verify-otp', verifyOtpLimiter, async (req, res) => {
             return res.status(400).json({ error: "Incorrect code" });
         }
 
-        await docRef.delete(); // one-time use
-        res.status(200).json({ message: "Code verified" });
+        // The account is created here and nowhere else, so a correct OTP is the
+        // only way to get one. Client-side sign-up is disabled in the Firebase console.
+        const user = await admin.auth().createUser({ email: normalizedEmail, password, emailVerified: true });
+        let token;
+        try {
+            token = await admin.auth().createCustomToken(user.uid);
+        } catch (error) {
+            await admin.auth().deleteUser(user.uid); // the browser could never sign in to it
+            throw error;
+        }
+
+        await docRef.delete(); // one-time use, consumed only once the account exists
+        res.status(200).json({ token });
     } catch (error) {
+        if (error.code === 'auth/email-already-exists') {
+            return res.status(409).json({ error: "An account with this email already exists." });
+        }
         console.error("Failed to verify OTP:", error);
         res.status(500).json({ error: "Failed to verify code" });
     }
