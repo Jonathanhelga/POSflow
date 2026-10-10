@@ -9,6 +9,8 @@ import { showToast } from "./toast";
 export async function renderLoggedInState(user) {
     const profile = await fetchUserProfile(user.uid);
     if (profile) {
+        document.getElementById('js-landing').style.display = 'none';
+        document.body.classList.remove('is-booting');
         document.getElementById('setup-wizard').classList.add('is-hidden');
         document.getElementById('pos-app').classList.add('is-active');
         initInventoryForm();
@@ -30,6 +32,7 @@ export async function renderLoggedInState(user) {
         if (avatar) avatar.textContent = initial;
     }
     else{
+        document.body.classList.remove('is-booting');
         showToast('Please complete your business profile setup to continue.', 'info');
         const wizard = document.getElementById('setup-wizard');
         wizard.classList.remove('is-hidden');

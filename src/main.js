@@ -69,16 +69,13 @@ document.addEventListener('DOMContentLoaded', function(){
     eventDelegation('js-wizard__body');
     let initialized = false;
     onAuthStateChanged(auth, (user) => {
-        // document.body.classList.remove('is-booting');
-        document.body.classList.remove('is-booting');
         if (user) {
-            document.getElementById('js-landing').style.display = 'none';
-            document.getElementById('js-wizard-overlay').classList.add('is-hidden');
             if (initialized) return;
             initialized = true;
             showToast("successfully logging in");
             initLoggedInApp(user);
         } else {
+            document.body.classList.remove('is-booting');
             document.getElementById('pos-app').classList.remove('is-active');
             const wizard = document.getElementById('setup-wizard');
             wizard.classList.remove('is-hidden');

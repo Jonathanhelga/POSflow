@@ -179,7 +179,6 @@ function ifButtonIsClicked(){
             buttonSignUp.textContent = 'Creating Account…';
             await signInWithToken(verifyData.token);
             buttonSignUp.textContent = 'Account Successfully Created';
-            document.getElementById('js-setup-next').click();
         } catch (error) {
             showMessage(buttonSignUp, error.message || 'Failed to create account. Please try again.');
             buttonSignUp.textContent = buttonSignUpText;
