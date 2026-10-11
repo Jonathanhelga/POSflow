@@ -227,7 +227,7 @@ async function submitSettingForm(){
     try {
         await submitSettingsData(formData);
         submitSettingButton.textContent = "Submit Successfully";
-        setTimeout(() => {window.location.reload();}, 800);
+        setTimeout(() => { window.location.reload();}, 800 );
     } catch (error) {
         console.error("Submitting failed:", error);
         showToast(error?.message || 'Submitting failed', 'error');

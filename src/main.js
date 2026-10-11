@@ -37,8 +37,9 @@ import { initClock } from './clock';
 import { initThemeToggle } from './theme';
 import { showToast } from './toast';
 import { populateCurrencySelect } from './formatCurrency';
-function initLoggedInApp(user) {
-    renderLoggedInState(user);
+async function initLoggedInApp(user) {
+    const hasProfile = await renderLoggedInState(user);
+    if (!hasProfile) return;
     initInsights(user);
     initExport(user);
     initOrderHistory(user);

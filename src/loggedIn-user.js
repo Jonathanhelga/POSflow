@@ -30,6 +30,7 @@ export async function renderLoggedInState(user) {
         const initial = (user.email || '?').charAt(0).toUpperCase();
         const avatar = document.getElementById('js-profile-avatar');
         if (avatar) avatar.textContent = initial;
+        return true;
     }
     else{
         document.body.classList.remove('is-booting');
@@ -39,5 +40,6 @@ export async function renderLoggedInState(user) {
         wizard.classList.add('is-active');
         // controlSignUpWizardPageDirection auto-starts at step 2 when auth.currentUser exists
         switchView('signUp');
+        return false;
     }
 }
