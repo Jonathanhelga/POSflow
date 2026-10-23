@@ -3,29 +3,30 @@ import { fetchInventory, fetchOrders, fetchUserProfile, getCachedUserProfile } f
 import { showToast } from './toast';
 import { allItems } from './search_item';
 import { getExcelCurrencyFormat } from './formatCurrency';
+import { summarizeTotals, summarizeItems, summarizeDiscounts, summarizePaymentMethods, summarizeCategories } from './sales_metrics';
 
 const COL_PADDING = 2;
 const COL_MIN_WCH = 10;
 const COL_MAX_WCH = 40;
 
-// Row/column map of the summary sheet. The title banner at row 0 pushes every other
-// block down by one, so these are the single source of truth: the style functions
-// below derive their cell addresses from them rather than hardcoding.
+// The title banner is always row 0 with the metadata under it; every table's rows are
+// recorded by addTable while the sheet is built, because tables vary in length.
+const TOP_ITEMS_COUNT = 5;
+
+// Content starts at B2, leaving an empty row 1 and a narrow column A as a margin.
+const SHEET_ORIGIN = { r: 1, c: 1 };
+const MARGIN_WCH   = 2;
 const SUMMARY_TITLE_ROW      = 0;
 const SUMMARY_META_FIRST_ROW = 1;
-const SUMMARY_META_LAST_ROW  = 4; 
-const SUMMARY_SPACER_ROW     = 5;
-const SUMMARY_HEADER_ROW     = 6;
-const SUMMARY_FIRST_DATA_ROW = 7;
-const SUMMARY_LAST_COL       = 6; // column G
-const SUMMARY_MONEY_COLS     = [2, 3, 4, 5]; // Gross Collected, Tax Collected, Net Revenue, Total Profit
-const SUMMARY_MARGIN_COL     = 6; // Margin Percentage
 
 // Excel's percent format multiplies the cell by 100 when it renders, so the cell must
 // hold the raw fraction (0.325) rather than 32.5, or it would read 3250%.
 const PCT_FORMAT = '0.0%';
 
 const LEFT_ALIGN = { alignment: { horizontal: 'left' } };
+
+const THIN_SIDE = { style: 'thin', color: { rgb: '808080' } };
+const CELL_BORDER = { border: { top: THIN_SIDE, bottom: THIN_SIDE, left: THIN_SIDE, right: THIN_SIDE } };
 
 let currentUser = null;
 let isExporting = false;
@@ -79,7 +80,7 @@ async function runExport(event){
         if (!items.length && !orders.length) { showToast('No data to export for this range.', 'error'); return; }
 
         const wb = XLSX.utils.book_new();
-        XLSX.utils.book_append_sheet(wb, buildSummarySheet(profile, orders, from, to, currency), 'Summary');
+        XLSX.utils.book_append_sheet(wb, buildSummarySheet(profile, orders, items, from, to, currency), 'Summary');
         const bizName = (profile?.business_name || 'POS').replace(/[^\w-]+/g, '_');
         const fileName = `${bizName}_export_${fileDateStamp()}.xlsx`;
         const buf = XLSX.write(wb, { type: 'array', bookType: 'xlsx' });
@@ -95,62 +96,79 @@ async function runExport(event){
     }
 } 
 
-function buildSummarySheet(profile, orders, fromDate, toDate, currency){
-    const rows = summaryRows(profile, orders, fromDate, toDate, currency);
-    const worksheet = XLSX.utils.aoa_to_sheet(rows);
-    const { cols, wrapCols } = computeAoaColWidths(rows);
-    worksheet['!cols'] = cols;
-    metaDataStyle(worksheet);
-    
-    tableDataStyle(worksheet, currency);
+function buildSummarySheet(profile, orders, inventory, fromDate, toDate, currency){
+    const { rows, tables } = summaryRows(profile, orders, inventory, fromDate, toDate, currency);
+    const worksheet = XLSX.utils.aoa_to_sheet(rows, { origin: SHEET_ORIGIN });
+    const textRows = new Set([SUMMARY_TITLE_ROW, ...tables.flatMap(table => [table.titleRow, table.noteRow])]);
+    const { cols, wrapCols } = computeAoaColWidths(rows, textRows);
+    const lastCol = Math.max(...tables.map(table => table.lastCol));
+    worksheet['!cols'] = [{ wch: MARGIN_WCH }, ...cols];
+    metaDataStyle(worksheet, tables[0].headerRow - 1, lastCol);
 
-    wrapColumns(worksheet, wrapCols);
+    tables.forEach(table => tableDataStyle(worksheet, table, currency));
+
+    wrapColumns(worksheet, wrapCols, tables);
 
     return worksheet;
 }
 
-function summaryRows(profile, orders, fromDate, toDate, currency){
+function summaryRows(profile, orders, inventory, fromDate, toDate, currency){
     const businessName = profile?.business_name || 'POS';
-    const totalOrders = orders.length;
-    let grossCollected = 0;
-    let taxCollected = 0;
-    let netRevenue = 0;
-    let costOfGoods = 0;
-    let itemsSold = 0;
+    const totals = summarizeTotals(orders);
+    const discounts = summarizeDiscounts(orders);
 
-    orders.forEach((order) => {
-        const tax = order.taxAmount ?? 0;
-        // Net revenue is what the shop actually keeps: gross minus the tax it only
-        // collects on the government's behalf. totalPrice is defined as
-        // subtotalAfterDiscount + taxAmount, so this fallback is that identity
-        // rearranged, not a guess. It also reads correctly for orders written before
-        // the tax feature existed, where tax is 0 and totalPrice never included any.
-        const net = order.subtotalAfterDiscount ?? ((order.totalPrice ?? 0) - tax);
-        grossCollected += order.totalPrice ?? 0;
-        taxCollected += tax;
-        netRevenue += net;
-
-        const lis = Array.isArray(order.items) ? order.items : [];
-        lis.forEach((li) => {
-            itemsSold += li.quantity ?? 0;
-            costOfGoods += Number(li.cost ?? 0) * Number(li.quantity ?? 0);
-        });
-    });
-    const profit = netRevenue - costOfGoods;
-    // Stored as a fraction for PCT_FORMAT. An empty range leaves netRevenue at 0;
-    // guard so the cell holds 0 rather than NaN.
-    const marginPercentage = netRevenue > 0 ? profit / netRevenue : 0;
-
-    return [
+    const rows = [
         [`${businessName} Sales Report`],
         ['Report Type:', 'Summary'],
         ['Business Name:', businessName],
         ['Currency:', currency],
         ['Period:', formatPeriod(fromDate, toDate)],
         [],
-        ['Total Orders', 'Total Item Sold', 'Gross Collected', 'Tax Collected', 'Net Revenue', 'Total Profit', 'Margin Percentage'],
-        [totalOrders, itemsSold, grossCollected, taxCollected, netRevenue, profit, marginPercentage]
     ];
+    const tables = [];
+    addTable(rows, tables, {
+        header: ['Total Orders', 'Items Sold', 'Gross Collected', 'Tax Collected', 'Net Revenue', 'Total Profit', 'Margin %', 'AOV'],
+        body: [[totals.totalOrders, totals.itemsSold, totals.grossCollected, totals.taxCollected, totals.netRevenue, totals.profit, totals.margin, totals.aov]],
+        moneyCols: [2, 3, 4, 5, 7], pctCols: [6],
+    });
+    addTable(rows, tables, {
+        title: `Top ${TOP_ITEMS_COUNT} Items (before order discounts)`,
+        header: ['Rank', 'Item', 'Units Sold', 'Revenue', 'Profit', 'Margin %'],
+        body: summarizeItems(orders).slice(0, TOP_ITEMS_COUNT).map((item, i) => [i + 1, item.name, item.unitsSold, item.revenue, item.profit, item.margin]),
+        moneyCols: [3, 4], pctCols: [5],
+    });
+    addTable(rows, tables, {
+        title: 'Discounts',
+        header: ['Orders Discounted', 'Total Discount', 'Profit Before Discounts', '% of Profit Given as Discount'],
+        body: [[discounts.ordersDiscounted, discounts.totalDiscount, discounts.profitBeforeDiscounts, discounts.discountShareOfProfit]],
+        moneyCols: [1, 2], pctCols: [3],
+    });
+    addTable(rows, tables, {
+        title: 'Sales by Payment Method',
+        header: ['Method', 'Orders', 'Net Revenue', 'Share %'],
+        body: summarizePaymentMethods(orders).map(row => [row.label, row.orders, row.netRevenue, row.share]),
+        moneyCols: [2], pctCols: [3],
+    });
+    addTable(rows, tables, {
+        title: 'Sales by Category (before order discounts)',
+        header: ['Category', 'Units Sold', 'Revenue', 'Profit'],
+        body: summarizeCategories(orders, inventory).map(row => [row.category, row.unitsSold, row.revenue, row.profit]),
+        moneyCols: [2, 3],
+        note: 'An item in several categories counts in each, so these rows can add up to more than total revenue.',
+    });
+    return { rows, tables };
+}
+
+// Appends an optional blank row and title, the table, and an optional note, recording each row index.
+function addTable(rows, tables, { title, header, body, moneyCols = [], pctCols = [], note }) {
+    if (title) rows.push([], [title]);
+    const titleRow = title ? rows.length - 1 : null;
+    const headerRow = rows.length;
+    rows.push(header, ...body);
+    const lastDataRow = rows.length - 1;
+    if (note) rows.push([note]);
+    const noteRow = note ? rows.length - 1 : null;
+    tables.push({ titleRow, headerRow, firstDataRow: headerRow + 1, lastDataRow, noteRow, lastCol: header.length - 1, moneyCols, pctCols });
 }
 
 // Both bounds are optional, so the period reads as a closed range, an open one,
@@ -169,18 +187,18 @@ function formatRangeDate(d) {
     return d.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
 }
 
-function metaDataStyle(worksheet) {
+function metaDataStyle(worksheet, spacerRow, lastCol) {
     const cleanPaperBoldLabel = { font: { bold: true, color: { rgb: '000000' } }, fill: { fgColor: { rgb: 'FFFFFF' } } };
     const cleanPaperNormalValue = { font: { color: { rgb: '000000' } }, fill: { fgColor: { rgb: 'FFFFFF' } } };
 
-    for (let R = SUMMARY_META_FIRST_ROW; R <= SUMMARY_SPACER_ROW; R++) {
-        for (let C = 0; C <= SUMMARY_LAST_COL; C++) {
-            const cellAddress = XLSX.utils.encode_cell({ r: R, c: C });
+    for (let R = SUMMARY_META_FIRST_ROW; R <= spacerRow; R++) {
+        for (let C = 0; C <= lastCol; C++) {
+            const address = cellAddress(R, C);
 
-            if (!worksheet[cellAddress]) { worksheet[cellAddress] = { t: 's', v: '' }; }
+            if (!worksheet[address]) { worksheet[address] = { t: 's', v: '' }; }
 
-            if (C === 0 && R <= SUMMARY_META_LAST_ROW) { mergeCellStyle(worksheet[cellAddress], cleanPaperBoldLabel); }
-            else { mergeCellStyle(worksheet[cellAddress], cleanPaperNormalValue); }
+            if (C === 0 && R < spacerRow) { mergeCellStyle(worksheet[address], cleanPaperBoldLabel); }
+            else { mergeCellStyle(worksheet[address], cleanPaperNormalValue); }
         }
     }
 
@@ -191,52 +209,66 @@ function metaDataStyle(worksheet) {
     };
 
     // Excel paints a merged range using the top-left cell's value, but it draws
-    // the fill per underlying cell, so B1 to E1 need the style too.
-    for (let C = 0; C <= SUMMARY_LAST_COL; C++) {
-        const cellAddress = XLSX.utils.encode_cell({ r: SUMMARY_TITLE_ROW, c: C });
-        if (!worksheet[cellAddress]) { worksheet[cellAddress] = { t: 's', v: '' }; }
-        mergeCellStyle(worksheet[cellAddress], titleStyle);
+    // the fill per underlying cell, so every cell of the banner row needs the style too.
+    for (let C = 0; C <= lastCol; C++) {
+        const address = cellAddress(SUMMARY_TITLE_ROW, C);
+        if (!worksheet[address]) { worksheet[address] = { t: 's', v: '' }; }
+        mergeCellStyle(worksheet[address], titleStyle);
     }
 
-    worksheet['!merges'] = [{ s: { r: SUMMARY_TITLE_ROW, c: 0 }, e: { r: SUMMARY_TITLE_ROW, c: SUMMARY_LAST_COL } }];
-    worksheet['!rows'] = [{ hpt: 50 }];
+    const bannerRow = SHEET_ORIGIN.r + SUMMARY_TITLE_ROW;
+    worksheet['!merges'] = [{ s: { r: bannerRow, c: SHEET_ORIGIN.c }, e: { r: bannerRow, c: SHEET_ORIGIN.c + lastCol } }];
+    worksheet['!rows'] = [];
+    worksheet['!rows'][bannerRow] = { hpt: 50 };
 }
 
-function tableDataStyle(worksheet, cur) {
+function tableDataStyle(worksheet, table, cur) {
+    if (table.titleRow != null) mergeCellStyle(worksheet[cellAddress(table.titleRow, 0)], { font: { bold: true, sz: 12, color: { rgb: '1F3864' } } });
+    if (table.noteRow != null) mergeCellStyle(worksheet[cellAddress(table.noteRow, 0)], { font: { italic: true, color: { rgb: '595959' } } });
+
     const headerStyle = {
         font: { bold: true, color: { rgb: 'FFFFFF' } },
         fill: { fgColor: { rgb: '4F81BD' } },
         alignment: { horizontal: 'center', vertical: 'center' },
     };
 
-    for (let C = 0; C <= SUMMARY_LAST_COL; C++) {
-        const cell = worksheet[XLSX.utils.encode_cell({ r: SUMMARY_HEADER_ROW, c: C })];
+    for (let C = 0; C <= table.lastCol; C++) {
+        const cell = worksheet[cellAddress(table.headerRow, C)];
         if (cell) { mergeCellStyle(cell, headerStyle); }
     }
 
     const fmt = getExcelCurrencyFormat(cur);
-    const range = XLSX.utils.decode_range(worksheet['!ref']);
 
-    for (let R = SUMMARY_FIRST_DATA_ROW; R <= range.e.r; R++) {
+    for (let R = table.firstDataRow; R <= table.lastDataRow; R++) {
         // Left-align every cell in the data row.
-        for (let C = 0; C <= SUMMARY_LAST_COL; C++) {
-            const cell = worksheet[XLSX.utils.encode_cell({ r: R, c: C })];
+        for (let C = 0; C <= table.lastCol; C++) {
+            const cell = worksheet[cellAddress(R, C)];
             if (cell) mergeCellStyle(cell, LEFT_ALIGN);
         }
-        // Currency number format applies only to the money columns.
-        SUMMARY_MONEY_COLS.forEach((C) => {
-            const cell = worksheet[XLSX.utils.encode_cell({ r: R, c: C })];
-            if (!cell || typeof cell.v !== 'number') return;
-            cell.z = fmt;
+        // Number formats apply only to numeric cells in the table's money and percent columns.
+        table.moneyCols.forEach((C) => {
+            const cell = worksheet[cellAddress(R, C)];
+            if (cell && typeof cell.v === 'number') cell.z = fmt;
+        });
+        table.pctCols.forEach((C) => {
+            const cell = worksheet[cellAddress(R, C)];
+            if (cell && typeof cell.v === 'number') cell.z = PCT_FORMAT;
         });
     }
 
-    const margin = worksheet[XLSX.utils.encode_cell({ r: SUMMARY_FIRST_DATA_ROW, c: SUMMARY_MARGIN_COL })];
-    if (margin) margin.z = PCT_FORMAT;
+    // Border every cell from the header down, creating any blank cell so the grid has no gaps.
+    for (let R = table.headerRow; R <= table.lastDataRow; R++) {
+        for (let C = 0; C <= table.lastCol; C++) {
+            const address = cellAddress(R, C);
+            if (!worksheet[address]) worksheet[address] = { t: 's', v: '' };
+            mergeCellStyle(worksheet[address], CELL_BORDER);
+        }
+    }
 }
 
-function computeAoaColWidths(rows) {
-    const measured = rows.slice(SUMMARY_TITLE_ROW + 1);
+// Title, section title and note rows are skipped: they spill into empty cells instead of widening column A.
+function computeAoaColWidths(rows, skipRows) {
+    const measured = rows.filter((row, r) => !skipRows.has(r));
 
     let widest = 0;
     measured.forEach((row) => { if (row.length > widest) widest = row.length; });
@@ -258,17 +290,17 @@ function computeAoaColWidths(rows) {
     return { cols, wrapCols };
 }
 
-// Wrapping the merged title banner would fight the merge, so start at the header.
-function wrapColumns(worksheet, wrapCols) {
-    if (!wrapCols.length) return;
-    const range = XLSX.utils.decode_range(worksheet['!ref']);
-    for (let r = SUMMARY_HEADER_ROW; r <= range.e.r; r++) {
-        wrapCols.forEach((c) => {
-            mergeCellStyle(worksheet[XLSX.utils.encode_cell({ r, c })], {
-                alignment: { wrapText: true, vertical: 'top' },
+// Only table rows wrap; wrapping the banner, section titles or notes would squeeze them into one column.
+function wrapColumns(worksheet, wrapCols, tables) {
+    tables.forEach((table) => {
+        for (let r = table.headerRow; r <= table.lastDataRow; r++) {
+            wrapCols.forEach((c) => {
+                mergeCellStyle(worksheet[cellAddress(r, c)], {
+                    alignment: { wrapText: true, vertical: 'top' },
+                });
             });
-        });
-    }
+        }
+    });
 }
 
 function sizeColumn(maxLen) {
@@ -277,6 +309,11 @@ function sizeColumn(maxLen) {
         wch: Math.min(Math.max(desired, COL_MIN_WCH), COL_MAX_WCH),
         overflow: desired > COL_MAX_WCH,
     };
+}
+
+// Layout code counts rows and columns from the content's top-left; this shifts them past the margin.
+function cellAddress(r, c) {
+    return XLSX.utils.encode_cell({ r: r + SHEET_ORIGIN.r, c: c + SHEET_ORIGIN.c });
 }
 
 function mergeCellStyle(cell, patch) {
