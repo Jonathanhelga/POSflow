@@ -337,6 +337,7 @@ export async function deleteOrder(orderId, pin) {
     await postAdminDelete('/api/orders/delete', { orderId, pin });
 }
 
+// Reserves the next auto SKU in a transaction; never below fallbackSeed, so typed SKUs aren't reused.
 export async function reserveNextSku(uid, fallbackSeed = 0) {
     const counterRef = doc(db, 'skuCounters', uid);
     const nextSeq = await runTransaction(db, async (transaction) => {

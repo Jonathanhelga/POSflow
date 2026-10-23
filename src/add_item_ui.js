@@ -11,10 +11,26 @@ let currencyCode = 'IDR';
 
 function currentCurrency() { return currencyCode; }
 
-
+// Highest SKU-##### number in allItems, or 0; the floor for reserveNextSku's counter.
 function highestSkuSeq(items) {
-    const numbers = items.map(i => /^SKU-(\d+)$/.exec(i.sku)).filter(Boolean).map(m => parseInt(m[1], 10));
+    const numbers = items
+        .map(i => /^SKU-(\d+)$/.exec(i.sku))
+        .filter(Boolean)
+        .map(m => parseInt(m[1], 10));
     return numbers.length ? Math.max(...numbers) : 0;
+}
+
+// SKU-##### compared by number (SKU-0009 = SKU-00009); other formats by exact text.
+function skuKey(sku) {
+    const upper = (sku ?? '').toUpperCase();
+    const match = /^SKU-(\d+)$/.exec(upper);
+    return match ? `SKU-${parseInt(match[1], 10)}` : upper;
+}
+
+// The item whose SKU matches this one under skuKey, or undefined.
+function findItemBySku(sku) {
+    const key = skuKey(sku);
+    return allItems.find(i => skuKey(i.sku) === key);
 }
 
 // Instant preview only — the in-memory cache can be stale across tabs/devices,
@@ -160,6 +176,15 @@ export function initInventoryForm() {
             showToast('Cost Price and Selling Price must be valid numbers.', 'error');
             document.getElementById(badPrice).focus();
             return;
+        }
+
+        if (!skuAutoCheckbox.checked) {
+            const existing = findItemBySku(skuInput.value.trim().toUpperCase());
+            if (existing) {
+                showToast(`${existing.sku} is already used by ${existing.itemName}.`, 'error');
+                skuInput.focus();
+                return;
+            }
         }
 
         const originalText = submitBtn.textContent;
