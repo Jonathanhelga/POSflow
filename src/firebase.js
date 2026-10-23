@@ -337,19 +337,12 @@ export async function deleteOrder(orderId, pin) {
     await postAdminDelete('/api/orders/delete', { orderId, pin });
 }
 
-// Atomically reserves the next auto-generated SKU for this owner. The client-side
-// preview (generateNextSku in add_item_ui.js) reads the in-memory item cache, which
-// can be stale across tabs/devices — two sessions previewing at once would offer the
-// same "next" number. This transaction is the source of truth used at actual save
-// time: it increments a per-owner counter doc, so concurrent saves always land on
-// different sequence numbers. `fallbackSeed` seeds the counter the first time it's
-// used, from the highest existing SKU number the caller already has in memory, so
-// numbering continues where the shop's existing items left off.
 export async function reserveNextSku(uid, fallbackSeed = 0) {
     const counterRef = doc(db, 'skuCounters', uid);
     const nextSeq = await runTransaction(db, async (transaction) => {
         const snap = await transaction.get(counterRef);
-        const current = snap.exists() ? (Number(snap.data().value) || 0) : fallbackSeed;
+        const stored = snap.exists() ? (Number(snap.data().value) || 0) : 0;
+        const current = Math.max(stored, fallbackSeed);
         const next = current + 1;
         transaction.set(counterRef, { value: next, ownerId: uid }, { merge: true });
         return next;

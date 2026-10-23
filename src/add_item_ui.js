@@ -11,14 +11,9 @@ let currencyCode = 'IDR';
 
 function currentCurrency() { return currencyCode; }
 
-// Highest existing auto-format SKU number in the in-memory item cache, or 0 if
-// none. Used both to preview the next SKU and, at actual save time, to seed
-// reserveNextSku()'s counter the first time it's used for this owner.
+
 function highestSkuSeq(items) {
-    const numbers = items
-        .map(i => /^SKU-(\d+)$/.exec(i.sku))
-        .filter(Boolean)
-        .map(m => parseInt(m[1], 10));
+    const numbers = items.map(i => /^SKU-(\d+)$/.exec(i.sku)).filter(Boolean).map(m => parseInt(m[1], 10));
     return numbers.length ? Math.max(...numbers) : 0;
 }
 
