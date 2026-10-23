@@ -4,6 +4,7 @@ import { attachMoneyInput, parseMoneyInput } from './moneyInput';
 import { addSingleItem, allItems } from "./search_item";
 import { toggleModal } from './modal-handler';
 import { showToast } from "./toast";
+import { showConfirm } from './confirm_modal';
 
 let currencySymbol = 'Rp';
 
@@ -33,9 +34,13 @@ function findItemBySku(sku) {
     return allItems.find(i => skuKey(i.sku) === key);
 }
 
-// Instant preview only — the in-memory cache can be stale across tabs/devices,
-// so this is not what actually gets saved. See reserveNextSku() in firebase.js
-// for the transactionally-unique SKU used at submit time.
+// The item with this name, ignoring case and outer spaces, or undefined.
+function findItemByName(name) {
+    const key = name.trim().toLowerCase();
+    return allItems.find(i => (i.itemName ?? '').trim().toLowerCase() === key);
+}
+
+// Preview only; the saved SKU comes from reserveNextSku() at submit time.
 function generateNextSku(items) {
     return `SKU-${String(highestSkuSeq(items) + 1).padStart(5, '0')}`;
 }
@@ -187,13 +192,25 @@ export function initInventoryForm() {
             }
         }
 
+        const nameInput = document.getElementById('item-name');
+        const sameName = findItemByName(nameInput.value);
+        if (sameName) {
+            const ok = await showConfirm({
+                title: 'Item name already exists',
+                message: `An item named ${sameName.itemName} already exists (${sameName.sku}). Save anyway?`,
+                confirmText: 'Save',
+            });
+            if (!ok) {
+                nameInput.focus();
+                return;
+            }
+        }
+
         const originalText = submitBtn.textContent;
         submitBtn.disabled = true;
         submitBtn.textContent = "Saving Item...";
 
-        // The input just shows a preview when auto-SKU is on; reserve the real,
-        // transactionally-unique SKU now so two concurrent adds can't save the
-        // same number (see reserveNextSku in firebase.js).
+        // Auto-SKU reserves the real number now so two concurrent adds never share one.
         let sku = document.getElementById('sku').value.trim().toUpperCase();
         if (skuAutoCheckbox.checked) {
             try {
