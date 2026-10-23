@@ -172,9 +172,9 @@
 
 .btn--primary    { background-color: #4E7397; color: white; }
 .btn--success    { background-color: #86A38C; color: white; }
-.btn--neutral    { background-color: #718096; color: white; }
+.btn--neutral    { background-color: #6E9BC5; color: white; }
 .btn--priority   { background-color: #C58B8B; color: white; }
 .btn--legibility { background-color: #2D3748; color: white; }
-.btn--pink { background-color: #ea8cd1; color: rgb(149, 149, 149); }
-.btn--yellow { background-color: #ebdfa4; color: rgb(149, 149, 149);}
+.btn--pink       { background-color: #ea8cd1; color: #6B2157; }   /* light themes get dark text in their own hue */
+.btn--yellow     { background-color: #ebdfa4; color: #5C4A12; }
 

@@ -240,6 +240,54 @@ body {
     outline: none;
 }
 
+/* — Theme swatch picker (src/themes.js) — */
+.c-swatches {
+    --swatch-gap: var(--clr-panel);   /* ring gap must match what sits behind the circles */
+    display: flex;
+    gap: 10px;
+    padding: 2px 0;
+}
+.c-swatch {
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    border: 1px solid color-mix(in srgb, var(--clr-text-primary) 20%, transparent);
+    cursor: pointer;
+    padding: 0;
+    transition: transform 0.12s, box-shadow 0.12s;
+}
+@media (hover: hover) {
+    .c-swatch:hover { transform: scale(1.1); }
+}
+.c-swatch--active {
+    box-shadow: 0 0 0 2px var(--swatch-gap), 0 0 0 4px var(--clr-primary);
+}
+
+/* Boxed variant: sits in a box matching .c-field__input so it lines up with the inputs beside it */
+.c-swatches--boxed {
+    --swatch-gap: var(--clr-input-bg);
+    justify-content: space-between;
+    align-items: center;
+    padding: 8.5px 14px;   /* 28px circles + this = .c-field__input height */
+    border: 1px solid var(--clr-border);
+    border-radius: var(--radius);
+    background-color: var(--clr-input-bg);
+}
+.c-swatches--boxed .c-swatch {
+    width: 28px;
+    height: 28px;
+}
+
+.c-swatches__head {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+}
+.c-swatches__name {
+    font-size: 0.85rem;
+    color: var(--clr-text-secondary);
+}
+
 /* — Actions Group — */
 .c-actions {
     display: flex;

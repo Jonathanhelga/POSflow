@@ -5,6 +5,7 @@ import { addSingleItem, allItems } from "./search_item";
 import { toggleModal } from './modal-handler';
 import { showToast } from "./toast";
 import { showConfirm } from './confirm_modal';
+import { buildThemeSwatches, setActiveTheme, getActiveTheme } from './themes';
 
 let currencySymbol = 'Rp';
 
@@ -117,6 +118,11 @@ export function initInventoryForm() {
     attachMoneyInput(document.getElementById('cost-price'), currentCurrency);
     attachMoneyInput(document.getElementById('sell-price'), currentCurrency);
 
+    const themePicker = document.getElementById('tag-color');
+    const themeNameEl = document.getElementById('tag-color-name');
+    buildThemeSwatches(themePicker, themeNameEl);
+    setActiveTheme(themePicker, 'primary', themeNameEl);
+
     document.getElementById('js-item-create-open').addEventListener('click', () => {
         const currency = getCachedUserProfile()?.currency || 'IDR';
         currencyCode = currency;
@@ -225,7 +231,7 @@ export function initInventoryForm() {
         }
 
         const formData = {
-            tagColor: document.getElementById('tag-color').value,
+            tagColor: getActiveTheme(themePicker),
             sku,
             itemName: document.getElementById('item-name').value.trim(),
             costPrice: cost.value,

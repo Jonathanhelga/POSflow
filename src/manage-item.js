@@ -12,9 +12,9 @@ import { attachListKeyNav } from './listKeyNav';
 import { getCategories } from './categories';
 import { getItemCategories } from './item_categories';
 import { endOfDayMs, toDateInputValue, promoRemaining } from './promo';
+import { swatchFor, themeName, buildThemeSwatches, setActiveTheme, getActiveTheme } from './themes';
 let filteredItems  = [];
 const selection    = createSelection();
-let selectedTheme  = 'primary';
 let selectedCategories = new Set();
 
 // Change-history paging state (mirrors the stock-update history in the
@@ -22,53 +22,6 @@ let selectedCategories = new Set();
 const HISTORY_PAGE = 5;
 let historyLastDoc = null;
 let historyItemId  = null;
-
-const TAG_SWATCH = {
-    primary:    '#4E7397',
-    success:    '#86A38C',
-    neutral:    '#718096',
-    priority:   '#C58B8B',
-    legibility: '#2D3748',
-    pink:       '#ea8cd1',
-    yellow:     '#ebdfa4',
-};
-const THEMES = [
-    { token: 'primary',    name: 'Muted Cobalt' },
-    { token: 'success',    name: 'Sage Green' },
-    { token: 'neutral',    name: 'Soft Blue' },
-    { token: 'priority',   name: 'Dusty Rose' },
-    { token: 'legibility', name: 'Deep Charcoal' },
-    { token: 'pink',       name: 'Baby Pink' },
-    { token: 'yellow',     name: 'Yellow Butter' },
-];
-
-function swatchFor(tagColor) {
-    return TAG_SWATCH[tagColor] || 'var(--clr-border)';
-}
-
-function buildThemeSwatches() {
-    const container = document.getElementById('mi-edit-theme');
-    const frag = document.createDocumentFragment();
-    THEMES.forEach(theme => {
-        const btn = document.createElement('button');
-        btn.type = 'button';
-        btn.className = 'mi-swatch';
-        btn.dataset.theme = theme.token;
-        btn.title = theme.name;            // native tooltip on hover
-        btn.style.backgroundColor = swatchFor(theme.token);
-        btn.addEventListener('click', () => setActiveTheme(theme.token));
-        frag.appendChild(btn);
-    });
-    container.replaceChildren(frag);
-}
-
-function setActiveTheme(token) {
-    selectedTheme = token;
-    document.querySelectorAll('#mi-edit-theme .mi-swatch').forEach(sw => {
-        sw.classList.toggle('mi-swatch--active', sw.dataset.theme === token);
-    });
-}
-
 
 function buildCategoryChips() {
     const container = document.getElementById('mi-edit-categories');
@@ -215,7 +168,7 @@ function populateDetail(item) {
     fillPromoFields(item.promo);
     selectedCategories = new Set(getItemCategories(item));
     buildCategoryChips();
-    setActiveTheme(item.tagColor || 'primary');
+    setActiveTheme(document.getElementById('mi-edit-theme'), item.tagColor || 'primary');
 
     clearFeedback();
 
@@ -343,10 +296,6 @@ function promoWriteFields(promo) {
 
 //  Change diffing
 
-function themeName(token) {
-    return (THEMES.find(t => t.token === token) || {}).name || token || '—';
-}
-
 // usedQty is deliberately left out: it moves on every sale, and the history is for changes the owner made, not for a running sales log.
 function fmtPromo(promo) {
     if (!promo) return '(none)';
@@ -404,7 +353,7 @@ async function handleSave(event) {
     const minStockLevel = parseFloat(document.getElementById('mi-edit-min').value);
     const supplier      = document.getElementById('mi-edit-supplier').value.trim();
     const categories    = [...selectedCategories];
-    const tagColor      = selectedTheme;
+    const tagColor      = getActiveTheme(document.getElementById('mi-edit-theme'));
 
     if (!cost.valid || costPrice < 0) {
         showFeedback('Cost Price must be a number of 0 or more.', 'error');
@@ -643,7 +592,7 @@ export function initManageItem(user) {
     const openBtn = document.getElementById('manage-item-open');
     if (!openBtn) return;
 
-    buildThemeSwatches();
+    buildThemeSwatches(document.getElementById('mi-edit-theme'));
 
     // Attached once at boot, not on each open, so the listener does not stack.
     attachMoneyInput(document.getElementById('mi-edit-cost'), currentCurrency);

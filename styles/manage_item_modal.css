@@ -365,27 +365,6 @@
     padding-left: 10px;
 }
 
-/* ─── Theme swatch picker ────────────────────────────────────── */
-
-.mi-swatches {
-    display: flex;
-    gap: 10px;
-    padding: 2px 0;
-}
-.mi-swatch {
-    width: 26px;
-    height: 26px;
-    border-radius: 50%;
-    border: 1px solid var(--clr-border);
-    cursor: pointer;
-    padding: 0;
-    transition: transform 0.12s, box-shadow 0.12s;
-}
-.mi-swatch:hover { transform: scale(1.1); }
-.mi-swatch--active {
-    box-shadow: 0 0 0 2px var(--clr-panel), 0 0 0 4px var(--clr-primary);
-}
-
 /* ─── Category chips (multi-select) ──────────────────────────── */
 
 .mi-chip-row {

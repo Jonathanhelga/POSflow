@@ -344,16 +344,11 @@
                   </div>
                 </div>
                 <div class="c-field">
-                  <label class="c-field__label" for="tag-color">Button Theme</label>
-                  <select id="tag-color" class="c-field__select">
-                    <option value="primary">Muted Cobalt</option>
-                    <option value="success">Sage Green</option>
-                    <option value="neutral">Soft Blue</option>
-                    <option value="priority">Dusty Rose</option>
-                    <option value="legibility">Deep Charcoal</option>
-                    <option value="pink">Baby Pink</option>
-                    <option value="yellow">Yellow Butter</option>
-                  </select>
+                  <div class="c-swatches__head">
+                    <span class="c-field__label">Button Theme</span>
+                    <span id="tag-color-name" class="c-swatches__name"></span>
+                  </div>
+                  <div id="tag-color" class="c-swatches c-swatches--boxed"></div>
                 </div>
                 <div class="c-field">
                   <label class="c-field__label" for="item-name">Item Name <span class="c-required">*</span></label>
@@ -1033,7 +1028,7 @@
                   </div>
                   <div class="mi-field">
                     <span class="mi-field__label">Button Theme</span>
-                    <div id="mi-edit-theme" class="mi-swatches"></div>
+                    <div id="mi-edit-theme" class="c-swatches"></div>
                   </div>
                 </div>
               </div>
