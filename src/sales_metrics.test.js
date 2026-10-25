@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { summarizeTotals, summarizeItems, summarizeDiscounts, summarizePaymentMethods, summarizeCategories } from './sales_metrics';
+import { orderNetRevenue, summarizeTotals, summarizeItems, summarizeDiscounts, summarizePaymentMethods, summarizeCategories } from './sales_metrics';
 
 const latteAndCakeOrder = {
     items: [
@@ -191,5 +191,16 @@ describe('summarizeCategories', () => {
         expect(summarizeCategories([latteAndCakeOrder], inventory)).toEqual([
             { category: 'Uncategorized', unitsSold: 2, revenue: 100000, profit: 50000 },
         ]);
+    });
+});
+
+describe('orderNetRevenue', () => {
+    it('uses the amount after order discounts, before tax', () => {
+        expect(orderNetRevenue(latteAndCakeOrder)).toBe(90000);
+    });
+
+    it('falls back to total minus tax for an order from before the discount feature', () => {
+        expect(orderNetRevenue({ totalPrice: 11000, taxAmount: 1000 })).toBe(10000);
+        expect(orderNetRevenue({ totalPrice: 5000 })).toBe(5000);
     });
 });

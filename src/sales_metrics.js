@@ -1,6 +1,12 @@
-// Pure order math shared by the export (and later Insights): no Firestore, DOM or Excel here.
+// Pure order math shared by the export and Sales Insights: no Firestore, DOM or Excel here.
 import { PAYMENT_METHODS, PAYMENT_METHOD_LABELS } from './payment_methods';
 import { getItemCategories } from './item_categories';
+
+// What the business keeps from one order: after order discounts, before tax.
+// Orders from before the discount feature have no subtotalAfterDiscount, so fall back to total minus tax.
+export function orderNetRevenue(order){
+    return order.subtotalAfterDiscount ?? (order.totalPrice - (order.taxAmount ?? 0));
+}
 
 export function summarizeTotals(orders){
     let itemsSold = 0;
@@ -18,7 +24,7 @@ export function summarizeTotals(orders){
         });
         grossCollected += order.totalPrice;
         taxCollected += tax;
-        netRevenue += order.subtotalAfterDiscount ?? (order.totalPrice - tax);
+        netRevenue += orderNetRevenue(order);
     });
 
     const totalOrders = orders.length;
@@ -93,7 +99,7 @@ export function summarizePaymentMethods(orders){
         const method = order.paymentMethod ?? 'unrecorded';
         if (!rowsByMethod.has(method)) rowsByMethod.set(method, { method, label: 'Not recorded', orders: 0, netRevenue: 0 });
         const row = rowsByMethod.get(method);
-        const net = order.subtotalAfterDiscount ?? (order.totalPrice - (order.taxAmount ?? 0));
+        const net = orderNetRevenue(order);
         row.orders += 1;
         row.netRevenue += net;
         totalNet += net;

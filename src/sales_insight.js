@@ -1,10 +1,10 @@
 import Chart from 'chart.js/auto'
 import { toggleModal } from './modal-handler';
-import { fetchUserProfile, fetchInventory, fetchOrders, getCurrentCurrency as currentCurrency } from './firebase';
+import { fetchUserProfile, fetchOrders, getCurrentCurrency as currentCurrency } from './firebase';
 import { formatCurrency, getCurrencySymbol } from './formatCurrency';
 import { showToast } from './toast';
+import { orderNetRevenue, summarizeTotals, summarizeItems } from './sales_metrics';
 
-let inventory_item = [];
 let orders = [];
 let chartInstance = null;
 let topItemsSortKey = 'revenue';
@@ -15,11 +15,10 @@ export async function initInsights(user){
     if(!user){ return; }
     try{
         await fetchUserProfile(user.uid);
-        inventory_item = await fetchInventory(user.uid);
         orders = await fetchOrders(user.uid);
         setupToolBar();
     }catch(err){
-        console.error('Failed to load inventory:', err);
+        console.error('Failed to load insights:', err);
     }
 }
 
@@ -128,26 +127,7 @@ function applyCustomRange(event){
 }
 
 function fillTopItemsTable(filtered_orders){
-    const popularItem = new Map();
-    const revenuePerItem = new Map();
-    inventory_item.forEach(item => {
-        popularItem.set(item.itemName, 0);
-        revenuePerItem.set(item.itemName, 0);
-    });
-    filtered_orders.forEach(order => {
-        order.items.forEach(item => {
-            if(popularItem.has(item.name)){
-                popularItem.set(item.name, popularItem.get(item.name) + item.quantity);
-                revenuePerItem.set(item.name, revenuePerItem.get(item.name) + item.subtotal);
-            }
-        });
-    });
-
-    topItemsRows = [];
-    popularItem.forEach((quantity, name) => {
-        topItemsRows.push({ name, quantity, revenue: revenuePerItem.get(name) });
-    });
-
+    topItemsRows = summarizeItems(filtered_orders);
     renderTopItemsTable();
 }
 
@@ -177,7 +157,7 @@ function renderTopItemsTable(){
         tableData2.textContent = row.name;
         const tableData3 = document.createElement('td');
         tableData3.className = 'c-sales__col-num';
-        tableData3.textContent = row.quantity;
+        tableData3.textContent = row.unitsSold;
         const tableData4 = document.createElement('td');
         tableData4.className = 'c-sales__col-num';
         tableData4.textContent = `${getCurrencySymbol(currentCurrency())} ${formatCurrency(row.revenue, currentCurrency())}`;
@@ -190,23 +170,14 @@ function renderTopItemsTable(){
 }
 
 function fillInKPI(filtered_orders){
-    let revenue = 0;
-    let totalOrder = filtered_orders.length;
-    let totalItemSold = 0;
-    let profit = 0;
-    filtered_orders.forEach(order => {
-        revenue += order.totalPrice;
-        order.items.forEach(item => {
-            totalItemSold += item.quantity;
-            profit += item.subtotal - ((item.cost ?? 0) * item.quantity);
-        })
-    })
+    const totals = summarizeTotals(filtered_orders);
 
     const symbol = getCurrencySymbol(currentCurrency());
-    document.getElementById('js-kpi-revenue').textContent = `${symbol} ${formatCurrency(revenue, currentCurrency())}`;
-    document.getElementById('js-kpi-orders').textContent = totalOrder;
-    document.getElementById('js-kpi-items').textContent = totalItemSold;
-    document.getElementById('js-kpi-profit').textContent = `${symbol} ${formatCurrency(profit, currentCurrency())}`;
+    document.getElementById('js-kpi-revenue').textContent = `${symbol} ${formatCurrency(totals.netRevenue, currentCurrency())}`;
+    document.getElementById('js-kpi-orders').textContent = totals.totalOrders;
+    document.getElementById('js-kpi-items').textContent = totals.itemsSold;
+    document.getElementById('js-kpi-aov').textContent = `${symbol} ${formatCurrency(totals.aov, currentCurrency())}`;
+    document.getElementById('js-kpi-profit').textContent = `${symbol} ${formatCurrency(totals.profit, currentCurrency())}`;
 }
 
 function filterOrders(startingDate, endDate){
@@ -245,7 +216,7 @@ function bucketRevenueByDay(filtered_orders, startDate, endDate){
 
     filtered_orders.forEach(order => {
         const key = dayKey(order.createdAt.toDate());
-        if (buckets.has(key)) { buckets.set(key, buckets.get(key) + order.totalPrice); }
+        if (buckets.has(key)) { buckets.set(key, buckets.get(key) + orderNetRevenue(order)); }
     });
 
     return { labels: [...buckets.keys()], values: [...buckets.values()] };
@@ -272,7 +243,7 @@ function renderChart(filtered_orders, startDate, endDate){
         data: {
             labels,
             datasets: [{
-                label: 'Revenue',
+                label: 'Net Revenue',
                 data: values,
                 backgroundColor: 'rgba(59, 130, 246, 0.6)',
                 borderColor: 'rgb(0, 45, 117)',

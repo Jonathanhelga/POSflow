@@ -56,8 +56,6 @@
     --clr-status-pos-fg: #166534;   /* good / success text     */
     --clr-status-neg-bg: #fee2e2;   /* alert badge fill        */
     --clr-status-neg-fg: #991b1b;   /* alert / error text      */
-    --clr-trend-up:      #2f855a;   /* KPI delta rising        */
-    --clr-trend-down:    #c05621;   /* KPI delta falling       */
 }
 
 /*  DARK THEME */
@@ -107,8 +105,6 @@
     --clr-status-pos-fg: #86efac;
     --clr-status-neg-bg: #7f1d1d;
     --clr-status-neg-fg: #fca5a5;
-    --clr-trend-up:      #4ade80;
-    --clr-trend-down:    #fb923c;
 }
 
 

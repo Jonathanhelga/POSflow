@@ -141,9 +141,6 @@
     grid-template-columns: repeat(3, 1fr);
     gap: 0.875rem;
 }
-@media (min-width: 720px) {
-    .c-kpi-grid { grid-template-columns: repeat(4, 1fr); }
-}
 
 .c-kpi {
     display: flex;
@@ -173,14 +170,6 @@
     line-height: 1.1;
     letter-spacing: -0.01em;
 }
-.c-kpi__delta {
-    font-size: 0.78rem;
-    font-weight: 500;
-    color: var(--clr-text-secondary);
-    min-height: 1em;            /* reserve space so layout doesn't jump */
-}
-.c-kpi__delta.is-up   { color: var(--clr-trend-up); }
-.c-kpi__delta.is-down { color: var(--clr-trend-down); }
 
 /* ── Card primitive (chart + top items share this) ────────────── */
 .c-card {

@@ -1274,36 +1274,31 @@
           <!-- KPI tiles -->
           <section class="c-kpi-grid" aria-label="Key metrics">
             <article class="c-kpi">
-              <span class="c-kpi__label">Revenue</span>
+              <span class="c-kpi__label">Net Revenue</span>
               <span class="c-kpi__value" id="js-kpi-revenue">Rp 0</span>
-              <span class="c-kpi__delta" id="js-kpi-revenue-delta"></span>
             </article>
             <article class="c-kpi">
               <span class="c-kpi__label">Orders</span>
               <span class="c-kpi__value" id="js-kpi-orders">0</span>
-              <span class="c-kpi__delta" id="js-kpi-orders-delta"></span>
             </article>
             <article class="c-kpi">
               <span class="c-kpi__label">Items Sold</span>
               <span class="c-kpi__value" id="js-kpi-items">0</span>
-              <span class="c-kpi__delta" id="js-kpi-items-delta"></span>
             </article>
-            <!-- <article class="c-kpi">
+            <article class="c-kpi">
               <span class="c-kpi__label">Avg Order Value</span>
               <span class="c-kpi__value" id="js-kpi-aov">Rp 0</span>
-              <span class="c-kpi__delta" id="js-kpi-aov-delta"></span>
-            </article> -->
+            </article>
             <article class="c-kpi">
               <span class="c-kpi__label">Profit</span>
               <span class="c-kpi__value" id="js-kpi-profit">Rp 0</span>
-              <span class="c-kpi__delta" id="js-kpi-profit-delta"></span>
             </article>
           </section>
 
           <!-- Chart card -->
           <section class="c-card c-sales__chart-card">
             <header class="c-card__header">
-              <h3 class="c-card__title">Revenue over time</h3>
+              <h3 class="c-card__title">Net revenue over time</h3>
               <span class="c-card__hint" id="js-sales-chart-hint">Daily totals</span>
             </header>
             <div class="c-card__body c-sales__chart-body">
@@ -1318,7 +1313,7 @@
           <section class="c-card c-sales__top-card">
             <header class="c-card__header">
               <h3 class="c-card__title">Top selling items</h3>
-              <span class="c-card__hint">By revenue</span>
+              <span class="c-card__hint">Revenue before order discounts</span>
             </header>
             <div class="c-card__body">
               <table class="c-table c-sales__table">
@@ -1326,7 +1321,7 @@
                   <tr>
                     <th class="c-sales__col-rank">#</th>
                     <th>Item</th>
-                    <th class="c-sales__col-num c-sales__col-sortable" data-sort="quantity">Qty<span class="c-sales__sort-arrow"></span></th>
+                    <th class="c-sales__col-num c-sales__col-sortable" data-sort="unitsSold">Qty<span class="c-sales__sort-arrow"></span></th>
                     <th class="c-sales__col-num c-sales__col-sortable is-active" data-sort="revenue">Revenue<span class="c-sales__sort-arrow"></span></th>
                   </tr>
                 </thead>
