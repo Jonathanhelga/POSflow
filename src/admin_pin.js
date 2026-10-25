@@ -28,7 +28,13 @@ async function callPinApi(path, pin, extra = {}) {
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${idToken}` },
         body: JSON.stringify({ pin, ...extra }),
     });
-    return { ok: response.ok };
+    return { ok: response.ok, status: response.status };
+}
+
+// adminPinLimiter answers 429 after too many wrong PINs, even for a correct one,
+// so a lockout must not be shown as a wrong PIN.
+function pinFailureMessage(status, fallback) {
+    return status === 429 ? 'Too many attempts. Try again in a few minutes.' : fallback;
 }
 
 async function refreshPinStatus() {
@@ -125,9 +131,9 @@ async function handleVerifyOldPin(event) {
     btn.disabled = true;
 
     try {
-        const { ok } = await callPinApi('/api/admin-pin/verify', input);
+        const { ok, status } = await callPinApi('/api/admin-pin/verify', input);
         if (!ok) {
-            setApFeedback('ap-old-feedback', 'Incorrect Admin PIN.');
+            setApFeedback('ap-old-feedback', pinFailureMessage(status, 'Incorrect Admin PIN.'));
             return;
         }
         setApFeedback('ap-old-feedback', '');
@@ -162,9 +168,9 @@ async function handleSaveNewPin(event) {
         // When changing an existing PIN, send the old PIN the server now requires.
         // It is still in ap-old-input from the verify step earlier in this flow.
         const extra = isChangingPin ? { currentPin: getRawPin('ap-old-input') } : {};
-        const { ok } = await callPinApi('/api/admin-pin/set', newPin, extra);
+        const { ok, status } = await callPinApi('/api/admin-pin/set', newPin, extra);
         if (!ok) {
-            setApFeedback('ap-feedback', 'Failed to save PIN. Please try again.');
+            setApFeedback('ap-feedback', pinFailureMessage(status, 'Failed to save PIN. Please try again.'));
             return;
         }
         hasPinConfigured = true;
@@ -199,9 +205,9 @@ async function handlePinGateSubmit(event) {
     btn.disabled = true;
 
     try {
-        const { ok } = await callPinApi('/api/admin-pin/verify', input);
+        const { ok, status } = await callPinApi('/api/admin-pin/verify', input);
         if (!ok) {
-            setApFeedback('ap-gate-feedback', 'Incorrect Admin PIN.');
+            setApFeedback('ap-gate-feedback', pinFailureMessage(status, 'Incorrect Admin PIN.'));
             return;
         }
         toggleModal('admin-pin-gate-modal');
