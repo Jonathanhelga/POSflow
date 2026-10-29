@@ -657,6 +657,7 @@ async function handleDeleteOrder() {
         applyFilters();
     } catch (err) {
         console.error('Order delete failed:', err);
+        showToast(err.message, 'error');
         btn.disabled = false;
     } finally {
         btn.textContent = 'Delete Order';

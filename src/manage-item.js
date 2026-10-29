@@ -473,7 +473,7 @@ async function handleDelete() {
         btn.textContent = 'Delete Item';
     } catch (err) {
         console.error('Item delete failed:', err);
-        showFeedback('Failed to delete item. Please try again.', 'error');
+        showFeedback(err.message, 'error');
         btn.disabled    = false;
         btn.textContent = 'Delete Item';
     }

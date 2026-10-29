@@ -48,6 +48,7 @@ const adminDeleteLimiter = rateLimit({
     windowMs: 15 * 60 * 1000,
     max: 10,                       // only wrong-PIN attempts count toward this
     skipSuccessfulRequests: true,
+    message: { error: "Too many wrong PIN attempts. Please try again in 15 minutes." },
     standardHeaders: true,
     legacyHeaders: false,
 });

@@ -318,11 +318,16 @@ export async function updateItemData(itemId, fields) {
 // order restock now lives in that endpoint's transaction.
 async function postAdminDelete(path, body) {
     const idToken = await auth.currentUser.getIdToken();
-    const response = await fetch(`${SERVER_URL}${path}`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${idToken}` },
-        body: JSON.stringify(body),
-    });
+    let response;
+    try {
+        response = await fetch(`${SERVER_URL}${path}`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${idToken}` },
+            body: JSON.stringify(body),
+        });
+    } catch {
+        throw new Error('Could not reach the server. Check your connection and try again.');
+    }
     if (!response.ok) {
         const data = await response.json().catch(() => ({}));
         throw new Error(data.error || `Delete failed with status ${response.status}`);
