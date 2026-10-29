@@ -454,29 +454,16 @@ async function handleDelete() {
     });
     if (!confirmed) return;
 
-    const pin = await requireAdminPin();
-    if (!pin) return;
+    const deleted = await requireAdminPin(pin => deleteInventoryItem(item.id, pin));
+    if (!deleted) return;
 
-    const btn = document.getElementById('mi-delete-btn');
-    btn.disabled    = true;
-    btn.textContent = 'Deleting...';
-
-    try {
-        await deleteInventoryItem(item.id, pin);
-        removeLocalItem(item.id);
-        selection.clear();
-        document.getElementById('mi-detail-view').classList.add('is-hidden');
-        document.getElementById('mi-placeholder').classList.remove('is-hidden');
-        document.getElementById('mi-save-btn').disabled = true;
-        renderItemList_Manage(filteredItems = filteredItems.filter(i => i.id !== item.id));
-        showToast(`Successfully delete item ${item.id}`);
-        btn.textContent = 'Delete Item';
-    } catch (err) {
-        console.error('Item delete failed:', err);
-        showFeedback(err.message, 'error');
-        btn.disabled    = false;
-        btn.textContent = 'Delete Item';
-    }
+    removeLocalItem(item.id);
+    selection.clear();
+    document.getElementById('mi-detail-view').classList.add('is-hidden');
+    document.getElementById('mi-placeholder').classList.remove('is-hidden');
+    document.getElementById('mi-save-btn').disabled = true;
+    renderItemList_Manage(filteredItems = filteredItems.filter(i => i.id !== item.id));
+    showToast(`Successfully delete item ${item.id}`);
 }
 
 //  Feedback helpers

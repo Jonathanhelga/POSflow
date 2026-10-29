@@ -634,34 +634,21 @@ async function handleDeleteOrder() {
     });
     if (!confirmed) return;
 
-    const pin = await requireAdminPin();
-    if (!pin) return;
+    const deleted = await requireAdminPin(pin => deleteOrder(order.id, pin));
+    if (!deleted) return;
 
-    const btn = document.getElementById('oh-delete-btn');
-    btn.disabled = true;
-    btn.textContent = 'Deleting...';
+    allOrders = allOrders.filter(o => o.id !== order.id);
+    currentOrder = null;
 
-    try {
-        await deleteOrder(order.id, pin);
-        allOrders = allOrders.filter(o => o.id !== order.id);
-        currentOrder = null;
-
-        for (const item of order.items ?? []) {
-            updateLocalStock(item.id, item.quantity);
-        }
-        refreshGrid();
-        refreshSelectedItemDetail();
-
-        showToast(`Successfully delete order ${order.id}`);
-        resetBillPanel();
-        applyFilters();
-    } catch (err) {
-        console.error('Order delete failed:', err);
-        showToast(err.message, 'error');
-        btn.disabled = false;
-    } finally {
-        btn.textContent = 'Delete Order';
+    for (const item of order.items ?? []) {
+        updateLocalStock(item.id, item.quantity);
     }
+    refreshGrid();
+    refreshSelectedItemDetail();
+
+    showToast(`Successfully delete order ${order.id}`);
+    resetBillPanel();
+    applyFilters();
 }
 
 // Init

@@ -6,6 +6,9 @@ const SERVER_URL = import.meta.env.VITE_SERVER_URL;
 let currentUser = null;
 let isChangingPin = false;
 let resolvePinConfirm = null;
+// The action the open PIN gate runs with the typed PIN, and whether it is mid-request.
+let pinGateAction = null;
+let pinGateBusy = false;
 // Whether the account has a PIN configured, per the server's /adminPins record.
 // Cached locally after initAdminPin() so UI can decide synchronously (setup vs
 // gate) without an async round-trip on every click.
@@ -202,40 +205,54 @@ async function handlePinGateSubmit(event) {
     }
 
     const btn = document.getElementById('ap-gate-confirm-btn');
+    const cancelBtn = document.getElementById('ap-gate-cancel-btn');
     btn.disabled = true;
+    cancelBtn.disabled = true;
+    pinGateBusy = true;
+    setApFeedback('ap-gate-feedback', '');
 
     try {
-        const { ok, status } = await callPinApi('/api/admin-pin/verify', input);
-        if (!ok) {
-            setApFeedback('ap-gate-feedback', pinFailureMessage(status, 'Incorrect Admin PIN.'));
-            return;
-        }
-        toggleModal('admin-pin-gate-modal');
-        if (resolvePinConfirm) resolvePinConfirm(input);
+        // The server checks the PIN as part of the action itself, so a wrong PIN
+        // throws here and the modal stays open with the server's message.
+        await pinGateAction(input);
+        pinGateBusy = false;
+        const gateModal = document.getElementById('admin-pin-gate-modal');
+        if (!gateModal.classList.contains('is-hidden')) toggleModal('admin-pin-gate-modal');
+        if (resolvePinConfirm) resolvePinConfirm(true);
         resolvePinConfirm = null;
     } catch (err) {
-        console.error('Failed to verify Admin PIN:', err);
-        setApFeedback('ap-gate-feedback', 'Could not verify PIN. Check your connection.');
+        pinGateBusy = false;
+        console.error('Admin PIN action failed:', err);
+        setApFeedback('ap-gate-feedback', err.message);
+        // The modal was closed mid-request (Escape / backdrop): nobody is looking at it.
+        if (document.getElementById('admin-pin-gate-modal').classList.contains('is-hidden') && resolvePinConfirm) {
+            resolvePinConfirm(false);
+            resolvePinConfirm = null;
+        }
     } finally {
         btn.disabled = false;
+        cancelBtn.disabled = false;
     }
 }
 
 function handlePinGateCancel() {
     toggleModal('admin-pin-gate-modal');
-    if (resolvePinConfirm) resolvePinConfirm(null);
+    if (resolvePinConfirm) resolvePinConfirm(false);
     resolvePinConfirm = null;
 }
 
 // Exported gate: call before any inventory item / order deletion.
-// Resolves to the verified 4-digit PIN, which the caller must forward to the
-// server delete endpoint so the deletion itself carries proof of verification.
-// Resolves to null when the user cancels or has no PIN configured yet.
-export function requireAdminPin() {
+// `action(pin)` is the delete itself. It runs with the typed PIN, and the server
+// verifies that PIN inside the delete endpoint, so the PIN is checked exactly once.
+// If `action` throws, the error message is shown in the modal and it stays open
+// so the user can retry. Resolves to true once `action` has succeeded, and to
+// false when the user cancels, closes the modal, or has no PIN configured yet.
+export function requireAdminPin(action) {
     if (!hasPinConfigured) {
         openSetupFlow();
-        return Promise.resolve(null);
+        return Promise.resolve(false);
     }
+    pinGateAction = action;
     openPinGate();
     return new Promise(resolve => {
         let settled = false;
@@ -249,8 +266,8 @@ export function requireAdminPin() {
 
         const gateModal = document.getElementById('admin-pin-gate-modal');
         const observer = new MutationObserver(() => {
-            if (gateModal.classList.contains('is-hidden')) {
-                settle(null);
+            if (gateModal.classList.contains('is-hidden') && !pinGateBusy) {
+                settle(false);
             }
         });
         observer.observe(gateModal, { attributes: true, attributeFilter: ['class'] });
