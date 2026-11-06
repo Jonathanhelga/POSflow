@@ -1,8 +1,7 @@
 import { toggleModal } from './modal-handler';
 import { formatCurrency, getCurrencySymbol, roundToCurrency } from "./formatCurrency";
-import { allItems, updateLocalStock, updateLocalPromoUsage } from "./search_item";
+import { allItems } from "./search_item";
 import { auth, submitOrder, upsertCustomerByPhone, saveOrderFieldDefinitions, getCachedUserProfile, getCurrentCurrency as currentCurrency } from "./firebase";
-import { refreshInsights } from './sales_insight';
 import {
     openCustomerCheckout,
     closeCustomerCheckout,
@@ -453,20 +452,11 @@ async function handleCheckoutFormSubmit(e) {
     );
 
     try {
-        mappedItems.forEach(item => {
-            updateLocalStock(item.id, -item.quantity);
-            updateLocalPromoUsage(item.id, item.promoDiscountedQty);
-        });
         clearOrderTable();
-        refreshInsights(user);
         closeCustomerCheckout();
         showToast('Order submitted successfully!');
     } catch (err) {
         console.error("Post-submit local update failed:", err);
-        mappedItems.forEach(item => {
-            updateLocalStock(item.id, item.quantity);
-            updateLocalPromoUsage(item.id, -item.promoDiscountedQty);
-        });
         showToast('Order was submitted, but display failed to update. Please refresh.', 'error');
     } finally {
         setCheckoutSubmitting(false, "Submit Order");

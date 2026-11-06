@@ -8,6 +8,17 @@ export function attachListKeyNav(config) {
     document.addEventListener('keydown', (e) => handleListKeyNav(e, config));
 }
 
+// Re-renders a list while keeping the user's place: its scroll position and the
+// keyboard cursor. For updates the user did not trigger, such as a sale on another
+// device changing a row while the list is open.
+export function rerenderKeepingPlace(container, render) {
+    const scrollTop = container.scrollTop;
+    const cursor = cursorIndexOf(Array.from(container.children));
+    render();
+    container.scrollTop = scrollTop;
+    if (cursor !== -1) {container.children[cursor]?.classList.add(CURSOR_CLASS);}
+}
+
 function handleListKeyNav(e, config) {
     if (e.key !== 'ArrowDown' && e.key !== 'ArrowUp' && e.key !== 'Enter') return;
 

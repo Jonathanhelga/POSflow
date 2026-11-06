@@ -2,13 +2,13 @@ import { updateItemData, deleteInventoryItem, getCachedUserProfile, addMetaUpdat
 import { getCurrencySymbol, formatCurrency } from './formatCurrency';
 import { attachMoneyInput, parseMoneyInput, formatMoneyInput } from './moneyInput';
 import { toggleModal } from './modal-handler';
-import { allItems, loadAllItems, updateLocalItem, removeLocalItem, refreshGrid } from './search_item';
+import { allItems, getItemsStatus, onItemsChanged, filterItems } from './search_item';
 import { createSelection } from './selection';
 import { showConfirm } from './confirm_modal';
 import { requireAdminPin } from './admin_pin';
 import { showToast } from "./toast";
 import { skeletonBar } from './skeleton';
-import { attachListKeyNav } from './listKeyNav';
+import { attachListKeyNav, rerenderKeepingPlace } from './listKeyNav';
 import { getCategories } from './categories';
 import { getItemCategories } from './item_categories';
 import { endOfDayMs, toDateInputValue, promoRemaining } from './promo';
@@ -99,6 +99,7 @@ function renderItemList_Manage(items) {
     items.forEach(item => {
         const card = document.createElement('div');
         card.className = 'mi-card';
+        if (selection.is(item)) card.classList.add('mi-card--active');
         card.dataset.itemId = item.id;
 
         const topRow = document.createElement('div');
@@ -131,14 +132,6 @@ function selectItem(item, cardEl) {
     document.querySelectorAll('.mi-card').forEach(c => c.classList.remove('mi-card--active'));
     cardEl.classList.add('mi-card--active');
     selection.set(item);
-    populateDetail(item);
-}
-
-// Re-render the detail panel for the currently selected item, e.g. after its
-// stock is mutated elsewhere (order deletion restock) while the modal is open
-export function refreshSelectedItemDetail() {
-    const item = selection.get();
-    if (!item) return;
     populateDetail(item);
 }
 
@@ -220,9 +213,8 @@ function clearPromoFields() {
     setPctLocked(false);
 }
 
-// The count can lag: `allItems` is loaded once per modal open, so it reflects
-// the total as of that load. The order transaction is always exact; only this
-// display can trail behind sales made on another device.
+// The order transaction is always exact. This readout only updates when the item
+// is reselected, so it can trail behind sales made while the panel is open.
 function renderPromoUsage(promo) {
     const el = document.getElementById('mi-promo-usage');
     if (!promo) { el.textContent = '—'; return; }
@@ -389,12 +381,6 @@ async function handleSave(event) {
         const { promo: promoRules, ...rest } = fields;
         await updateItemData(item.id, { ...rest, ...promoWriteFields(promoRules) });
 
-        // The local copy keeps a usedQty so the usage readout still renders. It
-        // is only ever a guess, which is why it never leaves this device.
-        const localFields = { ...fields, promo: promo && { ...promo, usedQty: Number(item.promo?.usedQty) || 0 } };
-        updateLocalItem(item.id, localFields);
-        Object.assign(item, localFields);
-
         // Re-sync the promo block so the usage readout and the Remove button
         // reflect what was just saved (a removal disables the button).
         fillPromoFields(item.promo);
@@ -408,14 +394,6 @@ async function handleSave(event) {
                 console.error('History write failed:', e);
             }
         }
-
-        // Rebuild the POS grid from the now-updated in-memory items so the
-        // button reflects the new colour (and re-sorts) without a page reload.
-        refreshGrid();
-
-        // Refresh the selected card's swatch in the list.
-        const cardEl = document.querySelector(`.mi-card[data-item-id="${item.id}"]`);
-        if (cardEl) cardEl.querySelector('.mi-card__dot').style.backgroundColor = swatchFor(tagColor);
 
         document.getElementById('mi-detail-dot').style.backgroundColor = swatchFor(tagColor);
         showFeedback('Item updated successfully.', 'success');
@@ -457,12 +435,7 @@ async function handleDelete() {
     const deleted = await requireAdminPin(pin => deleteInventoryItem(item.id, pin));
     if (!deleted) return;
 
-    removeLocalItem(item.id);
-    selection.clear();
-    document.getElementById('mi-detail-view').classList.add('is-hidden');
-    document.getElementById('mi-placeholder').classList.remove('is-hidden');
-    document.getElementById('mi-save-btn').disabled = true;
-    renderItemList_Manage(filteredItems = filteredItems.filter(i => i.id !== item.id));
+    clearDetail();
     showToast(`Successfully delete item ${item.id}`);
 }
 
@@ -543,16 +516,12 @@ function renderMetaHistory(records, append) {
 
 //  Open / load
 
-async function openManageItem(user) {
+function openManageItem(user) {
     if (!user) return;
 
-    selection.clear();
-    document.getElementById('mi-detail-view').classList.add('is-hidden');
-    document.getElementById('mi-save-btn').disabled = true;
+    clearDetail();
     document.getElementById('mi-delete-btn').disabled = true;
-    document.getElementById('mi-placeholder').classList.remove('is-hidden');
     document.getElementById('mi-search').value = '';
-    
 
     // Set currency symbol from user profile
     const currency = getCachedUserProfile()?.currency || 'IDR';
@@ -560,19 +529,40 @@ async function openManageItem(user) {
     document.getElementById('mi-cost-currency').textContent = symbol;
     document.getElementById('mi-sell-currency').textContent = symbol;
 
-    document.getElementById('mi-item-list').replaceChildren(buildItemSkeleton());
+    refreshItemList();
+}
 
-    try {
-        await loadAllItems();
-        filteredItems = [...allItems];
-        renderItemList_Manage(filteredItems);
-    } catch (err) {
-        console.error('Failed to load inventory:', err);
+function clearDetail() {
+    selection.clear();
+    document.getElementById('mi-detail-view').classList.add('is-hidden');
+    document.getElementById('mi-placeholder').classList.remove('is-hidden');
+    document.getElementById('mi-save-btn').disabled = true;
+}
+
+// Rebuilds the list from allItems, which the listener keeps current, so this never
+// touches the network. The skeleton only shows before the very first result.
+function refreshItemList() {
+    const list = document.getElementById('mi-item-list');
+    const status = getItemsStatus();
+    if (status === 'loading') {list.replaceChildren(buildItemSkeleton()); return;}
+    if (status === 'error' && allItems.length === 0) {
         const errMsg = document.createElement('p');
         errMsg.className = 'mi-empty mi-empty--error';
         errMsg.textContent = 'Failed to load inventory.';
-        document.getElementById('mi-item-list').replaceChildren(errMsg);
+        list.replaceChildren(errMsg);
+        return;
     }
+    filteredItems = filterItems(document.getElementById('mi-search').value);
+    rerenderKeepingPlace(list, () => renderItemList_Manage(filteredItems));
+}
+
+// The form is left alone so a change from elsewhere cannot wipe what is being typed.
+function handleItemsChanged() {
+    if (document.getElementById('manage-item-modal').classList.contains('is-hidden')) return;
+    const item = selection.get();
+    if (item && !allItems.includes(item)) {clearDetail();}
+    else if (item) {document.getElementById('mi-ro-stock').textContent = `${item.stockLevel ?? 0} ${item.unit ?? ''}`.trim();}
+    refreshItemList();
 }
 
 export function initManageItem(user) {
@@ -609,13 +599,6 @@ export function initManageItem(user) {
         onOpen:      (item, card) => selectItem(item, card),
     });
 
-    document.getElementById('mi-search').addEventListener('input', (e) => {
-        const q = e.target.value.trim().toLowerCase();
-        filteredItems = q
-            ? allItems.filter(item =>
-                (item.itemName ?? '').toLowerCase().includes(q) ||
-                (item.sku ?? '').toLowerCase().includes(q))
-            : [...allItems];
-        renderItemList_Manage(filteredItems);
-    });
+    document.getElementById('mi-search').addEventListener('input', refreshItemList);
+    onItemsChanged(handleItemsChanged);
 }

@@ -3,7 +3,7 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 // firebase.js initializes the SDK at import time, so the SDK is replaced with stubs.
 // Only auth.currentUser.getIdToken matters for the delete helpers.
 vi.mock('firebase/app', () => ({ initializeApp: vi.fn() }));
-vi.mock('firebase/firestore', () => ({ getFirestore: vi.fn() }));
+vi.mock('firebase/firestore', () => ({ initializeFirestore: vi.fn(), persistentLocalCache: vi.fn(), persistentMultipleTabManager: vi.fn() }));
 vi.mock('firebase/auth', () => ({
     getAuth: () => ({ currentUser: { getIdToken: async () => 'test-token' } }),
 }));

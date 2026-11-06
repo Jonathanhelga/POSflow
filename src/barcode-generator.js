@@ -1,13 +1,13 @@
 import JsBarcode from 'jsbarcode';
 import html2canvas from 'html2canvas';
-import { fetchInventory, getCurrentCurrency as currentCurrency } from './firebase';
+import { getCurrentCurrency as currentCurrency } from './firebase';
+import { allItems, getItemsStatus, onItemsChanged, filterItems } from './search_item';
 import { toggleModal } from './modal-handler';
 import { formatCurrency, getCurrencySymbol } from './formatCurrency';
 import { showToast } from './toast';
 import { createSelection } from './selection';
 import { skeletonBar } from './skeleton';
-import { attachListKeyNav } from './listKeyNav';
-let allItems      = [];
+import { attachListKeyNav, rerenderKeepingPlace } from './listKeyNav';
 let filteredItems = [];
 const selection   = createSelection();
 
@@ -209,35 +209,51 @@ async function saveDesign() {
 
 // open / reset
 
-async function openBarcodeGenerator(user) {
+function openBarcodeGenerator(user) {
     if (!user) return;
 
     selection.clear();
     cleanupObjectUrl();
     uploadedImageUrl = null;
 
-    document.getElementById('bg-item-list').replaceChildren(buildItemSkeleton_Barcode());
     document.getElementById('bg-search').value        = '';
-    document.getElementById('bg-save-btn').disabled   = true;
     document.getElementById('bg-img-upload').value    = '';
     document.getElementById('bg-color-picker').value = "#ffffff";
     document.getElementById('bg-img-filename').textContent = '';
+    clearPreview();
+    refreshItemList();
+}
+
+function clearPreview() {
+    document.getElementById('bg-save-btn').disabled = true;
     const selectMsg = document.createElement('p');
     selectMsg.className = 'bg-empty';
     selectMsg.textContent = 'Select an item from the list.';
     document.getElementById('bg-barcode-design').replaceChildren(selectMsg);
+}
 
-    try {
-        allItems      = await fetchInventory(user.uid);
-        filteredItems = [...allItems];
-        renderItemList_Barcode(filteredItems);
-    } catch (err) {
-        console.error('Failed to load inventory:', err);
+// Rebuilds the list from allItems, which the listener keeps current, so this never
+// touches the network. The skeleton only shows before the very first result.
+function refreshItemList() {
+    const list = document.getElementById('bg-item-list');
+    const status = getItemsStatus();
+    if (status === 'loading') {list.replaceChildren(buildItemSkeleton_Barcode()); return;}
+    if (status === 'error' && allItems.length === 0) {
         const errMsg = document.createElement('p');
         errMsg.className = 'bg-empty bg-empty--error';
         errMsg.textContent = 'Failed to load inventory.';
-        document.getElementById('bg-item-list').replaceChildren(errMsg);
+        list.replaceChildren(errMsg);
+        return;
     }
+    filteredItems = filterItems(document.getElementById('bg-search').value);
+    rerenderKeepingPlace(list, () => renderItemList_Barcode(filteredItems));
+}
+
+function handleItemsChanged() {
+    if (document.getElementById('barcode-generator-modal').classList.contains('is-hidden')) return;
+    const item = selection.get();
+    if (item && !allItems.includes(item)) {selection.clear(); clearPreview();}
+    refreshItemList();
 }
 
 // init
@@ -262,16 +278,8 @@ export async function initBarcodeGenerator(user) {
         onOpen:      (item) => selectItem(item),
     });
 
-    document.getElementById('bg-search').addEventListener('input', (e) => {
-        const q = e.target.value.trim().toLowerCase();
-        filteredItems = q
-            ? allItems.filter(item =>
-                (item.itemName ?? '').toLowerCase().includes(q) ||
-                (item.sku     ?? '').toLowerCase().includes(q)
-              )
-            : [...allItems];
-        renderItemList_Barcode(filteredItems);
-    });
+    document.getElementById('bg-search').addEventListener('input', refreshItemList);
+    onItemsChanged(handleItemsChanged);
 
     document.getElementById('bg-img-upload').addEventListener('change', (e) => {
         const file = e.target.files?.[0];

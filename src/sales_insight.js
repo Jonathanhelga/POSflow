@@ -1,37 +1,33 @@
 import Chart from 'chart.js/auto'
 import { toggleModal } from './modal-handler';
-import { fetchUserProfile, fetchOrders, getCurrentCurrency as currentCurrency } from './firebase';
+import { getCurrentCurrency as currentCurrency } from './firebase';
 import { formatCurrency, getCurrencySymbol } from './formatCurrency';
 import { showToast } from './toast';
 import { orderNetRevenue, summarizeTotals, summarizeItems } from './sales_metrics';
+import { allOrders, onOrdersChanged } from './orders_store';
 
-let orders = [];
+// The From/To range being viewed, or null when a chip (Today, Last 7 days...) is active.
+let customRange = null;
 let chartInstance = null;
 let topItemsSortKey = 'revenue';
 let topItemsSortDir = 'desc';
 let topItemsRows = [];
 
-export async function initInsights(user){
+export function initInsights(user){
     if(!user){ return; }
-    try{
-        await fetchUserProfile(user.uid);
-        orders = await fetchOrders(user.uid);
-        setupToolBar();
-    }catch(err){
-        console.error('Failed to load insights:', err);
-    }
+    setupToolBar();
+    onOrdersChanged(handleOrdersChanged);
 }
 
-export async function refreshInsights(user){
-    if(!user){ return; }
-    try{
-        orders = await fetchOrders(user.uid);
-        const activeChip = document.querySelector('.c-chip.is-active');
-        const range = activeChip ? activeChip.dataset.range : 'today';
-        filterOrders(getStartDate(range), new Date());
-    }catch(err){
-        console.error('Failed to refresh insights:', err);
-    }
+// Charts are only drawn while the modal is open. Opening it always redraws, so nothing is missed.
+function handleOrdersChanged(){
+    if (!document.getElementById('sales-insights-modal').classList.contains('is-hidden')) {redrawCurrentRange();}
+}
+
+function redrawCurrentRange(){
+    if (customRange) {filterOrders(customRange.startDate, customRange.endDate); return;}
+    const activeChip = document.querySelector('.c-chip.is-active');
+    filterOrders(getStartDate(activeChip ? activeChip.dataset.range : 'today'), new Date());
 }
 
 function getStartDate(range) {                            
@@ -45,30 +41,26 @@ function getStartDate(range) {
 
 function setupToolBar(){
     document.getElementById('sales-insights-open').addEventListener('click', () => {
-        document.getElementById('js-sales-from').value = todayInputValue();
-        document.getElementById('js-sales-to').value = todayInputValue();
+        if (!customRange) {
+            document.getElementById('js-sales-from').value = todayInputValue();
+            document.getElementById('js-sales-to').value = todayInputValue();
+        }
         toggleModal('sales-insights-modal');
         toggleModal('features-modal');
+        redrawCurrentRange();
     });
     const chips = document.querySelectorAll('.c-chip');
     chips.forEach(chip => {
         chip.addEventListener('click', () => {
             chips.forEach(c=> { c.classList.remove('is-active'); })
             chip.classList.add('is-active');
-            const range = chip.dataset.range;
-            const now = new Date();
-            let startDate = getStartDate(range);
-            filterOrders(startDate, now);
+            customRange = null;
+            redrawCurrentRange();
         });
     });
 
     document.getElementById('js-sales-range-form').addEventListener('submit', applyCustomRange);
     setupTopItemsSort();
-
-    // document.getElementById('js-sales-to').value = todayInputValue();
-
-    let startDate = getStartDate("today");
-    filterOrders(startDate, new Date());
 }
 
 function setupTopItemsSort(){
@@ -123,7 +115,8 @@ function applyCustomRange(event){
     }
 
     document.querySelectorAll('.c-chip').forEach(c => c.classList.remove('is-active'));
-    filterOrders(startDate, endDate);
+    customRange = { startDate, endDate };
+    redrawCurrentRange();
 }
 
 function fillTopItemsTable(filtered_orders){
@@ -186,7 +179,7 @@ function filterOrders(startingDate, endDate){
     if (isMidnight) { rangeEnd.setHours(23, 59, 59, 999); }
 
     let filteredOrder = [];
-    orders.forEach(order => {
+    allOrders.forEach(order => {
         let orderDate = order.createdAt.toDate();
         if(orderDate >= startingDate && orderDate <= rangeEnd){ filteredOrder.push(order); }
     });

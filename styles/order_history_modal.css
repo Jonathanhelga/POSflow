@@ -620,3 +620,16 @@
     }
 }
 
+
+.oh-show-more {
+    flex-shrink: 0;
+    align-self: center;
+    background: none;
+    border: none;
+    padding: 0.25rem 0.5rem;
+    font-size: 0.8rem;
+    color: var(--clr-primary);
+    cursor: pointer;
+    text-decoration: underline;
+    text-underline-offset: 2px;
+}

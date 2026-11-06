@@ -1,6 +1,7 @@
 import { fetchUserProfile } from "./firebase";
 import { initInventoryForm } from './add_item_ui';
-import { allItems, loadAllItems, initializeSearch, initSort, initGlobalBarcodeListener } from './search_item';
+import { allItems, startItemsListener, initializeSearch, initSort, initGlobalBarcodeListener } from './search_item';
+import { startOrdersListener } from './orders_store';
 import { initializeOrderForm, initSubmitOrder, setTaxRate, scanAddItem, restoreOrderFromStorage } from "./order-add_item";
 import { initProfile } from "./profile";
 import { switchView } from "./control_wizard";
@@ -15,7 +16,8 @@ export async function renderLoggedInState(user) {
         document.getElementById('pos-app').classList.add('is-active');
         initInventoryForm();
         // Restore the saved cart only after inventory has loaded, so each line can be reconciled against live stock. 
-        loadAllItems().then(restoreOrderFromStorage);
+        startItemsListener(user.uid).then(restoreOrderFromStorage);
+        startOrdersListener(user.uid);
         initializeSearch();
         initSort();
         initializeOrderForm();

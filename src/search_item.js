@@ -1,10 +1,15 @@
-import { auth, fetchInventory } from './firebase';
-// import { doc, updateDoc, serverTimestamp } from 'firebase/firestore';
+import { listenToInventory } from './firebase';
 import { renderItemGrid } from './item_ui';
 import { getCategories } from './categories';
 import { getItemCategories } from './item_categories';
+import { syncItemsInPlace } from './item_sync';
 
+// Only the listener in startItemsListener writes to this array. Writes elsewhere
+// reach it through Firestore, so no module should change stock or prices by hand:
+// the same change would then be applied twice.
 export let allItems = [];
+let itemsStatus = 'loading'; // 'loading' | 'ready' | 'error'
+const itemsChangedCallbacks = [];
 let searchTimeout = 0;
 let currentQuery = '';
 let currentSortMode = 'color';
@@ -47,19 +52,39 @@ export function refreshGrid(){
     renderItemGrid(sortItems(filtered, currentSortMode));
 }
 
-export async function loadAllItems() {
-    try {
-        const user = auth.currentUser;
-        if (!user) return;
-        allItems = await fetchInventory(user.uid);
-        refreshGrid();
-    }
-    catch (error) { console.error("Error pulling data:", error); }
+export function getItemsStatus() {return itemsStatus;}
+
+// Runs `callback` after every change to allItems, from this device or another one.
+export function onItemsChanged(callback) {itemsChangedCallbacks.push(callback);}
+
+function handleItemsChanged() {
+    refreshGrid();
+    itemsChangedCallbacks.forEach(callback => callback());
 }
 
-export function addSingleItem(item){
-    allItems.push(item);
-    refreshGrid();
+// Call once after login. The promise resolves on the first result, or on failure,
+// so a caller waiting for items is never left hanging.
+export function startItemsListener(uid) {
+    return new Promise((resolve) => {
+        listenToInventory(uid, (incoming) => {
+            allItems = syncItemsInPlace(allItems, incoming);
+            itemsStatus = 'ready';
+            handleItemsChanged();
+            resolve();
+        }, (error) => {
+            console.error("Error pulling data:", error);
+            itemsStatus = 'error';
+            handleItemsChanged();
+            resolve();
+        });
+    });
+}
+
+// Name or SKU match for the modal search boxes. A blank query returns every item.
+export function filterItems(query) {
+    const q = query.trim().toLowerCase();
+    if (!q) return [...allItems];
+    return allItems.filter(item => (item.itemName ?? '').toLowerCase().includes(q) || (item.sku ?? '').toLowerCase().includes(q));
 }
 
 function searchedItems(query){
@@ -178,31 +203,4 @@ function handleGlobalScan(event) {
 export function initGlobalBarcodeListener(onScan) {
     scanCallback = onScan;
     document.addEventListener('keydown', handleGlobalScan);
-}
-
-//=============
-export function updateLocalStock(itemId, quantityChange) {
-    const item = allItems.find(i => i.id === itemId);
-    if (!item) return;
-    item.stockLevel = (item.stockLevel || 0) + quantityChange;
-}
-
-export function updateLocalPromoUsage(itemId, quantityChange) {
-    const item = allItems.find(i => i.id === itemId);
-    if (!item?.promo) return;
-    item.promo.usedQty = (Number(item.promo.usedQty) || 0) + quantityChange;
-}
-
-// Merge edited metadata fields into the canonical in-memory item so the grid
-// and other modules reflect the change without a full reload.
-export function updateLocalItem(itemId, fields) {
-    const item = allItems.find(i => i.id === itemId);
-    if (!item) return;
-    Object.assign(item, fields);
-}
-
-// Remove a deleted item from the canonical in-memory list and refresh the grid.
-export function removeLocalItem(itemId) {
-    allItems = allItems.filter(i => i.id !== itemId);
-    refreshGrid();
 }

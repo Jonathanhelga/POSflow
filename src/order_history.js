@@ -1,21 +1,23 @@
-import { auth, fetchOrders, fetchUserProfile, deleteOrder } from './firebase';
+import { auth, fetchUserProfile, deleteOrder } from './firebase';
+import { allOrders, getOrdersStatus, onOrdersChanged, startOrdersListener } from './orders_store';
 import { formatCurrency, getCurrencySymbol } from './formatCurrency';
 import { toggleModal } from './modal-handler';
 import { showConfirm } from './confirm_modal';
 import { requireAdminPin } from './admin_pin';
 import { showToast } from "./toast";
-import { updateLocalStock, refreshGrid } from './search_item';
-import { refreshSelectedItemDetail } from './manage-item';
 import { skeletonBar } from './skeleton';
-import { attachListKeyNav } from './listKeyNav';
+import { attachListKeyNav, rerenderKeepingPlace } from './listKeyNav';
 
 let isProcessing = false;
 let currentOrder = null;
 
-// Search state. `allOrders` is the master array loaded once per modal open;
+// The list is only drawn this many rows at a time. Filters still search every order.
+const ORDER_PAGE_SIZE = 100;
+let shownOrderCount = ORDER_PAGE_SIZE;
+
+// Search state. `allOrders` is the master array, owned by orders_store.js;
 // `activeFilters` are the chips currently applied (AND semantics); `searchAttributes`
 // is rebuilt per open from the fixed attributes + the user's field library.
-let allOrders = [];
 let activeFilters = [];
 let searchAttributes = [];
 // The orders currently rendered in the list (post-filter), in display order —
@@ -99,9 +101,11 @@ function renderOrderList(orders) {
         return;
     }
 
-    orders.forEach(order => {
+    const frag = document.createDocumentFragment();
+    orders.slice(0, shownOrderCount).forEach(order => {
         const card = document.createElement('div');
         card.className = 'oh-card';
+        if (order.id === currentOrder?.id) card.classList.add('oh-card--active');
         const topRow = document.createElement('div');
         topRow.className = 'oh-card__top-row';
         const dateSpan = document.createElement('span');
@@ -143,8 +147,22 @@ function renderOrderList(orders) {
         });
 
         card.querySelector('.oh-card__bottom-row').appendChild(btn);
-        container.appendChild(card);
+        frag.appendChild(card);
     });
+    if (orders.length > shownOrderCount) frag.appendChild(buildShowMoreButton(container));
+    container.appendChild(frag);
+}
+
+function buildShowMoreButton(container) {
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'oh-show-more';
+    btn.textContent = 'Show more';
+    btn.addEventListener('click', () => {
+        shownOrderCount += ORDER_PAGE_SIZE;
+        rerenderKeepingPlace(container, () => renderOrderList(visibleOrders));
+    });
+    return btn;
 }
 
 // One receipt line, printed the way a real till prints it: the name on its own
@@ -432,6 +450,7 @@ function addCurrentFilter() {
 
     activeFilters = activeFilters.filter(f => f.key !== attr.key);
     activeFilters.push({ key: attr.key, attr, value, display: displayFilterValue(attr, value) });
+    shownOrderCount = ORDER_PAGE_SIZE;
     renderChips();
     applyFilters();
 
@@ -440,6 +459,7 @@ function addCurrentFilter() {
 
 function removeFilter(key) {
     activeFilters = activeFilters.filter(f => f.key !== key);
+    shownOrderCount = ORDER_PAGE_SIZE;
     renderChips();
     applyFilters();
 }
@@ -637,21 +657,37 @@ async function handleDeleteOrder() {
     const deleted = await requireAdminPin(pin => deleteOrder(order.id, pin));
     if (!deleted) return;
 
-    allOrders = allOrders.filter(o => o.id !== order.id);
     currentOrder = null;
-
-    for (const item of order.items ?? []) {
-        updateLocalStock(item.id, item.quantity);
-    }
-    refreshGrid();
-    refreshSelectedItemDetail();
 
     showToast(`Successfully delete order ${order.id}`);
     resetBillPanel();
     applyFilters();
 }
 
-// Init
+// Draws from allOrders, which the listener keeps current, so this never touches the
+// network. The skeleton only shows before the very first result.
+function refreshOrderList() {
+    const list = document.getElementById('oh-order-list');
+    const status = getOrdersStatus();
+    if (status === 'loading') {list.replaceChildren(buildOrderSkeleton()); return;}
+    if (status === 'error' && allOrders.length === 0) {
+        const errorMsg = document.createElement('p');
+        errorMsg.className = 'oh-empty oh-empty--error';
+        errorMsg.textContent = 'Failed to load orders.';
+        list.replaceChildren(errorMsg);
+        return;
+    }
+    rerenderKeepingPlace(list, applyFilters);
+}
+
+function handleOrdersChanged() {
+    if (document.getElementById('order-history-modal').classList.contains('is-hidden')) return;
+    if (currentOrder && !allOrders.some(o => o.id === currentOrder.id)) {
+        currentOrder = null;
+        resetBillPanel();
+    }
+    refreshOrderList();
+}
 
 export async function initOrderHistory(user) {
     const openBtn = document.getElementById('js-order-history-open');
@@ -669,21 +705,12 @@ export async function initOrderHistory(user) {
         currentOrder = null;
         resetBillPanel();
 
-        // Fetch and render orders
-        const orderList = document.getElementById('oh-order-list');
-        orderList.replaceChildren(buildOrderSkeleton());
-        try {
-            const orders = await fetchOrders(user.uid);
-            allOrders = orders;
-            applyFilters();
-        } catch (err) {
-            console.error('Failed to load order history:', err);
-            const errorMsg = document.createElement('p');
-            errorMsg.className = 'oh-empty oh-empty--error';
-            errorMsg.textContent = 'Failed to load orders.';
-            orderList.replaceChildren(errorMsg);
-        }
+        shownOrderCount = ORDER_PAGE_SIZE;
+        if (getOrdersStatus() === 'error') {startOrdersListener(user.uid);}
+        refreshOrderList();
     });
+
+    onOrdersChanged(handleOrdersChanged);
 
     document.getElementById('oh-search-attr').addEventListener('change', renderValueControl);
     document.getElementById('oh-search-add').addEventListener('click', addCurrentFilter);

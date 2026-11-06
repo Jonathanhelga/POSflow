@@ -1,5 +1,5 @@
 import { initializeApp } from "firebase/app";
-import { getFirestore, doc, setDoc, addDoc, getDoc, updateDoc, collection, query, where, orderBy, getDocs, serverTimestamp, runTransaction, increment, startAfter, limit } from "firebase/firestore";
+import { initializeFirestore, persistentLocalCache, persistentMultipleTabManager, onSnapshot, terminate, clearIndexedDbPersistence, doc, setDoc, addDoc, getDoc, updateDoc, collection, query, where, orderBy, getDocs, serverTimestamp, runTransaction, increment, startAfter, limit } from "firebase/firestore";
 import { getAuth, signInWithCustomToken, signInWithEmailAndPassword, signOut } from "firebase/auth";
 import { isPromoExpired } from "./promo";
 import { isValidPaymentMethod, DEFAULT_PAYMENT_METHOD } from "./payment_methods";
@@ -35,7 +35,9 @@ const firebaseConfig = {
 };
 
 const app = initializeApp(firebaseConfig);
-export const db = getFirestore(app);
+// Keeps Firestore data in IndexedDB. A listener on a query seen before fires from
+// that copy straight away, then downloads only the documents that changed.
+export const db = initializeFirestore(app, { localCache: persistentLocalCache({ tabManager: persistentMultipleTabManager() }) });
 export const auth = getAuth(app);
 
 // The account itself is created by POST /api/verify-otp, which returns this token.
@@ -69,7 +71,21 @@ export async function loginUser(email, password) {
 
 export async function LogOutUser(){
     clearCachedUserProfile();
+    activeListeners.forEach(stop => stop());
+    activeListeners.clear();
     await signOut(auth);
+    await clearLocalData();
+}
+
+// Business data must not stay on a shared till after logout. The browser refuses
+// the clear while another tab of the app has the database open, so that case can
+// only be logged. The caller reloads the page, which is what makes Firestore usable
+// again after terminate().
+async function clearLocalData() {
+    try {
+        await terminate(db);
+        await clearIndexedDbPersistence(db);
+    } catch (error) { console.warn("Could not clear local Firestore data:", error); }
 }
 
 let cachedUserProfile = null;
@@ -107,25 +123,40 @@ export async function submitItemData(itemData, uid){
     }
 }
 
+function inventoryQuery(uid) {return query(collection(db, "inventory"), where("ownerId", "==", uid), orderBy("createdAt", "desc"));}
+
+function ordersQuery(uid) {return query(collection(db, "orders"), where("ownerId", "==", uid), orderBy("createdAt", "desc"));}
+
 export async function fetchInventory(uid) {
-    const q = query(
-        collection(db, "inventory"),
-        where("ownerId", "==", uid),
-        orderBy("createdAt", "desc")
-    );
-    const snapshot = await getDocs(q);
+    const snapshot = await getDocs(inventoryQuery(uid));
     return snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
 }
 
-export async function fetchOrders(uid) {
-    const q = query(
-        collection(db, "orders"),
-        where("ownerId", "==", uid),
-        orderBy("createdAt", "desc")
-    );
-    const snapshot = await getDocs(q);
-    return snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
+// Stop functions of every running listener, so logout can end them all.
+const activeListeners = new Set();
+
+// onDocs(docs, synced): `synced` is false while the docs come from the copy on this
+// device and may be out of date. Finding that out needs includeMetadataChanges, which
+// also fires when nothing changed, so those calls are skipped here.
+// `estimate` fills a just-written serverTimestamp() with a local time. Without it
+// the field reads as null until the server confirms the write.
+function listen(q, onDocs, onError) {
+    let delivered = false;
+    let wasSynced = false;
+    const toDocs = (snapshot) => snapshot.docs.map(d => ({ id: d.id, ...d.data({ serverTimestamps: 'estimate' }) }));
+    const stop = onSnapshot(q, { includeMetadataChanges: true }, (snapshot) => {
+        const synced = !snapshot.metadata.fromCache;
+        if (delivered && synced === wasSynced && snapshot.docChanges().length === 0) return;
+        delivered = true;
+        wasSynced = synced;
+        onDocs(toDocs(snapshot), synced);
+    }, onError);
+    activeListeners.add(stop);
 }
+
+export function listenToInventory(uid, onItems, onError) {listen(inventoryQuery(uid), onItems, onError);}
+
+export function listenToOrders(uid, onOrders, onError) {listen(ordersQuery(uid), onOrders, onError);}
 
 export async function fetchUserProfile(uid) {
     if (cachedUserProfile) return cachedUserProfile;

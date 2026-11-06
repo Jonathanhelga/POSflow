@@ -1,7 +1,7 @@
 import { submitItemData, reserveNextSku, auth, getCachedUserProfile } from "./firebase";
 import { getCurrencySymbol } from './formatCurrency';
 import { attachMoneyInput, parseMoneyInput } from './moneyInput';
-import { addSingleItem, allItems } from "./search_item";
+import { allItems } from "./search_item";
 import { toggleModal } from './modal-handler';
 import { showToast } from "./toast";
 import { showConfirm } from './confirm_modal';
@@ -245,7 +245,6 @@ export function initInventoryForm() {
 
         try {
             const itemData = await submitItemData(formData, user.uid);
-            addSingleItem(itemData);
             showToast('Inventory updated successfully.');
 
             // Rapid-add: keep the modal open, log the item, and clear only the

@@ -1,7 +1,8 @@
 import { toggleModal } from './modal-handler';
-import { fetchInventory, fetchOrders, fetchUserProfile, getCachedUserProfile } from './firebase';
+import { fetchInventory, fetchUserProfile, getCachedUserProfile } from './firebase';
 import { showToast } from './toast';
 import { allItems } from './search_item';
+import { allOrders, whenOrdersSynced } from './orders_store';
 import { getExcelCurrencyFormat } from './formatCurrency';
 import { summarizeTotals, summarizeItems, summarizeDiscounts, summarizePaymentMethods, summarizeCategories } from './sales_metrics';
 
@@ -75,7 +76,9 @@ async function runExport(event){
         const profile = getCachedUserProfile() || await fetchUserProfile(currentUser.uid);
         const currency = profile?.currency || 'IDR';
         const items = (allItems && allItems.length) ? allItems : await fetchInventory(currentUser.uid);
-        const orders = filterOrdersByRange(await fetchOrders(currentUser.uid), from, to);
+        // A report built from an out-of-date copy would look complete while missing sales.
+        if (!await whenOrdersSynced()) { showToast('Could not reach the server, so the export could be missing orders. Check your connection and try again.', 'error'); return; }
+        const orders = filterOrdersByRange(allOrders, from, to);
 
         if (!items.length && !orders.length) { showToast('No data to export for this range.', 'error'); return; }
 

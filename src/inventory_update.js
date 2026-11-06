@@ -1,11 +1,11 @@
 import { db, getCurrentCurrency as currentCurrency, addStockUpdateHistory, fetchStockHistory } from './firebase';
 import { doc, updateDoc, increment, serverTimestamp } from 'firebase/firestore';
 import { toggleModal } from './modal-handler';
-import { allItems, loadAllItems, updateLocalStock } from './search_item';
+import { allItems, getItemsStatus, onItemsChanged, filterItems } from './search_item';
 import { createSelection } from './selection';
 import { formatCurrency, getCurrencySymbol } from './formatCurrency';
 import { skeletonBar } from './skeleton';
-import { attachListKeyNav } from './listKeyNav';
+import { attachListKeyNav, rerenderKeepingPlace } from './listKeyNav';
 
 let filteredItems = [];
 const selection   = createSelection();
@@ -37,6 +37,7 @@ function renderItemList_Inventory(items) {
         const status = getStockStatus(item.stockLevel, item?.minStockLevel || 0);
         const card = document.createElement('div');
         card.className = 'iu-card';
+        if (selection.is(item)) card.classList.add('iu-card--active');
         card.dataset.itemId = item.id;
 
         const topRow = document.createElement('div');
@@ -112,18 +113,10 @@ function populateDetail(item) {
     document.getElementById('iu-placeholder').classList.add('is-hidden');
     document.getElementById('iu-detail-view').classList.remove('is-hidden');
 
-    const status = getStockStatus(item.stockLevel, item?.minStockLevel || 0);
-    const badgeEl = document.getElementById('iu-status-badge');
-    badgeEl.textContent = status === 'good' ? 'GOOD' : 'ALERT';
-    badgeEl.className = `iu-detail-badge iu-badge--${status}`;
-
-    const tagDot = document.getElementById('iu-detail-tag');
-    tagDot.className = `iu-detail-tag iu-tag--${status === 'good' ? 'good' : 'alert'}`;
-
+    renderDetailStock(item);
     document.getElementById('iu-detail-name').textContent = item.itemName ?? '—';
     document.getElementById('iu-detail-sku').textContent  = `SKU: ${item.sku ?? '—'}`;
 
-    document.getElementById('iu-current-stock').textContent = `${item.stockLevel ?? 0} ${item.unit ?? ''}`;
     document.getElementById('iu-min-stock').textContent     = `${item.minStockLevel ?? 0} ${item.unit ?? ''}`;
     document.getElementById('iu-unit').textContent          = item.unit || '—';
     document.getElementById('iu-supplier').textContent      = item.supplier || '—';
@@ -139,6 +132,18 @@ function populateDetail(item) {
     historyLastDoc = null;
     historyItemId  = item.id;
     loadStockHistory(item.id, false);
+}
+
+function renderDetailStock(item) {
+    const status = getStockStatus(item.stockLevel, item?.minStockLevel || 0);
+    const badgeEl = document.getElementById('iu-status-badge');
+    badgeEl.textContent = status === 'good' ? 'GOOD' : 'ALERT';
+    badgeEl.className = `iu-detail-badge iu-badge--${status}`;
+
+    const tagDot = document.getElementById('iu-detail-tag');
+    tagDot.className = `iu-detail-tag iu-tag--${status === 'good' ? 'good' : 'alert'}`;
+
+    document.getElementById('iu-current-stock').textContent = `${item.stockLevel ?? 0} ${item.unit ?? ''}`;
 }
 
 // ─── Save stock update
@@ -172,25 +177,6 @@ async function handleSave(event) {
             await addStockUpdateHistory(item.id, qty, previousStock);
         } catch (e) {
             console.error('History write failed:', e);
-        }
-
-        updateLocalStock(item.id, qty);
-
-        // Refresh the card in the list
-        const cardEl = document.querySelector(`.iu-card[data-item-id="${item.id}"]`);
-        if (cardEl) {
-            const status = getStockStatus(item.stockLevel, item.minStockLevel);
-            cardEl.querySelector('.iu-badge').textContent = status === 'good' ? 'GOOD' : 'ALERT';
-            cardEl.querySelector('.iu-badge').className   = `iu-badge iu-badge--${status}`;
-            const stockInfoEl = cardEl.querySelector('.iu-card__stock-info');
-            const updatedUnitSpan = document.createElement('span');
-            updatedUnitSpan.className = 'iu-card__unit';
-            updatedUnitSpan.textContent = item.unit ?? '';
-            stockInfoEl.replaceChildren(
-                document.createTextNode(`${item.stockLevel} `),
-                updatedUnitSpan,
-                document.createTextNode(` \u00a0/\u00a0 min ${item.minStockLevel ?? 0}`)
-            );
         }
 
         populateDetail(item);
@@ -272,27 +258,45 @@ function renderStockHistory(records, append) {
 
 // ─── Load inventory on open
 
-async function openInventoryUpdate(user) {
+function openInventoryUpdate(user) {
     if (!user) return;
 
     // Reset panel state
+    clearDetail();
+    document.getElementById('iu-search').value = '';
+    refreshItemList();
+}
+
+function clearDetail() {
     selection.clear();
     document.getElementById('iu-detail-view').classList.add('is-hidden');
     document.getElementById('iu-placeholder').classList.remove('is-hidden');
-    document.getElementById('iu-search').value = '';
+}
 
-    document.getElementById('iu-item-list').replaceChildren(buildItemSkeleton_Inventory());
-    try {
-        await loadAllItems();
-        filteredItems = [...allItems];
-        renderItemList_Inventory(filteredItems);
-    } catch (err) {
-        console.error('Failed to load inventory:', err);
+// Rebuilds the list from allItems, which the listener keeps current, so this never
+// touches the network. The skeleton only shows before the very first result.
+function refreshItemList() {
+    const list = document.getElementById('iu-item-list');
+    const status = getItemsStatus();
+    if (status === 'loading') {list.replaceChildren(buildItemSkeleton_Inventory()); return;}
+    if (status === 'error' && allItems.length === 0) {
         const errMsg = document.createElement('p');
         errMsg.className = 'iu-empty iu-empty--error';
         errMsg.textContent = 'Failed to load inventory.';
-        document.getElementById('iu-item-list').replaceChildren(errMsg);
+        list.replaceChildren(errMsg);
+        return;
     }
+    filteredItems = filterItems(document.getElementById('iu-search').value);
+    rerenderKeepingPlace(list, () => renderItemList_Inventory(filteredItems));
+}
+
+// Only the stock readout updates, so a typed quantity is not wiped by a change from elsewhere.
+function handleItemsChanged() {
+    if (document.getElementById('inventory-update-modal').classList.contains('is-hidden')) return;
+    const item = selection.get();
+    if (item && !allItems.includes(item)) {clearDetail();}
+    else if (item) {renderDetailStock(item);}
+    refreshItemList();
 }
 
 export function initInventoryUpdate(user) {
@@ -322,13 +326,6 @@ export function initInventoryUpdate(user) {
         if (historyItemId) loadStockHistory(historyItemId, true);
     });
 
-    document.getElementById('iu-search').addEventListener('input', (e) => {
-        const q = e.target.value.trim().toLowerCase();
-        filteredItems = q
-            ? allItems.filter(item =>
-                (item.itemName ?? '').toLowerCase().includes(q) ||
-                (item.sku ?? '').toLowerCase().includes(q))
-            : [...allItems];
-        renderItemList_Inventory(filteredItems);
-    });
+    document.getElementById('iu-search').addEventListener('input', refreshItemList);
+    onItemsChanged(handleItemsChanged);
 }

@@ -2,7 +2,6 @@ import { db, fetchUserProfile, getCachedUserProfile, setCachedUserProfile, LogOu
 import { setDoc, doc } from 'firebase/firestore';
 import { toggleModal } from './modal-handler';
 import { setTaxRate, clearOrderTable } from './order-add_item';
-import { refreshInsights } from './sales_insight';
 import { showToast } from './toast';
 import { showConfirm } from './confirm_modal';
 export function initProfile(user) {
@@ -143,10 +142,7 @@ async function saveProfileData(user) {
         const updatedProfile = { ...previousProfile, ...formData };
         setCachedUserProfile(updatedProfile);
 
-        if (currencyChanged) {
-            refreshInsights(user);
-            clearOrderTable();
-        }
+        if (currencyChanged) {clearOrderTable();}
 
         setTaxRate(formData.tax_rate);
         applyPrintPaperSize(formData.printer_size || '80');
