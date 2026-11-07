@@ -24,7 +24,10 @@ export function initCustomFields() {
 
 function toggleTypeMenu() {
     const menu = document.getElementById('js-checkout-type-menu');
-    if (menu) menu.classList.toggle('is-hidden');
+    if (!menu) return;
+    const isOpen = !menu.classList.toggle('is-hidden');
+    // The menu sits inside the modal's scroll area, so its last rows (Saved fields) can open below the visible part.
+    if (isOpen) {menu.scrollIntoView({ block: 'nearest', behavior: 'smooth' });}
 }
 
 function closeTypeMenu() {
